@@ -1,0 +1,338 @@
+---
+// No changes to your frontmatter or color theme logic.
+import { getCollection } from "astro:content";
+const projects = await getCollection("projects");
+import { Image } from "astro:assets";
+
+const cardThemes = [
+  {
+    bg: "--pink-10",
+    text: "--pink-1",
+    imageBg: "--pink-3",
+    outline: "--pink-12",
+    halftone: "--pink-9",
+  },
+  {
+    bg: "--green-10",
+    text: "--green-1",
+    imageBg: "--green-3",
+    outline: "--green-12",
+    halftone: "--green-9",
+  },
+  {
+    bg: "--purple-10",
+    text: "--purple-1",
+    imageBg: "--purple-3",
+    outline: "--purple-12",
+    halftone: "--purple-9",
+  },
+  {
+    bg: "--amber-10",
+    text: "--amber-1",
+    imageBg: "--amber-3",
+    outline: "--amber-12",
+    halftone: "--amber-9",
+  },
+  {
+    bg: "--blue-10",
+    text: "--blue-1",
+    imageBg: "--blue-3",
+    outline: "--blue-12",
+    halftone: "--blue-9",
+  },
+  {
+    bg: "--red-10",
+    text: "--red-1",
+    imageBg: "--red-3",
+    outline: "--red-12",
+    halftone: "--red-9",
+  },
+];
+---
+
+<div
+  class="projects-list-wrapper"
+  role="region"
+  aria-label="Featured projects carousel"
+>
+  <div class="projects-list">
+    <ul class="project-list-items">
+      {
+        projects.map((project, index) => {
+          const theme = cardThemes[index % cardThemes.length];
+          return (
+            <li
+              class="project-list-item"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Project: ${project.data.title}`}
+              style={`
+                --card-bg-color: var(${theme.bg});
+                --card-text-color: var(${theme.text});
+                --image-wrapper-bg: var(${theme.imageBg});
+                --card-outline-color: var(${theme.outline});
+                --halftone-color: var(${theme.halftone});
+              `}
+            >
+              <div class="project-list-item-inner">
+                {/* ✨ ADDED: Number element from your new version */}
+                <div class="card-number">{index + 1}</div>
+                <div class="project-list-content">
+                  {project.data.image && (
+                    <div class="project-list-content-image">
+                      <Image
+                        src={project.data.image}
+                        alt={project.data.description}
+                        widths={[280, 400, 800]}
+                        sizes="(max-width: 400px) 280px, 400px"
+                      />
+                    </div>
+                  )}
+                  <h3 class="project-list-content-title">
+                    {project.data.title}
+                  </h3>
+                  <p class="project-list-content-description">
+                    {project.data.description}
+                  </p>
+                  <a href={`/projects/${project.slug}`} class="project-link">
+                    <span>View Project</span>
+                  </a>
+                </div>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* --- Layout & Base Card --- */
+  .projects-list-wrapper {
+    --card-gap: 2rem;
+    perspective: 1500px;
+  }
+
+  .projects-list {
+    display: flex;
+    overflow-x: auto;
+    padding-block: 0;
+    gap: var(--card-gap);
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* ✨ Great for touch performance */
+    scrollbar-width: none;
+  }
+  .projects-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .project-list-items {
+    display: flex;
+    gap: var(--card-gap);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-block: var(--space-xl);
+  }
+
+  .project-list-item {
+    --transform-scroll: rotate(0deg) scale(1);
+    --transform-hover: scale(1) rotate(0deg) translateY(0);
+    --opacity: 1;
+
+    flex: 0 0 clamp(280px, 80vw, 400px);
+    scroll-snap-align: center;
+    position: relative;
+
+    transform: var(--transform-scroll) var(--transform-hover);
+    opacity: var(--opacity);
+
+    /* ✨ IMPROVEMENT: Hint to the browser about upcoming changes for smoother animation */
+    will-change: transform, opacity;
+    transition:
+      transform 0.3s ease,
+      opacity 0.4s ease;
+  }
+
+  .project-list-item:hover {
+    --transform-hover: scale(1.05) rotate(2deg) translateY(-10px);
+    z-index: 10;
+  }
+
+  .project-list-item-inner {
+    background: var(--card-bg-color);
+    color: var(--card-text-color);
+    border: 3px solid var(--card-outline-color);
+    box-shadow: 8px 8px 0 var(--card-outline-color);
+    border-radius: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative; /* Needed for the number's absolute positioning */
+  }
+
+  /* ✨ ADDED: Styles for the card number circle */
+  .card-number {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--card-outline-color);
+    color: var(--card-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    z-index: 5;
+    border: 3px solid var(--card-bg-color);
+    box-shadow: 0 0 0 3px var(--card-outline-color);
+  }
+
+  /* --- Content & Typography (No Changes) --- */
+  .project-list-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+    color: var(--card-text-color);
+  }
+  .project-list-content-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--card-text-color);
+  }
+  .project-list-content-description {
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+    line-height: 1.6;
+  }
+  .project-list-content-image {
+    position: relative;
+    border: 3px solid var(--card-outline-color);
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  .project-list-content-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(
+      circle,
+      var(--halftone-color) 1px,
+      transparent 1px
+    );
+    background-size: 4px 4px;
+    mix-blend-mode: multiply;
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .project-list-content-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    filter: saturate(1.4) contrast(1.1);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .project-list-item:hover .project-list-content-image img {
+    transform: scale(1.1);
+  }
+  .project-list-item:hover .project-list-content-image::after {
+    opacity: 0.2;
+  }
+  .project-link {
+    display: inline-block;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    color: var(--card-text-color);
+    background-color: transparent;
+    padding: 0.75rem 1.5rem;
+    border: 3px solid var(--card-outline-color);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    align-self: flex-start;
+  }
+  .project-link:hover {
+    background-color: var(--card-outline-color);
+    color: var(--card-bg-color);
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0 var(--card-text-color);
+  }
+</style>
+
+<script>
+  // This JavaScript is your proven, working version. No changes needed.
+  document.addEventListener("DOMContentLoaded", () => {
+    const container = document.querySelector(".projects-list");
+    if (!container) return;
+    const list = container.querySelector(".project-list-items");
+    const cards = list.querySelectorAll(".project-list-item");
+    if (cards.length === 0) return;
+    let isTicking = false;
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function updateCardStyles() {
+      const containerCenter =
+        container.getBoundingClientRect().left + container.offsetWidth / 2;
+      cards.forEach((card) => {
+        const cardCenter =
+          card.getBoundingClientRect().left + card.offsetWidth / 2;
+        const distance = cardCenter - containerCenter;
+        const distanceFactor = distance / (container.offsetWidth / 2);
+        const maxScaleChange = 0.1;
+        const maxRotation = 8;
+        const maxOpacity = 0.5;
+        const scale = 1 - Math.abs(distanceFactor) * maxScaleChange;
+        const rotation = distanceFactor * maxRotation;
+        const opacity = 1 - Math.abs(distanceFactor) * maxOpacity;
+        card.style.setProperty(
+          "--transform-scroll",
+          `rotate(${rotation}deg) scale(${scale})`
+        );
+        card.style.setProperty("--opacity", opacity);
+      });
+      isTicking = false;
+    }
+    function onScroll() {
+      if (!isTicking) {
+        window.requestAnimationFrame(updateCardStyles);
+        isTicking = true;
+      }
+    }
+    function centerMiddleCard() {
+      if (cards.length > 0) {
+        const middleIndex = Math.floor(cards.length / 2);
+        const middleCard = cards[middleIndex];
+        const containerCenter = container.offsetWidth / 2;
+        const cardCenter = middleCard.offsetLeft + middleCard.offsetWidth / 2;
+        const scrollTarget = cardCenter - containerCenter;
+        container.scrollLeft = scrollTarget;
+      }
+    }
+    function initCarousel() {
+      const firstCard = cards[0];
+      if (firstCard) {
+        const scrollPadding =
+          (container.offsetWidth - firstCard.offsetWidth) / 2;
+        list.style.paddingInline = `${scrollPadding}px`;
+      }
+      centerMiddleCard();
+      if (!motionQuery.matches) {
+        container.addEventListener("scroll", onScroll, { passive: true });
+        updateCardStyles();
+      }
+    }
+    const observer = new ResizeObserver(initCarousel);
+    observer.observe(container);
+    initCarousel();
+  });
+</script>

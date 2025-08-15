@@ -1,0 +1,43 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Contact Me" description="Get in touch with me.">
+	<div class="container content">
+        <h1>Contact</h1>
+        <p>The best way to reach me is via email or through social media. I'm always open to discussing new projects, creative ideas, or opportunities to be part of an amazing team.</p>
+        
+        <div class="contact-info">
+            <p><strong>Email:</strong> <a href="mailto:your.email@example.com">your.email@example.com</a></p>
+            <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener noreferrer">/in/yourprofile</a></p>
+            <p><strong>GitHub:</strong> <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer">/yourusername</a></p>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    .content {
+        max-width: 75ch;
+    }
+    .content h1 {
+        font-size: var(--step-4);
+        margin-bottom: var(--space-m);
+    }
+    .content p {
+        margin-bottom: var(--space-m);
+    }
+    .contact-info {
+        margin-top: var(--space-l);
+        font-size: var(--step-0);
+    }
+    .contact-info p {
+        margin-bottom: var(--space-s);
+    }
+    .contact-info a {
+        color: var(--color-primary);
+        text-decoration: none;
+    }
+    .contact-info a:hover {
+        text-decoration: underline;
+    }
+</style>

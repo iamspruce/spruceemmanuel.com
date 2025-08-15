@@ -1,11 +1,38 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
+import ProjectList from "../components/projects/ProjectsList.astro";
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+  title="Spruce | Portfolio"
+  description="Welcome to my personal portfolio website."
+>
+  <header class="page-header">
+    <div class="center">
+      <hgroup>
+        <h1 class="page-title">Hi, I'm Spruce Emmanuel.</h1>
+        <p class="page-subtitle">
+          I'm an independent web UI engineer, author, speaker, and currently a
+          full-time educator. I specialize in inclusive design implementation.
+          And I'm here to help you become a more better Web designer/developer.
+        </p>
+      </hgroup>
+    </div>
+  </header>
+
+  <section class="projects-section">
+    <ProjectList />
+    <div class="center">
+      <p style="text-align: center;">
+        Above are some of the projects i am currently working on, <br /> make sure
+        to check them out.
+      </p>
+    </div>
+  </section>
 </Layout>
+
+<style>
+  .page-header .center {
+    text-align: center;
+  }
+</style>
