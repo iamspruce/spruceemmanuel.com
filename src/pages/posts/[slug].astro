@@ -1,0 +1,71 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import PageLayout from "../../layouts/Pagelayout.astro";
+
+// This function now builds pages from BOTH the 'writing' and 'projects' collections.
+export async function getStaticPaths() {
+  const posts = await getCollection("writing");
+  const projects = await getCollection("projects");
+
+  const postPaths = posts.map((post) => ({
+    params: { collection: "writing", slug: post.slug },
+    props: post,
+  }));
+
+  const projectPaths = projects.map((project) => ({
+    params: { collection: "projects", slug: project.slug },
+    props: project,
+  }));
+
+  // Combine the paths from both collections into a single array
+  return [...postPaths, ...projectPaths];
+}
+
+// Use a union type to allow props from either collection
+type Props = CollectionEntry<"writing"> | CollectionEntry<"projects">;
+
+const entry = Astro.props;
+const { collection } = Astro.params;
+
+// Get the rendered HTML content of the entry
+const { Content } = await entry.render();
+
+// Conditionally access data to handle differences between collections
+
+const pubDate = "pubDate" in entry.data ? entry.data.pubDate : undefined;
+---
+
+<PageLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  pubDate={pubDate}
+>
+  <article>
+    <Content />
+  </article>
+</PageLayout>
+
+<style>
+  /* Your existing title override */
+  :global(h1.page-header-title) {
+    font-size: var(--step-5);
+  }
+
+  /* Example styles for the new project link button */
+  .project-link-wrapper {
+    margin-bottom: 2rem;
+  }
+  .project-link-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--accent-regular);
+    color: var(--gray-1);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+  }
+  .project-link-button:hover {
+    background-color: var(--accent-strong);
+  }
+</style>

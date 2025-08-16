@@ -94,7 +94,7 @@ const cardThemes = [
                   <p class="project-list-content-description">
                     {project.data.description}
                   </p>
-                  <a href={`/projects/${project.slug}`} class="project-link">
+                  <a href={`/posts/${project.slug}`} class="project-link">
                     <span>View Project</span>
                   </a>
                 </div>
@@ -212,6 +212,7 @@ const cardThemes = [
     margin: 0 0 1.5rem 0;
     flex-grow: 1;
     line-height: 1.6;
+    font-size: calc(var(--step-0) * 0.7);
   }
   .project-list-content-image {
     position: relative;

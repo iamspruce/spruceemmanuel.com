@@ -143,7 +143,7 @@
     <!-- The dropdown menu -->
     <div class="nav-menu">
       <ul>
-        <li><a href="/work">Work</a></li>
+        <li><a href="https://github.com/iamspruce">Work</a></li>
         <li><a href="/about">About</a></li>
         <li><a href="/journal">Journal</a></li>
       </ul>
@@ -180,13 +180,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-m);
-    padding-block: var(--space-s);
-    padding-inline: var(--space-m);
+    gap: var(--space-2xs);
+    padding-block: var(--space-3xs);
+    padding-inline: var(--space-2xs);
   }
 
   .logo {
-    width: calc(var(--space-2xl) * 3.5);
+    width: calc(var(--space-3xl) * 1.2);
     height: auto;
     pointer-events: auto;
   }
@@ -197,7 +197,7 @@
     transform: rotate(3deg);
     display: flex; /* Aligns desktop buttons */
     align-items: center;
-    gap: var(--space-s);
+    gap: var(--space-2xs);
   }
 
   /* --- General Button/Link Styles --- */
@@ -214,22 +214,20 @@
     font-feature-settings: var(--font-unstable);
     cursor: pointer;
     background: var(--gray-12);
-    gap: var(--space-xs);
-    padding-inline: var(--space-m);
-    padding-block: var(--space-xs);
+    gap: var(--space-3xs);
+
     border-radius: var(--radius-full);
     transition: background-color 0.2s ease-in-out;
     z-index: 1001;
   }
 
   .cta-button {
-    padding: var(--space-xs) var(--space-m);
-    gap: var(--space-xs);
+    padding: var(--space-2xs) var(--space-xs);
     text-decoration: none;
   }
 
   .menu-toggle-button {
-    padding: var(--space-xs);
+    padding: var(--space-2xs) var(--space-xs);
     position: relative;
   }
 
@@ -271,7 +269,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-    min-width: calc(var(--space-3xl) * 3);
+    min-width: calc(var(--space-2xl) * 3);
     opacity: 0;
     visibility: hidden;
     transform-origin: top right;
@@ -301,7 +299,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--space-xs) var(--space-s);
+    padding: var(--space-3xs) var(--space-2xs);
     text-decoration: none;
     color: var(--gray-8);
     font-weight: var(--font-weight-bold);

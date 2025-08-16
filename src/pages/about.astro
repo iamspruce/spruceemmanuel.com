@@ -1,24 +1,51 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import ContentLayout from "../layouts/Pagelayout.astro";
+
+const title = "About Spruce.";
+const description =
+  "For nearly a decade, I’ve been tinkering with code and technology the way some people tinker with old radios—taking things apart, putting them back together, and discovering something new each time.";
+const pubDate = "2025-08-15";
 ---
 
-<Layout
-  title="About Me"
-  description="Learn more about my background and skills."
->
-  <article itemscope="" itemtype="https://schema.org/BlogPosting">
-    <header class="page-header">
-      <div class="center">
-        <hgroup role="group" aria-roledescription="Heading group">
-          <h1 itemprop="name" class="page-title">About Spruce</h1>
-          <p aria-roledescription="subtitle" class="page-subtitle">
-            Software developer from Nigeria.
-          </p>
-        </hgroup>
-      </div>
-    </header>
-    <section itemprop="articleBody" class="prose"></section>
-  </article>
-</Layout>
+<ContentLayout title={title} description={description} pubDate={pubDate}>
+  <div class="center">
+    <p>
+      I started playing with code since 2016 out of curiosity. I'd break and
+      make a few things, and then I'd write about breaking and making a few
+      things. You can read about it on my <a href="link-to-your-blog">blog</a>.
+    </p>
+    <p>
+      I am based in Nigeria and I like to work remotely. I also play chess; my
+      Lichess username is <a
+        href="https://lichess.org/@/your-lichess-username"
+        target="_blank">your-lichess-username</a
+      >.
+    </p>
 
-<style></style>
+    <p>but I suppose that’s not why you're here...</p>
+
+    <p>
+      You'll want to know specifics about my work. Since 2016, I have had a few
+      job titles, some which include "writer" and "developer," etc., but it all
+      boils down to making things. In the last 7+ years, I've worked at <strong
+        >ContentLab</strong
+      > as a Senior Software Engineer & Content Strategist, at <strong
+        >Professional Data Skills</strong
+      > as a Software Engineer & Documentation Expert, and as a Freelance Software
+      Engineer & Consultant.
+    </p>
+
+    <p>
+      While working, I've had the opportunity for some of my articles to be
+      published on top developer blogs like the <strong
+        >WhatsApp blog, CrowdStrike, Kinsta, and Zoho</strong
+      >. My focus is always on producing and implementing high-quality,
+      functional software solutions that align with user needs and business
+      goals.
+    </p>
+
+    <a href="link-to-your-resume.pdf" class="resume-button" download
+      >Download My Resume</a
+    >
+  </div>
+</ContentLayout>

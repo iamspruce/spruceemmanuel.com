@@ -3,23 +3,66 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import "../styles/global.css";
 
-interface Props {
+// Define the properties for the layout
+export interface Props {
   title: string;
   description: string;
+  image?: string; // Optional: an image for social media previews
 }
 
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  image = "/default-social-image.png", // A default fallback image
+} = Astro.props;
+
+// Get the canonical URL for the current page
+const canonicalURL = Astro.url.href;
+
+// Create an absolute URL for the social media image
+// IMPORTANT: Make sure to set `site` in your astro.config.mjs file!
+// Example: site: 'https://www.my-portfolio.com'
+const socialImageURL = new URL(image, Astro.site).href;
+
+const siteName = "Your Name's Portfolio"; // Change this to your site's name
 ---
 
 <!doctype html>
 <html class="dark-theme" lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={socialImageURL} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: siteName,
+        url: Astro.site,
+        description: description,
+      })}
+    />
+
+    {/* Your existing font styles */}
     <style>
       @font-face {
         font-style: normal;

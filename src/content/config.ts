@@ -7,6 +7,12 @@ const writingCollection = defineCollection({
     pubDate: z.string(),
     updatedDate: z.coerce.date().optional(),
     heroImage: z.string().optional(),
+    features: z.array(
+      z.object({
+        name: z.string(),
+        link: z.string(),
+      })
+    ),
   }),
 });
 

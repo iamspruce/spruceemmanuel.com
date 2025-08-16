@@ -1301,22 +1301,35 @@ a {
 }
 
 :root {
-  --step--1: clamp(0.8889rem, 0.88rem + 0.0444vi, 0.9rem);
-  --step-0: clamp(1rem, 0.9rem + 0.5vi, 1.125rem);
-  --step-1: clamp(1.125rem, 0.9rem + 1.125vi, 1.4063rem);
-  --step-2: clamp(1.2656rem, 0.8719rem + 1.9688vi, 1.7578rem);
-  --step-3: clamp(1.4238rem, 0.8051rem + 3.0938vi, 2.1973rem);
-  --step-4: clamp(1.6018rem, 0.686rem + 4.5791vi, 2.7466rem);
-  --step-5: clamp(1.802rem, 0.4971rem + 6.5248vi, 3.4332rem);
-  --step-6: clamp(2.0273rem, 0.2159rem + 9.057vi, 4.2915rem);
-  --space-2xs: clamp(0.25rem, 0.2065rem + 0.2174vw, 0.375rem);
-  --space-xs: clamp(0.375rem, 0.3098rem + 0.3261vw, 0.5625rem);
-  --space-s: clamp(0.5rem, 0.413rem + 0.4348vw, 0.75rem);
-  --space-m: clamp(0.75rem, 0.6196rem + 0.6522vw, 1.125rem);
-  --space-l: clamp(1rem, 0.8261rem + 0.8696vw, 1.5rem);
-  --space-xl: clamp(1.5rem, 1.2391rem + 1.3043vw, 2.25rem);
-  --space-2xl: clamp(2rem, 1.6522rem + 1.7391vw, 3rem);
-  --space-3xl: clamp(3rem, 2.4783rem + 2.6087vw, 4.5rem);
+  --space-3xs: clamp(0.3125rem, 0.2483rem + 0.321vw, 0.5625rem);
+  --space-2xs: clamp(0.5625rem, 0.418rem + 0.7223vw, 1.125rem);
+  --space-xs: clamp(0.875rem, 0.6663rem + 1.0433vw, 1.6875rem);
+  --space-s: clamp(1.125rem, 0.8361rem + 1.4446vw, 2.25rem);
+  --space-m: clamp(1.6875rem, 1.2541rem + 2.1669vw, 3.375rem);
+  --space-l: clamp(2.25rem, 1.6722rem + 2.8892vw, 4.5rem);
+  --space-xl: clamp(3.375rem, 2.5082rem + 4.3339vw, 6.75rem);
+  --space-2xl: clamp(4.5rem, 3.3443rem + 5.7785vw, 9rem);
+  --space-3xl: clamp(6.75rem, 5.0165rem + 8.6677vw, 13.5rem);
+  --space-3xs-2xs: clamp(0.3125rem, 0.1038rem + 1.0433vw, 1.125rem);
+  --space-2xs-xs: clamp(0.5625rem, 0.2736rem + 1.4446vw, 1.6875rem);
+  --space-xs-s: clamp(0.875rem, 0.5219rem + 1.7657vw, 2.25rem);
+  --space-s-m: clamp(1.125rem, 0.5472rem + 2.8892vw, 3.375rem);
+  --space-m-l: clamp(1.6875rem, 0.9652rem + 3.6116vw, 4.5rem);
+  --space-l-xl: clamp(2.25rem, 1.0943rem + 5.7785vw, 6.75rem);
+  --space-xl-2xl: clamp(3.375rem, 1.9304rem + 7.2231vw, 9rem);
+  --space-2xl-3xl: clamp(4.5rem, 2.1886rem + 11.557vw, 13.5rem);
+  --space-s-l: clamp(1.125rem, 0.2582rem + 4.3339vw, 4.5rem);
+  --step--3: clamp(0.875rem, 0.8462rem + 0.1439vw, 1rem);
+  --step--2: clamp(1rem, 0.9712rem + 0.1439vw, 1.125rem);
+  --step--1: clamp(1.125rem, 1.0818rem + 0.2158vw, 1.3125rem);
+  --step-0: clamp(1.25rem, 1.1349rem + 0.5755vw, 1.75rem);
+  --step-1: clamp(1.5rem, 1.3273rem + 0.8633vw, 2.25rem);
+  --step-2: clamp(1.75rem, 1.5773rem + 0.8633vw, 2.5rem);
+  --step-3: clamp(2rem, 1.7698rem + 1.1511vw, 3rem);
+  --step-4: clamp(2.25rem, 1.7176rem + 2.6619vw, 4.5625rem);
+  --step-5: clamp(2.625rem, 1.6754rem + 4.7482vw, 6.75rem);
+  --step-6: clamp(3rem, 0.0504rem + 14.7482vw, 15.8125rem);
+  --step-7: clamp(3.8125rem, 0.0427rem + 15.8489vw, 20.1875rem);
   --line-height-single: 1;
   --line-height-display: 1.1;
   --line-height-tight: 1.3;
@@ -1382,8 +1395,8 @@ body.dark {
 }
 
 ::selection {
-  background: var(--amber-4);
-  color: var(--amber-12);
+  background: var(--gray-12);
+  color: var(--gray-1);
 }
 
 h1,
@@ -1397,34 +1410,38 @@ h6 {
 }
 
 h1 {
-  font-size: var(--step-5);
+  font-size: var(--step-6);
   line-height: var(--line-height-display);
   letter-spacing: var(--letter-spacing-condensed);
 }
 
 h2 {
-  font-size: var(--step-3);
+  font-size: var(--step-5);
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-condensed);
 }
 
 h3 {
-  font-size: var(--step-2);
+  font-size: var(--step-4);
   line-height: var(--line-height-tight);
 }
 
 h4 {
-  font-size: var(--step-1);
+  font-size: var(--step-3);
   line-height: var(--line-height-tight);
 }
 
 h5 {
-  font-size: var(--step-0);
+  font-size: var(--step-2);
+  line-height: var(--line-height-tight);
+}
+h6 {
+  font-size: var(--step-1);
   line-height: var(--line-height-tight);
 }
 
 small {
-  font-size: var(--step--1);
+  font-size: var(--step--0);
   line-height: var(--line-height-body);
 }
 
@@ -1477,14 +1494,32 @@ a {
 }
 
 .page-header {
-  padding-block-end: var(--space-3xl);
+  padding-block: var(--space-3xs);
+  padding-inline: var(--space-2xs);
+  padding-block-end: var(--space-xl);
+  text-align: right;
 }
-.page-title {
-  padding-block-start: var(--space-2xl);
-  line-height: var(--line-height-display);
+.page-header-title {
+  font-size: var(--step-7);
+  text-transform: capitalize;
+  line-height: var(--line-height-single);
+  padding-block-start: var(--space-l-xl);
+  letter-spacing: -0.08ch;
 }
-.page-subtitle {
-  font-size: var(--step-2);
+.page-header-subtitle {
+  font-size: var(--step-1);
+  font-style: normal;
   line-height: var(--line-height-tight);
-  padding-block-start: var(--space-xs);
+  padding-block-start: var(--space-2xs);
+}
+.page-header-date {
+  margin-block-start: var(--space-s);
+  font-size: var(--step--1);
+}
+.page-body {
+  padding-block: var(--space-3xs);
+  padding-inline: var(--space-2xs);
+}
+.page-body p {
+  margin-block: var(--space-m);
 }
