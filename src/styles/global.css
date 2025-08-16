@@ -1458,7 +1458,8 @@ strong {
 
 a {
   text-decoration: underline;
-  text-decoration-color: var(--gray-8);
+  text-decoration-color: var(--pink-8);
+  color: var(--pink-10);
   text-underline-offset: max(0.1em, 2.5px);
   transition: text-decoration-color 0.2s ease-in-out,
     font-weight 0.2s ease-in-out;
@@ -1488,9 +1489,7 @@ a {
 .center {
   box-sizing: content-box;
   margin-inline: auto;
-  width: calc(100% - (var(--space-xl) * 2));
   max-inline-size: 800px;
-  padding-inline: var(--space-xl);
 }
 
 .page-header {

@@ -10,42 +10,144 @@ const pubDate = "2025-08-15";
 <ContentLayout title={title} description={description} pubDate={pubDate}>
   <div class="center">
     <p>
-      I started playing with code since 2016 out of curiosity. I'd break and
+      I started playing with code back in 2016 out of curiosity. I'd break and
       make a few things, and then I'd write about breaking and making a few
-      things. You can read about it on my <a href="link-to-your-blog">blog</a>.
-    </p>
-    <p>
-      I am based in Nigeria and I like to work remotely. I also play chess; my
-      Lichess username is <a
-        href="https://lichess.org/@/your-lichess-username"
-        target="_blank">your-lichess-username</a
+      things. You can read some of my articles over on <a
+        href="https://freecodecamp.org/news/spruce">Freecodecamp</a
       >.
     </p>
 
-    <p>but I suppose that’s not why you're here...</p>
+    <p>
+      I am based in Nigeria and I like to work remotely. I also play chess; my
+      Lichess username is <a href="#" target="_blank">SpruceEmma</a>.
+    </p>
+
+    <p><em>...but I suppose that’s not why you're here.</em></p>
 
     <p>
       You'll want to know specifics about my work. Since 2016, I have had a few
-      job titles, some which include "writer" and "developer," etc., but it all
-      boils down to making things. In the last 7+ years, I've worked at <strong
-        >ContentLab</strong
-      > as a Senior Software Engineer & Content Strategist, at <strong
-        >Professional Data Skills</strong
-      > as a Software Engineer & Documentation Expert, and as a Freelance Software
-      Engineer & Consultant.
+      job titles, including "writer" and "developer," but it all boils down to
+      making things. In the last 7+ years, I've had the pleasure of working with
+      some great companies.
     </p>
+
+    <p>Here’s a snapshot:</p>
+
+    <ul class="timeline">
+      <li>
+        <strong>ContentLab</strong> | <em>Content Strategist</em> (Apr 2022 - 2025)
+        <p>
+          I spent my time here designing and building proof-of-concept
+          applications with React.js and Next.js to break down complex
+          engineering topics. I also produced clean, efficient code for tools
+          and apps that set the standard for our technical articles, and I led
+          the technical review for over 100 of them to ensure everything was up
+          to snuff.
+        </p>
+      </li>
+      <li>
+        <strong>Professional Data Skills</strong> | <em
+          >Software Engineer & Documentation Expert</em
+        > (Oct 2023 - 2025)
+        <p>
+          My main role was to translate dense technical information into
+          developer-focused documentation that was actually easy to read. This
+          involved defining software requirements with our internal teams and
+          building out code examples to make our instructional content clearer.
+        </p>
+      </li>
+      <li>
+        <strong>Freelance</strong> | <em>Software Engineer & Consultant</em> (2017
+        - Present)
+        <p>
+          I've engineered and deployed robust, full-stack web applications for a
+          wide range of clients, focusing on scalable front-end systems using
+          React.js. I've also written and published over 50 detailed technical
+          guides on platforms like freeCodeCamp.
+        </p>
+      </li>
+    </ul>
 
     <p>
       While working, I've had the opportunity for some of my articles to be
       published on top developer blogs like the <strong
         >WhatsApp blog, CrowdStrike, Kinsta, and Zoho</strong
-      >. My focus is always on producing and implementing high-quality,
-      functional software solutions that align with user needs and business
-      goals.
+      >.
     </p>
 
-    <a href="link-to-your-resume.pdf" class="resume-button" download
-      >Download My Resume</a
-    >
-  </div>
-</ContentLayout>
+    <!-- Strengthened Call to Action -->
+    <div class="cta-section">
+      <p>
+        My focus is always on producing and implementing high-quality,
+        functional software solutions that align with user needs and business
+        goals. I'm always open to discussing new projects or opportunities. Feel
+        free to reach out via <a href="mailto:spruceemmanuel@gmail.com">email</a
+        > or connect with me on <a
+          href="https://linkedin.com/in/spruceemma"
+          target="_blank">LinkedIn</a
+        >.
+      </p>
+      <div style="margin-top: 1.5rem;">
+        <a href="Spruce_Emmanuel-10.pdf" download class="resume-button">
+          Download My Resume!
+        </a>
+      </div>
+    </div>
+  </div></ContentLayout
+>
+
+<style>
+  .timeline {
+    list-style-type: none;
+    padding-left: 20px; /* Make space for the line */
+    position: relative;
+  }
+
+  /* The new connecting line */
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 40px;
+    width: 4px;
+    background-color: var(--gray-12);
+    border-radius: 2px;
+  }
+
+  .timeline li {
+    position: relative; /* This is crucial for z-index to work */
+    z-index: 1; /* Ensure panels are on top of the line */
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: var(--gray-12);
+    color: var(--gray-1);
+    border: 3px solid var(--gray-10);
+    border-radius: 8px;
+    box-shadow: 6px 6px 0px var(--gray-8);
+  }
+
+  .timeline li p {
+    margin-block: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .timeline li strong {
+    font-size: 1.25rem;
+  }
+
+  .cta-section {
+    position: relative; /* Needed for z-index */
+    z-index: 1; /* Ensure it's above the line if it overlaps */
+    margin-top: 3rem;
+    padding: 2rem;
+    text-align: center;
+    background-color: var(--pink-10);
+    border: 3px solid var(--pink-12);
+    border-radius: 8px;
+    box-shadow: 6px 6px 0px var(--pink-12);
+  }
+  .cta-section a {
+    color: var(--gray-1);
+  }
+</style>

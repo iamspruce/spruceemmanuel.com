@@ -121,7 +121,7 @@ const cardThemes = [
     gap: var(--card-gap);
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* ✨ Great for touch performance */
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
   .projects-list::-webkit-scrollbar {
@@ -148,8 +148,6 @@ const cardThemes = [
 
     transform: var(--transform-scroll) var(--transform-hover);
     opacity: var(--opacity);
-
-    /* ✨ IMPROVEMENT: Hint to the browser about upcoming changes for smoother animation */
     will-change: transform, opacity;
     transition:
       transform 0.3s ease,
@@ -165,16 +163,32 @@ const cardThemes = [
     background: var(--card-bg-color);
     color: var(--card-text-color);
     border: 3px solid var(--card-outline-color);
-    box-shadow: 8px 8px 0 var(--card-outline-color);
     border-radius: 1rem;
     height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative; /* Needed for the number's absolute positioning */
+    position: relative;
+    /* ✨ FIX 1: box-shadow removed from here */
   }
 
-  /* ✨ ADDED: Styles for the card number circle */
+  /* ✨ FIX 1: Replaced box-shadow with a more performant pseudo-element */
+  .project-list-item-inner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit; /* Match the parent's border-radius */
+    background: var(--card-outline-color);
+    border: 3px solid var(--card-outline-color);
+    transform: translate(8px, 8px);
+    z-index: -1;
+    transition: transform 0.3s ease; /* To match hover effect */
+  }
+
+  .project-list-item:hover .project-list-item-inner::after {
+    transform: translate(12px, 12px);
+  }
+
   .card-number {
     position: absolute;
     top: 1rem;
@@ -243,6 +257,8 @@ const cardThemes = [
     aspect-ratio: 16 / 9;
     filter: saturate(1.4) contrast(1.1);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    /* ✨ FIX 2: Hint to the browser to use the GPU for this image */
+    transform: translateZ(0);
   }
   .project-list-item:hover .project-list-content-image img {
     transform: scale(1.1);
@@ -270,7 +286,6 @@ const cardThemes = [
     box-shadow: 4px 4px 0 var(--card-text-color);
   }
 </style>
-
 <script>
   // This JavaScript is your proven, working version. No changes needed.
   document.addEventListener("DOMContentLoaded", () => {
