@@ -1510,6 +1510,7 @@ a {
   font-style: normal;
   line-height: var(--line-height-tight);
   padding-block-start: var(--space-2xs);
+  text-transform: capitalize;
 }
 .page-header-date {
   margin-block-start: var(--space-s);

@@ -96,6 +96,21 @@ const cardThemes = [
                   </p>
                   <a href={`/posts/${project.slug}`} class="project-link">
                     <span>View Project</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="var(--space-l)"
+                      height="var(--space-l)"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <path
+                        d="M6 18L8.5 15.5M18 6H9M18 6V15M18 6L11.5 12.5"
+                        stroke="#1C274C"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
                   </a>
                 </div>
               </div>
@@ -267,7 +282,9 @@ const cardThemes = [
     opacity: 0.2;
   }
   .project-link {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-weight: 700;
     text-decoration: none;
     text-align: center;
@@ -278,6 +295,7 @@ const cardThemes = [
     border-radius: 0.5rem;
     transition: all 0.2s ease-in-out;
     align-self: flex-start;
+    width: 100%;
   }
   .project-link:hover {
     background-color: var(--card-outline-color);
