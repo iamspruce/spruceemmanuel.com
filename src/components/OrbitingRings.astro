@@ -1,0 +1,196 @@
+---
+interface Props {
+  centerText?: string;
+  centerColor?: string;
+  backgroundColor?: string;
+  ringColor1?: string;
+  ringColor2?: string;
+  ringColor3?: string;
+  speed?: number;
+  width?: number;
+  height?: number;
+}
+
+const {
+  centerText = "D3.js",
+  centerColor = "#f9a03f",
+  backgroundColor = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  ringColor1 = "#ffd700",
+  ringColor2 = "#00d4ff",
+  ringColor3 = "#ff6b6b",
+  speed = 1,
+  width = 600,
+  height = 600,
+} = Astro.props;
+
+const centerX = width / 2;
+const centerY = height / 2;
+const orbitRadius = width / 4;
+---
+
+<div class="orbital-container" style={`background: ${backgroundColor}`}>
+  <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <g id="center-group">
+      <circle
+        cx={centerX}
+        cy={centerY}
+        r={width / 12}
+        fill={centerColor}
+        stroke="#fff"
+        stroke-width="3"></circle>
+      <text
+        x={centerX}
+        y={centerY}
+        class="center-text"
+        style={`font-size: ${width / 18.75}px`}
+      >
+        {centerText}
+      </text>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .orbital-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: "Arial", sans-serif;
+  }
+
+  svg {
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+  }
+
+  .orbit-path {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    opacity: 0.6;
+  }
+
+  .orbit-trace {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.9;
+  }
+
+  .center-text {
+    font-weight: bold;
+    fill: #fff;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  .orbit-dot {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+</style>
+
+<script
+  define:vars={{
+    centerX,
+    centerY,
+    orbitRadius,
+    ringColor1,
+    ringColor2,
+    ringColor3,
+    speed,
+  }}
+>
+  const svg = document.querySelector("svg");
+
+  const orbits = [
+    { angle: 60, speed: 2 * speed, color: ringColor1 },
+    { angle: 0, speed: 2.5 * speed, color: ringColor2 },
+    { angle: -60, speed: 3 * speed, color: ringColor3 },
+  ];
+
+  orbits.forEach((orbit, index) => {
+    createOrbit(orbit.angle, orbit.speed, orbit.color, index);
+  });
+
+  function createOrbit(tiltAngle, orbitSpeed, color, index) {
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.setAttribute(
+      "transform",
+      `rotate(${tiltAngle} ${centerX} ${centerY})`
+    );
+
+    // Create the full orbit path (static background)
+    const orbitPath = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "ellipse"
+    );
+    orbitPath.setAttribute("cx", centerX);
+    orbitPath.setAttribute("cy", centerY);
+    orbitPath.setAttribute("rx", orbitRadius);
+    orbitPath.setAttribute("ry", orbitRadius * 0.3);
+    orbitPath.setAttribute("class", "orbit-path");
+    group.appendChild(orbitPath);
+
+    // Create the animated trace path
+    const tracePath = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
+    tracePath.setAttribute("class", "orbit-trace");
+    tracePath.setAttribute("stroke", color);
+    group.appendChild(tracePath);
+
+    // Create the orbiting dot
+    const dot = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
+    dot.setAttribute("r", 6);
+    dot.setAttribute("class", "orbit-dot");
+    dot.setAttribute("fill", color);
+    group.appendChild(dot);
+
+    svg.appendChild(group);
+
+    // Animation
+    let angle = index * 120; // Offset each orbit
+
+    function animate() {
+      angle += orbitSpeed * 0.02;
+
+      const radians = (angle * Math.PI) / 180;
+      const x = centerX + Math.cos(radians) * orbitRadius;
+      const y = centerY + Math.sin(radians) * orbitRadius * 0.3;
+
+      // Update dot position
+      dot.setAttribute("cx", x);
+      dot.setAttribute("cy", y);
+
+      // Create trailing path effect
+      const trailLength = 180; // degrees
+      const startAngle = angle - trailLength;
+
+      let pathData = "";
+      for (let a = startAngle; a <= angle; a += 2) {
+        const rad = (a * Math.PI) / 180;
+        const px = centerX + Math.cos(rad) * orbitRadius;
+        const py = centerY + Math.sin(rad) * orbitRadius * 0.3;
+
+        if (a === startAngle) {
+          pathData += `M ${px} ${py}`;
+        } else {
+          pathData += ` L ${px} ${py}`;
+        }
+      }
+
+      tracePath.setAttribute("d", pathData);
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  }
+</script>

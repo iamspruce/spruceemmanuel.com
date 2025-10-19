@@ -1,5 +1,4 @@
 ---
-// No changes to your frontmatter or color theme logic.
 import { getCollection } from "astro:content";
 const projects = await getCollection("projects");
 import { Image } from "astro:assets";
@@ -75,7 +74,6 @@ const cardThemes = [
               `}
             >
               <div class="project-list-item-inner">
-                {/* ✨ ADDED: Number element from your new version */}
                 <div class="card-number">{index + 1}</div>
                 <div class="project-list-content">
                   {project.data.image && (
@@ -123,10 +121,18 @@ const cardThemes = [
 </div>
 
 <style>
-  /* --- Layout & Base Card --- */
   .projects-list-wrapper {
     --card-gap: 2rem;
-    perspective: 1500px;
+    perspective: 1200px;
+  }
+  .projects-list-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--gray-1), transparent);
+  }
+
+  .projects-list-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--gray-1), transparent);
   }
 
   .projects-list {
@@ -138,6 +144,7 @@ const cardThemes = [
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    scroll-padding: 0;
   }
   .projects-list::-webkit-scrollbar {
     display: none;
@@ -153,24 +160,25 @@ const cardThemes = [
   }
 
   .project-list-item {
-    --transform-scroll: rotate(0deg) scale(1);
-    --transform-hover: scale(1) rotate(0deg) translateY(0);
+    --transform-scroll: perspective(1000px) rotateY(0deg) scale(1) translateZ(0);
+    --transform-hover: scale(1.05) rotate(2deg) translateY(-10px);
     --opacity: 1;
 
     flex: 0 0 clamp(280px, 80vw, 400px);
     scroll-snap-align: center;
     position: relative;
 
-    transform: var(--transform-scroll) var(--transform-hover);
+    transform: var(--transform-scroll);
     opacity: var(--opacity);
     will-change: transform, opacity;
     transition:
-      transform 0.3s ease,
+      transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
       opacity 0.4s ease;
   }
 
   .project-list-item:hover {
-    --transform-hover: scale(1.05) rotate(2deg) translateY(-10px);
+    --transform-hover: scale(1.05) rotate(2deg) translateY(-10px)
+      translateZ(20px);
     z-index: 10;
   }
 
@@ -184,20 +192,20 @@ const cardThemes = [
     flex-direction: column;
     overflow: hidden;
     position: relative;
-    /* ✨ FIX 1: box-shadow removed from here */
+    transform-origin: center;
   }
 
-  /* ✨ FIX 1: Replaced box-shadow with a more performant pseudo-element */
   .project-list-item-inner::after {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: inherit; /* Match the parent's border-radius */
+    border-radius: inherit;
     background: var(--card-outline-color);
     border: 3px solid var(--card-outline-color);
     transform: translate(8px, 8px);
     z-index: -1;
-    transition: transform 0.3s ease; /* To match hover effect */
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
   }
 
   .project-list-item:hover .project-list-item-inner::after {
@@ -223,7 +231,6 @@ const cardThemes = [
     box-shadow: 0 0 0 3px var(--card-outline-color);
   }
 
-  /* --- Content & Typography (No Changes) --- */
   .project-list-content {
     padding: 1.5rem;
     display: flex;
@@ -231,18 +238,21 @@ const cardThemes = [
     margin-top: auto;
     color: var(--card-text-color);
   }
+
   .project-list-content-title {
     margin: 0 0 0.5rem 0;
     font-size: 1.75rem;
     font-weight: 800;
     color: var(--card-text-color);
   }
+
   .project-list-content-description {
     margin: 0 0 1.5rem 0;
     flex-grow: 1;
     line-height: 1.6;
     font-size: calc(var(--step-0) * 0.7);
   }
+
   .project-list-content-image {
     position: relative;
     border: 3px solid var(--card-outline-color);
@@ -250,6 +260,7 @@ const cardThemes = [
     margin-bottom: 1.5rem;
     overflow: hidden;
   }
+
   .project-list-content-image::after {
     content: "";
     position: absolute;
@@ -265,6 +276,7 @@ const cardThemes = [
     pointer-events: none;
     transition: opacity 0.3s ease;
   }
+
   .project-list-content-image img {
     display: block;
     width: 100%;
@@ -272,15 +284,18 @@ const cardThemes = [
     aspect-ratio: 16 / 9;
     filter: saturate(1.4) contrast(1.1);
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    /* ✨ FIX 2: Hint to the browser to use the GPU for this image */
     transform: translateZ(0);
+    backface-visibility: hidden;
   }
+
   .project-list-item:hover .project-list-content-image img {
-    transform: scale(1.1);
+    transform: scale(1.1) translateZ(0);
   }
+
   .project-list-item:hover .project-list-content-image::after {
     opacity: 0.2;
   }
+
   .project-link {
     display: flex;
     align-items: center;
@@ -297,6 +312,7 @@ const cardThemes = [
     align-self: flex-start;
     width: 100%;
   }
+
   .project-link:hover {
     background-color: var(--card-outline-color);
     color: var(--card-bg-color);
@@ -304,44 +320,59 @@ const cardThemes = [
     box-shadow: 4px 4px 0 var(--card-text-color);
   }
 </style>
+
 <script>
-  // This JavaScript is your proven, working version. No changes needed.
   document.addEventListener("DOMContentLoaded", () => {
     const container = document.querySelector(".projects-list");
     if (!container) return;
     const list = container.querySelector(".project-list-items");
     const cards = list.querySelectorAll(".project-list-item");
     if (cards.length === 0) return;
+
     let isTicking = false;
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
     function updateCardStyles() {
-      const containerCenter =
-        container.getBoundingClientRect().left + container.offsetWidth / 2;
+      const containerRect = container.getBoundingClientRect();
+      const containerCenter = containerRect.left + containerRect.width / 2;
+      const containerWidth = containerRect.width;
+
       cards.forEach((card) => {
-        const cardCenter =
-          card.getBoundingClientRect().left + card.offsetWidth / 2;
+        const cardRect = card.getBoundingClientRect();
+        const cardCenter = cardRect.left + cardRect.width / 2;
         const distance = cardCenter - containerCenter;
-        const distanceFactor = distance / (container.offsetWidth / 2);
-        const maxScaleChange = 0.1;
-        const maxRotation = 8;
-        const maxOpacity = 0.5;
-        const scale = 1 - Math.abs(distanceFactor) * maxScaleChange;
-        const rotation = distanceFactor * maxRotation;
-        const opacity = 1 - Math.abs(distanceFactor) * maxOpacity;
+        const distanceFactor = distance / (containerWidth / 2);
+
+        // Clamp distance factor for smooth transitions
+        const clampedFactor = Math.max(-1, Math.min(1, distanceFactor));
+
+        const maxScaleChange = 0.12;
+        const maxRotationY = 15; // Increased for more pronounced curve
+        const maxRotationZ = 8;
+        const maxOpacity = 0.4;
+
+        const scale = 1 - Math.abs(clampedFactor) * maxScaleChange;
+        const rotationY = clampedFactor * maxRotationY;
+        const rotationZ = clampedFactor * maxRotationZ;
+        const opacity = 1 - Math.abs(clampedFactor) * maxOpacity;
+
         card.style.setProperty(
           "--transform-scroll",
-          `rotate(${rotation}deg) scale(${scale})`
+          `perspective(1000px) rotateY(${rotationY}deg) rotateZ(${rotationZ}deg) scale(${scale}) translateZ(0)`
         );
         card.style.setProperty("--opacity", opacity);
       });
+
       isTicking = false;
     }
+
     function onScroll() {
       if (!isTicking) {
         window.requestAnimationFrame(updateCardStyles);
         isTicking = true;
       }
     }
+
     function centerMiddleCard() {
       if (cards.length > 0) {
         const middleIndex = Math.floor(cards.length / 2);
@@ -352,6 +383,7 @@ const cardThemes = [
         container.scrollLeft = scrollTarget;
       }
     }
+
     function initCarousel() {
       const firstCard = cards[0];
       if (firstCard) {
@@ -365,6 +397,7 @@ const cardThemes = [
         updateCardStyles();
       }
     }
+
     const observer = new ResizeObserver(initCarousel);
     observer.observe(container);
     initCarousel();

@@ -8,7 +8,6 @@ export interface Props {
   image?: string;
   link?: string;
 }
-
 const { title, description, pubDate, image, link } = Astro.props;
 ---
 
@@ -47,8 +46,8 @@ const { title, description, pubDate, image, link } = Astro.props;
         )
       }
     </header>
+    <section itemprop="articleBody" class="page-body">
+      <slot />
+    </section>
   </article>
-  <section itemprop="articleBody" class="page-body">
-    <slot />
-  </section>
 </MainLayout>

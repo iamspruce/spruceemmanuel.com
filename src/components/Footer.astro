@@ -1,6 +1,11 @@
+---
+import Divider from "./Divider.astro";
+---
+
 <footer class="footer">
+  <Divider mirror={true} />
+
   <div class="wrapper">
-    <hr />
     <svg
       xmlns="http://www.w3.org/2000/svg"
       xmlns:bx="https://boxy-svg.com"
@@ -51,10 +56,11 @@
 
 <style>
   .footer {
-    margin-top: var(--space-xl);
     padding-block: var(--space-xl);
+    padding-block-start: 0px;
     background-color: var(--gray-1);
     color: var(--gray-12);
+    position: relative;
   }
   .wrapper {
     padding-block: var(--space-3xs);
@@ -62,11 +68,7 @@
     margin-inline: auto;
     max-width: 1300px;
   }
-  hr {
-    border-block-start: var(--space-l);
-    margin-block: var(--space-l);
-    border: 2px solid currentColor;
-  }
+
   .footer-about {
     font-size: var(--step-1);
     margin-block: var(--space-xl) var(--space-xl);

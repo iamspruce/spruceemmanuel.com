@@ -1,0 +1,362 @@
+---
+// WaveDivider.astro
+export interface Props {
+  mirror?: boolean;
+  variant?: "default" | "subtle" | "bold";
+  speed?: "slow" | "normal" | "fast";
+}
+
+const { mirror = false, variant = "default", speed = "normal" } = Astro.props;
+
+const uniqueId = `wave-${Math.random().toString(36).substr(2, 9)}`;
+const speedMultiplier = speed === "slow" ? 1.5 : speed === "fast" ? 0.5 : 1;
+---
+
+<div
+  class={`wave-divider ${mirror ? "mirror" : ""} variant-${variant}`}
+  data-speed={speedMultiplier}
+>
+  <svg
+    width="320rem"
+    height="15.625rem"
+    viewBox="0 0 5120 337"
+    fill="none"
+    preserveAspectRatio="none"
+    xmlns="http://www.w3.org/2000/svg"
+    class="wave-svg"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient
+        id={`gradient-${uniqueId}`}
+        x1="0%"
+        y1="0%"
+        x2="100%"
+        y2="0%"
+      >
+        <stop offset="0%" class="gradient-stop-1"></stop>
+        <stop offset="25%" class="gradient-stop-2"></stop>
+        <stop offset="50%" class="gradient-stop-3"></stop>
+        <stop offset="75%" class="gradient-stop-4"></stop>
+        <stop offset="100%" class="gradient-stop-1"></stop>
+      </linearGradient>
+
+      <filter id={`glow-${uniqueId}`}>
+        <feGaussianBlur stdDeviation="4" result="coloredBlur"></feGaussianBlur>
+        <feMerge>
+          <feMergeNode in="coloredBlur"></feMergeNode>
+          <feMergeNode in="SourceGraphic"></feMergeNode>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- Base wave fill with subtle gradient -->
+    <path
+      d="M2262 93C2122.5 82.5987 2116 21.5 2096.5 21.5C2077 21.5 2070.5 77.5238 1920.5 93C1794.5 106 1786 62 1771.5 63.5C1757 65 1687 155.5 1580 142C1473 128.5 1446.5 90 1435 93C1423.5 96 1448.03 199.005 1340 214C1181.5 236 1155.5 142 1144 142C1132.5 142 1105.5 269 946.5 236C787.5 203 799 115 784 114.5C769 114 732.5 162 544 158C382 154.562 352.5 81 341 84.5C329.5 88 358 269 168 326C-22 383 -75.5 180 -75.5 180V0.5H5189.5L5193.5 46C5193.5 46 5200 94 5069.5 100.5C4939 107 4923.5 21.5 4906.5 21.5C4889.5 21.5 4870 35 4835 93.5C4800 152 4765.5 169.5 4643.5 173.5C4521.5 177.5 4436.5 69 4425.5 76.5C4414.5 84 4413.5 212 4235 222C4056.5 232 4045.5 92 4033.5 89C4021.5 86 3968.5 169.5 3823.5 172.5C3678.5 175.5 3573.5 104 3562.5 106.5C3551.5 109 3553.5 167.5 3396 201C3238.5 234.5 3171.5 168.5 3161 172.5C3150.5 176.5 3164 273 3076.5 294.5C2975.99 319.197 2935 228 2920 225.5C2905 223 2862 276.955 2749 245C2671.4 223.057 2672.5 149 2660.5 151.5C2648.5 154 2622.5 181.04 2548.5 158C2425 119.548 2427.5 53.5 2412 51C2396.5 48.5 2376 101.5 2262 93Z"
+      class="wave-fill"></path>
+
+    <!-- Animated gradient line -->
+    <path
+      id={uniqueId}
+      d="M-75.5 180C-75.5 180 -22 383 168 326C358 269 329.5 88 341 84.5C352.5 81 382 154.562 544 158C732.5 162 769 114 784 114.5C799 115 787.5 203 946.5 236C1105.5 269 1132.5 142 1144 142C1155.5 142 1181.5 236 1340 214C1448.03 199.005 1423.5 96 1435 93C1446.5 90 1473 128.5 1580 142C1687 155.5 1757 65 1771.5 63.5C1786 62 1794.5 106 1920.5 93C2070.5 77.5238 2077 21.5 2096.5 21.5C2116 21.5 2122.5 82.5987 2262 93C2376 101.5 2396.5 48.5 2412 51C2427.5 53.5 2425 119.548 2548.5 158C2622.5 181.04 2648.5 154 2660.5 151.5C2672.5 149 2671.4 223.057 2749 245C2862 276.955 2905 223 2920 225.5C2935 228 2975.99 319.197 3076.5 294.5C3164 273 3150.5 176.5 3161 172.5C3171.5 168.5 3238.5 234.5 3396 201C3553.5 167.5 3551.5 109 3562.5 106.5C3573.5 104 3678.5 175.5 3823.5 172.5C3968.5 169.5 4021.5 86 4033.5 89C4045.5 92 4056.5 232 4235 222C4413.5 212 4414.5 84 4425.5 76.5C4436.5 69 4521.5 177.5 4643.5 173.5C4765.5 169.5 4800 152 4835 93.5C4870 35 4889.5 21.5 4906.5 21.5C4923.5 21.5 4939 107 5069.5 100.5C5200 94 5193.5 46 5193.5 46"
+      stroke-width="4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+      class="wave-line"
+      stroke={`url(#gradient-${uniqueId})`}
+      data-mirror={mirror}></path>
+  </svg>
+</div>
+
+<style>
+  .wave-divider {
+    position: absolute;
+    top: 95%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .wave-divider.mirror {
+    top: auto;
+    bottom: 98%;
+    transform: scale(-1, -1);
+  }
+
+  .wave-svg {
+    display: block;
+    max-width: revert;
+    width: 100%;
+    min-width: 950px;
+    overflow: visible;
+    will-change: transform;
+  }
+
+  /* Wave fill styling */
+  .wave-fill {
+    fill: var(--gray-1);
+    opacity: 0.98;
+    transition: fill 0.3s ease;
+  }
+
+  /* Variant styles */
+  .variant-subtle .wave-fill {
+    opacity: 0.6;
+  }
+
+  .variant-bold .wave-fill {
+    opacity: 1;
+    filter: drop-shadow(0 -2px 8px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Gradient stops animation */
+  .gradient-stop-1 {
+    stop-color: var(--jade-9);
+    animation: stopShift1 12s ease-in-out infinite;
+  }
+
+  .gradient-stop-2 {
+    stop-color: var(--blue-9);
+    animation: stopShift2 12s ease-in-out infinite;
+  }
+
+  .gradient-stop-3 {
+    stop-color: var(--purple-9);
+    animation: stopShift3 12s ease-in-out infinite;
+  }
+
+  .gradient-stop-4 {
+    stop-color: var(--pink-9);
+    animation: stopShift4 12s ease-in-out infinite;
+  }
+
+  @keyframes stopShift1 {
+    0%,
+    100% {
+      stop-color: var(--jade-9);
+    }
+    25% {
+      stop-color: var(--blue-9);
+    }
+    50% {
+      stop-color: var(--purple-9);
+    }
+    75% {
+      stop-color: var(--pink-9);
+    }
+  }
+
+  @keyframes stopShift2 {
+    0%,
+    100% {
+      stop-color: var(--blue-9);
+    }
+    25% {
+      stop-color: var(--purple-9);
+    }
+    50% {
+      stop-color: var(--pink-9);
+    }
+    75% {
+      stop-color: var(--jade-9);
+    }
+  }
+
+  @keyframes stopShift3 {
+    0%,
+    100% {
+      stop-color: var(--purple-9);
+    }
+    25% {
+      stop-color: var(--pink-9);
+    }
+    50% {
+      stop-color: var(--jade-9);
+    }
+    75% {
+      stop-color: var(--blue-9);
+    }
+  }
+
+  @keyframes stopShift4 {
+    0%,
+    100% {
+      stop-color: var(--pink-9);
+    }
+    25% {
+      stop-color: var(--jade-9);
+    }
+    50% {
+      stop-color: var(--blue-9);
+    }
+    75% {
+      stop-color: var(--purple-9);
+    }
+  }
+
+  /* Wave line styling */
+  .wave-line {
+    stroke-dasharray: 12000;
+    stroke-dashoffset: 12000;
+    filter: drop-shadow(0 0 8px currentColor);
+    opacity: 0.9;
+    will-change: stroke-dashoffset;
+  }
+
+  .variant-subtle .wave-line {
+    opacity: 0.6;
+    stroke-width: 3;
+  }
+
+  .variant-bold .wave-line {
+    opacity: 1;
+    stroke-width: 5;
+    filter: drop-shadow(0 0 12px currentColor);
+  }
+
+  /* Gentle breathing animation */
+  .wave-svg {
+    animation: waveBreath 8s ease-in-out infinite;
+  }
+
+  @keyframes waveBreath {
+    0%,
+    100% {
+      transform: translateY(-1px) scaleY(1);
+    }
+    50% {
+      transform: translateY(6px) scaleY(1.015);
+    }
+  }
+
+  .wave-divider.mirror .wave-svg {
+    animation: waveBreathMirror 8s ease-in-out infinite;
+  }
+
+  @keyframes waveBreathMirror {
+    0%,
+    100% {
+      transform: translateY(1px) scaleY(1);
+    }
+    50% {
+      transform: translateY(-6px) scaleY(1.015);
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .wave-svg,
+    .wave-line,
+    .gradient-stop-1,
+    .gradient-stop-2,
+    .gradient-stop-3,
+    .gradient-stop-4 {
+      animation: none !important;
+    }
+
+    .wave-line {
+      stroke: var(--jade-9);
+      opacity: 0.5;
+    }
+  }
+</style>
+
+<script>
+  class WaveAnimator {
+    private waveLine: SVGPathElement;
+    private isMirror: boolean;
+    private currentOffset: number = 12000;
+    private targetOffset: number = 12000;
+    private animationFrame: number | null = null;
+    private speedMultiplier: number = 1;
+    private lastScrollY: number = 0;
+    private scrollVelocity: number = 0;
+
+    constructor(waveLine: SVGPathElement, speedMultiplier: number) {
+      this.waveLine = waveLine;
+      this.isMirror = waveLine.getAttribute("data-mirror") === "true";
+      this.speedMultiplier = speedMultiplier;
+      this.lastScrollY = window.scrollY;
+    }
+
+    private calculateScrollProgress(): number {
+      const scrollY = window.scrollY;
+      this.scrollVelocity = scrollY - this.lastScrollY;
+      this.lastScrollY = scrollY;
+
+      const maxScroll = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      return Math.min(Math.max(scrollY / maxScroll, 0), 1);
+    }
+
+    private updateOffset = () => {
+      const scrollProgress = this.calculateScrollProgress();
+
+      // Calculate target with velocity influence for more dynamic movement
+      const baseOffset = 12000 - scrollProgress * 24000;
+      const velocityInfluence = this.scrollVelocity * 2;
+      this.targetOffset = baseOffset + velocityInfluence;
+
+      // Smooth easing with speed multiplier
+      const easingFactor = 0.08 * this.speedMultiplier;
+      this.currentOffset +=
+        (this.targetOffset - this.currentOffset) * easingFactor;
+
+      this.waveLine.style.strokeDashoffset = this.currentOffset.toFixed(2);
+
+      this.animationFrame = requestAnimationFrame(this.updateOffset);
+    };
+
+    start() {
+      if (!this.animationFrame) {
+        this.animationFrame = requestAnimationFrame(this.updateOffset);
+      }
+    }
+
+    stop() {
+      if (this.animationFrame) {
+        cancelAnimationFrame(this.animationFrame);
+        this.animationFrame = null;
+      }
+    }
+  }
+
+  // Initialize on DOM load
+  document.addEventListener("DOMContentLoaded", () => {
+    const waveLines = document.querySelectorAll(".wave-line");
+    const animators: WaveAnimator[] = [];
+
+    waveLines.forEach((waveLine) => {
+      if (!(waveLine instanceof SVGPathElement)) return;
+
+      const divider = waveLine.closest(".wave-divider");
+      const speedMultiplier = parseFloat(
+        divider?.getAttribute("data-speed") || "1"
+      );
+
+      const animator = new WaveAnimator(waveLine, speedMultiplier);
+      animators.push(animator);
+      animator.start();
+    });
+
+    // Pause animations when page is not visible
+    document.addEventListener("visibilitychange", () => {
+      animators.forEach((animator) => {
+        if (document.hidden) {
+          animator.stop();
+        } else {
+          animator.start();
+        }
+      });
+    });
+  });
+</script>
