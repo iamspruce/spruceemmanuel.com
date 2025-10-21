@@ -1,0 +1,1715 @@
+---
+// SVGCanvas.astro - Interactive canvas with draggable control points and drawing animation
+---
+
+<div class="canvas-container">
+  <!-- Command Buttons Bar -->
+  <div class="commands-bar">
+    <div class="commands-label">Path Commands:</div>
+    <div class="commands-grid">
+      <button
+        class="cmd-btn"
+        data-cmd="M"
+        data-example="M 50 50"
+        title="Move To"
+      >
+        <span class="cmd-letter">M</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="L"
+        data-example="L 100 100"
+        title="Line To"
+      >
+        <span class="cmd-letter">L</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="H"
+        data-example="H 150"
+        title="Horizontal Line"
+      >
+        <span class="cmd-letter">H</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="V"
+        data-example="V 80"
+        title="Vertical Line"
+      >
+        <span class="cmd-letter">V</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="C"
+        data-example="C 50 10, 90 10, 100 50"
+        title="Cubic Bezier"
+      >
+        <span class="cmd-letter">C</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="S"
+        data-example="S 150 90, 180 50"
+        title="Smooth Cubic"
+      >
+        <span class="cmd-letter">S</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="Q"
+        data-example="Q 70 10, 100 50"
+        title="Quadratic Bezier"
+      >
+        <span class="cmd-letter">Q</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="T"
+        data-example="T 150 50"
+        title="Smooth Quadratic"
+      >
+        <span class="cmd-letter">T</span>
+      </button>
+      <button
+        class="cmd-btn"
+        data-cmd="A"
+        data-example="A 30 30 0 0 1 100 50"
+        title="Arc"
+      >
+        <span class="cmd-letter">A</span>
+      </button>
+      <button class="cmd-btn" data-cmd="Z" data-example="Z" title="Close Path">
+        <span class="cmd-letter">Z</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tooltip for command info -->
+  <div id="cmd-tooltip" class="cmd-tooltip">
+    <div class="tooltip-title"></div>
+    <div class="tooltip-desc"></div>
+    <div class="tooltip-usage"></div>
+  </div>
+
+  <div class="canvas-toolbar">
+    <div class="toolbar-group">
+      <label for="canvas-size-input" class="canvas-label">Canvas:</label>
+      <input
+        id="canvas-size-input"
+        type="text"
+        value="800 × 450"
+        class="toolbar-input-med"
+        spellcheck="false"
+      />
+    </div>
+    <div class="toolbar-group">
+      <label for="viewbox-input" class="canvas-label">ViewBox:</label>
+      <input
+        id="viewbox-input"
+        type="text"
+        value="0 0 240 120"
+        class="toolbar-input-med"
+        spellcheck="false"
+      />
+    </div>
+    <div class="toolbar-group">
+      <label for="zoom-level" class="canvas-label">Zoom:</label>
+      <input
+        id="zoom-level"
+        type="text"
+        value="100%"
+        class="toolbar-input-sm"
+        readonly
+      />
+    </div>
+
+    <div class="toolbar-group toggle-group">
+      <label class="toggle-label">
+        <input type="checkbox" id="grid-toggle" checked />
+        <span>Grid</span>
+      </label>
+      <label class="toggle-label">
+        <input type="checkbox" id="guides-toggle" checked />
+        <span>Guides</span>
+      </label>
+    </div>
+
+    <div class="canvas-actions">
+      <button id="undo-btn" class="toolbar-btn" title="Undo (Ctrl+Z)">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M3 7v6h6M21 17a9 9 0 00-9-9 9 9 0 00-9 9"></path>
+        </svg>
+      </button>
+      <button id="redo-btn" class="toolbar-btn" title="Redo (Ctrl+Y)">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 7v6h-6M3 17a9 9 0 019-9 9 9 0 019 9"></path>
+        </svg>
+      </button>
+      <button
+        id="draw-path-btn"
+        class="toolbar-btn-primary"
+        title="Draw Path Animation"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <span>Draw</span>
+      </button>
+      <button id="fit-viewbox-btn" class="toolbar-btn" title="Fit ViewBox">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
+          ></path>
+        </svg>
+      </button>
+      <button id="clear-btn" class="toolbar-btn" title="Clear Path">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          ></path>
+        </svg>
+      </button>
+      <button id="copy-path-btn" class="toolbar-btn" title="Copy Path">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrapper">
+    <svg
+      id="main-canvas"
+      viewBox="0 0 240 120"
+      preserveAspectRatio="xMidYMid meet"
+      width="800"
+      height="450"
+    >
+      <defs>
+        <pattern
+          id="grid-pattern"
+          x="0"
+          y="0"
+          width="10"
+          height="10"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M 10 0 L 0 0 0 10"
+            fill="none"
+            stroke="var(--grid-color)"
+            stroke-width="0.5"
+            opacity="0.3"></path>
+        </pattern>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"
+          ></feGaussianBlur>
+          <feMerge>
+            <feMergeNode in="coloredBlur"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+        <filter id="control-shadow">
+          <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.3"
+          ></feDropShadow>
+        </filter>
+      </defs>
+      <rect
+        id="grid-background"
+        width="100%"
+        height="100%"
+        fill="url(#grid-pattern)"
+        opacity="0"></rect>
+      <g id="grid-layer"></g>
+      <g id="guides-layer"></g>
+      <g id="paths-layer">
+        <path
+          id="path-1"
+          class="svg-path selected"
+          d="M 20 60 L 80 20 L 140 60 L 200 20"
+          fill="none"
+          stroke="var(--pink-9)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          vector-effect="non-scaling-stroke"></path>
+      </g>
+      <g id="points-layer"></g>
+
+      <!-- Drawing pen cursor -->
+      <g id="drawing-pen" style="display: none;">
+        <circle
+          class="pen-outer"
+          r="12"
+          fill="none"
+          stroke="var(--pink-9)"
+          stroke-width="1.5"
+          opacity="0.4"
+        >
+          <animate
+            attributeName="r"
+            values="12;18;12"
+            dur="1s"
+            repeatCount="indefinite"></animate>
+          <animate
+            attributeName="opacity"
+            values="0.4;0.1;0.4"
+            dur="1s"
+            repeatCount="indefinite"></animate>
+        </circle>
+        <circle
+          class="pen-dot"
+          r="6"
+          fill="var(--pink-9)"
+          stroke="white"
+          stroke-width="2.5"
+          filter="url(#glow)"
+        >
+          <animate
+            attributeName="r"
+            values="6;8;6"
+            dur="0.6s"
+            repeatCount="indefinite"></animate>
+        </circle>
+      </g>
+    </svg>
+  </div>
+
+  <div class="canvas-hints">
+    <span class="hint-item">
+      <kbd>Scroll</kbd> to zoom
+    </span>
+    <span class="hint-item">
+      <kbd>Shift</kbd> + drag to pan
+    </span>
+    <span class="hint-item">
+      <kbd>Hover</kbd> commands for docs
+    </span>
+    <span class="hint-item">
+      <kbd>Click</kbd> Draw to animate
+    </span>
+  </div>
+</div>
+
+<style is:inline>
+  :root {
+    --grid-color: var(--gray-4);
+  }
+
+  .canvas-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  /* Command Buttons Bar */
+  .commands-bar {
+    background: linear-gradient(135deg, var(--pink-1) 0%, var(--pink-2) 100%);
+    border: 2px solid var(--pink-4);
+    border-radius: var(--radius-m);
+    padding: var(--space-s);
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.1);
+  }
+
+  .commands-label {
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: var(--pink-11);
+    margin-bottom: var(--space-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .commands-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: var(--space-2xs);
+  }
+
+  .cmd-btn {
+    position: relative;
+    padding: var(--space-xs);
+    background: white;
+    border: 2px solid var(--pink-6);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  .cmd-letter {
+    font-family: var(--font-mono);
+    font-size: var(--step-1);
+    font-weight: 700;
+    color: var(--pink-10);
+  }
+
+  .cmd-btn:hover {
+    background: var(--pink-3);
+    border-color: var(--pink-8);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  }
+
+  .cmd-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .dark .commands-bar {
+    background: linear-gradient(135deg, var(--pink-11) 0%, var(--pink-10) 100%);
+    border-color: var(--pink-8);
+  }
+
+  .dark .cmd-btn {
+    background: var(--gray-3);
+    border-color: var(--pink-7);
+  }
+
+  .dark .cmd-letter {
+    color: var(--pink-9);
+  }
+
+  .dark .cmd-btn:hover {
+    background: var(--gray-4);
+    border-color: var(--pink-9);
+  }
+
+  /* Command Tooltip */
+  .cmd-tooltip {
+    position: fixed;
+    background: var(--gray-12);
+    color: white;
+    padding: var(--space-s);
+    border-radius: var(--radius-xs);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    max-width: 320px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .cmd-tooltip.show {
+    opacity: 1;
+  }
+
+  .tooltip-title {
+    font-size: var(--step-0);
+    font-weight: 700;
+    margin-bottom: var(--space-3xs);
+    color: var(--pink-9);
+  }
+
+  .tooltip-desc {
+    font-size: var(--step--2);
+    color: var(--gray-11);
+    margin-bottom: var(--space-2xs);
+    line-height: 1.5;
+  }
+
+  .tooltip-usage {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    background: var(--gray-11);
+    padding: var(--space-3xs) var(--space-2xs);
+    border-radius: var(--radius-xs);
+    color: var(--pink-9);
+    border-left: 3px solid var(--pink-9);
+  }
+
+  .canvas-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2xs) var(--space-xs);
+    background: var(--gray-2);
+    border: 1px solid var(--gray-4);
+    border-radius: var(--radius-xs);
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .canvas-label {
+    font-size: var(--step--2);
+    color: var(--gray-10);
+    font-weight: 500;
+  }
+
+  .canvas-actions {
+    display: flex;
+    gap: var(--space-3xs);
+    align-items: center;
+  }
+
+  .toolbar-btn {
+    padding: var(--space-3xs) var(--space-2xs);
+    background: var(--gray-3);
+    border: 1px solid var(--gray-6);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-11);
+  }
+
+  .toolbar-btn:hover {
+    background: var(--gray-4);
+    border-color: var(--gray-7);
+    color: var(--gray-12);
+    transform: translateY(-1px);
+  }
+
+  .toolbar-btn:active {
+    transform: translateY(0);
+  }
+
+  .toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .toolbar-btn-primary {
+    padding: var(--space-2xs) var(--space-s);
+    background: var(--pink-9);
+    border: 1px solid var(--pink-9);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    color: white;
+    font-weight: 600;
+    font-size: var(--step--1);
+  }
+
+  .toolbar-btn-primary:hover {
+    background: var(--pink-10);
+    border-color: var(--pink-10);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+  }
+
+  .toolbar-btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .toolbar-btn-primary.drawing {
+    background: var(--gray-8);
+    border-color: var(--gray-8);
+  }
+
+  .canvas-wrapper {
+    background: var(--gray-1);
+    border: 1px solid var(--gray-4);
+    border-radius: var(--radius-m);
+    padding: var(--space-s);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 450px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #main-canvas {
+    background: linear-gradient(135deg, var(--gray-1) 0%, var(--gray-2) 100%);
+    border: 2px solid var(--gray-3);
+    border-radius: var(--radius-xs);
+    box-shadow: var(--shadow-m);
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.1s ease-out;
+    cursor: default;
+    touch-action: none;
+    user-select: none;
+    /* For older browser compatibility */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
+  }
+
+  #main-canvas.panning {
+    cursor: grabbing;
+  }
+
+  .svg-path {
+    transition:
+      stroke-width 0.2s ease,
+      stroke 0.2s ease,
+      filter 0.2s ease;
+    cursor: pointer;
+  }
+
+  .svg-path:hover {
+    stroke-width: 4;
+    filter: drop-shadow(0 0 4px var(--pink-6));
+  }
+
+  .svg-path.selected {
+    stroke: var(--pink-9);
+    filter: drop-shadow(0 0 8px var(--pink-6));
+  }
+
+  /* Drawing pen animation */
+  #drawing-pen {
+    pointer-events: none;
+  }
+
+  .pen-dot {
+    transform-origin: center;
+  }
+
+  .canvas-hints {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+    padding: var(--space-2xs) var(--space-xs);
+    background: var(--pink-2);
+    border: 1px solid var(--pink-4);
+    border-radius: var(--radius-xs);
+    flex-wrap: wrap;
+  }
+
+  .hint-item {
+    font-size: var(--step--2);
+    color: var(--pink-11);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+  }
+
+  kbd {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    padding: 2px 6px;
+    background: var(--pink-4);
+    border: 1px solid var(--pink-6);
+    border-radius: 3px;
+    color: var(--pink-11);
+    font-weight: 600;
+  }
+
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+  }
+
+  .toolbar-input,
+  .toolbar-input-med,
+  .toolbar-input-sm {
+    padding: 3px var(--space-3xs);
+    font-size: var(--step--1);
+    font-family: var(--font-mono);
+    background: var(--gray-1);
+    border: 1px solid var(--gray-6);
+    border-radius: var(--radius-xs);
+    color: var(--gray-12);
+    transition: all 0.2s ease;
+  }
+
+  .toolbar-input-med {
+    width: 130px;
+  }
+
+  .toolbar-input-sm {
+    width: 60px;
+  }
+
+  .toolbar-input:focus,
+  .toolbar-input-med:focus,
+  .toolbar-input-sm:focus {
+    outline: none;
+    border-color: var(--pink-9);
+    box-shadow: 0 0 0 2px var(--pink-3);
+  }
+
+  .toggle-group {
+    gap: var(--space-xs);
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    cursor: pointer;
+    margin: 0;
+    padding: 2px var(--space-3xs);
+    border-radius: var(--radius-xs);
+    transition: background 0.2s ease;
+  }
+
+  .toggle-label:hover {
+    background: var(--gray-3);
+  }
+
+  .toggle-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--pink-9);
+  }
+
+  .toggle-label span {
+    font-size: var(--step--2);
+    color: var(--gray-11);
+    font-weight: 500;
+    user-select: none;
+  }
+
+  .grid-line {
+    stroke: var(--grid-color);
+    stroke-width: 0.5;
+    shape-rendering: crispEdges;
+    pointer-events: none;
+  }
+
+  .grid-line.major {
+    stroke: var(--gray-6);
+    stroke-width: 1;
+  }
+
+  .grid-label {
+    fill: var(--gray-11);
+    font-size: 6px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .guide-line {
+    stroke: var(--pink-8);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 3;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .control-point {
+    fill: var(--pink-9);
+    stroke: var(--gray-1);
+    stroke-width: 2.5;
+    cursor: move;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: url(#control-shadow);
+  }
+
+  .control-point:hover {
+    fill: var(--pink-10);
+    r: 6;
+    filter: url(#control-shadow) drop-shadow(0 0 6px var(--pink-7));
+  }
+
+  .control-point.dragging {
+    r: 7;
+    fill: var(--pink-11);
+    filter: url(#control-shadow) drop-shadow(0 0 10px var(--pink-8));
+    cursor: grabbing;
+  }
+
+  .control-handle {
+    fill: var(--pink-9);
+    stroke: var(--gray-1);
+    stroke-width: 2;
+    cursor: move;
+    transition: all 0.2s ease;
+    filter: url(#control-shadow);
+  }
+
+  .control-handle:hover {
+    fill: var(--pink-10);
+    transform: scale(1.3);
+    filter: url(#control-shadow) drop-shadow(0 0 6px var(--pink-7));
+  }
+
+  .control-handle.dragging {
+    fill: var(--pink-11);
+    transform: scale(1.4);
+    cursor: grabbing;
+  }
+
+  @media (max-width: 768px) {
+    .commands-grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .toolbar-group {
+      flex: 1 1 auto;
+    }
+  }
+</style>
+
+<script>
+  // Command documentation
+  const commandDocs = {
+    M: {
+      name: "Move To",
+      description: "Moves the pen to a new position without drawing a line",
+      usage: "M x y",
+    },
+    L: {
+      name: "Line To",
+      description:
+        "Draws a straight line from the current position to the specified point",
+      usage: "L x y",
+    },
+    H: {
+      name: "Horizontal Line",
+      description: "Draws a horizontal line to the specified x coordinate",
+      usage: "H x",
+    },
+    V: {
+      name: "Vertical Line",
+      description: "Draws a vertical line to the specified y coordinate",
+      usage: "V y",
+    },
+    C: {
+      name: "Cubic Bézier Curve",
+      description: "Draws a cubic Bézier curve with two control points",
+      usage: "C x1 y1, x2 y2, x y",
+    },
+    S: {
+      name: "Smooth Cubic Bézier",
+      description:
+        "Draws a smooth cubic Bézier curve (reflects the previous control point)",
+      usage: "S x2 y2, x y",
+    },
+    Q: {
+      name: "Quadratic Bézier Curve",
+      description: "Draws a quadratic Bézier curve with one control point",
+      usage: "Q x1 y1, x y",
+    },
+    T: {
+      name: "Smooth Quadratic Bézier",
+      description:
+        "Draws a smooth quadratic Bézier curve (reflects the previous control point)",
+      usage: "T x y",
+    },
+    A: {
+      name: "Elliptical Arc",
+      description: "Draws an elliptical arc between two points",
+      usage: "A rx ry rotation large-arc sweep x y",
+    },
+    Z: {
+      name: "Close Path",
+      description:
+        "Closes the current path by drawing a line back to the starting point",
+      usage: "Z",
+    },
+  };
+
+  type PathCommand =
+    | {
+        type: "M" | "L" | "T" | "H" | "V" | "Z";
+        x: number;
+        y: number;
+        index: number;
+      }
+    | {
+        type: "C";
+        x1: number;
+        y1: number;
+        x2: number;
+        y2: number;
+        x: number;
+        y: number;
+        index: number;
+      }
+    | {
+        type: "Q" | "S";
+        x1: number;
+        y1: number;
+        x: number;
+        y: number;
+        index: number;
+      }
+    | {
+        type: "A";
+        rx: number;
+        ry: number;
+        rotation: number;
+        largeArc: number;
+        sweep: number;
+        x: number;
+        y: number;
+        index: number;
+      };
+
+  interface HistoryState {
+    pathData: string;
+  }
+
+  // DOM elements
+  const svg = document.getElementById(
+    "main-canvas"
+  ) as unknown as SVGSVGElement;
+  const pathEl = document.getElementById("path-1") as unknown as SVGPathElement;
+
+  const gridLayer = document.getElementById(
+    "grid-layer"
+  ) as unknown as SVGGElement;
+  const gridBackground = document.getElementById(
+    "grid-background"
+  ) as unknown as SVGRectElement;
+  const guidesLayer = document.getElementById(
+    "guides-layer"
+  ) as unknown as SVGGElement;
+  const pointsLayer = document.getElementById(
+    "points-layer"
+  ) as unknown as SVGGElement;
+  const zoomLevelEl = document.getElementById("zoom-level") as HTMLSpanElement;
+  const drawingPen = document.getElementById(
+    "drawing-pen"
+  ) as unknown as SVGGElement;
+  const tooltip = document.getElementById("cmd-tooltip") as HTMLDivElement;
+
+  // State
+  let isDraggingPoint = false;
+  let draggedElement: {
+    el: SVGElement;
+    type: "point" | "handle";
+    cmdIndex: number;
+    handleIndex?: number;
+  } | null = null;
+  let currentPathLength = 0;
+  let zoomLevel = 1;
+  let panOffset = { x: 0, y: 0 };
+  let isPanning = false;
+  let lastPanPoint = { x: 0, y: 0 };
+  let animationFrameId: number | null = null;
+  let commands: PathCommand[] = [];
+  let isDrawing = false;
+  let drawAnimationFrame: number | null = null;
+
+  // History management
+  let history: HistoryState[] = [];
+  let historyIndex = -1;
+  const MAX_HISTORY = 50;
+
+  function saveToHistory(pathData: string): void {
+    if (historyIndex < history.length - 1) {
+      history = history.slice(0, historyIndex + 1);
+    }
+    history.push({ pathData });
+    if (history.length > MAX_HISTORY) {
+      history.shift();
+    } else {
+      historyIndex++;
+    }
+    updateUndoRedoButtons();
+  }
+
+  function undo(): void {
+    if (historyIndex > 0) {
+      historyIndex--;
+      const state = history[historyIndex];
+      applyHistoryState(state);
+    }
+  }
+
+  function redo(): void {
+    if (historyIndex < history.length - 1) {
+      historyIndex++;
+      const state = history[historyIndex];
+      applyHistoryState(state);
+    }
+  }
+
+  function applyHistoryState(state: HistoryState): void {
+    const pathInput = document.getElementById(
+      "path-input"
+    ) as HTMLTextAreaElement;
+    if (pathInput) {
+      pathInput.value = state.pathData;
+    }
+    pathEl.setAttribute("d", state.pathData);
+    renderGuides();
+    updateUndoRedoButtons();
+  }
+
+  function updateUndoRedoButtons(): void {
+    const undoBtn = document.getElementById("undo-btn") as HTMLButtonElement;
+    const redoBtn = document.getElementById("redo-btn") as HTMLButtonElement;
+    undoBtn.disabled = historyIndex <= 0;
+    redoBtn.disabled = historyIndex >= history.length - 1;
+  }
+
+  // Command buttons
+  const cmdButtons = document.querySelectorAll(".cmd-btn");
+  cmdButtons.forEach((btn) => {
+    const button = btn as HTMLButtonElement;
+    const cmd = button.dataset.cmd!;
+    const example = button.dataset.example!;
+
+    button.addEventListener("click", () => {
+      const pathInput = document.getElementById(
+        "path-input"
+      ) as HTMLTextAreaElement;
+      if (pathInput) {
+        const lastChar = pathInput.value.trim().slice(-1);
+        const separator = lastChar && lastChar !== " " ? " " : "";
+        pathInput.value = pathInput.value + separator + example;
+        pathEl.setAttribute("d", pathInput.value);
+        renderGuides();
+        saveToHistory(pathInput.value);
+      }
+    });
+
+    button.addEventListener("mouseenter", (e) => {
+      const doc = commandDocs[cmd];
+      if (doc) {
+        tooltip.querySelector(".tooltip-title")!.textContent = doc.name;
+        tooltip.querySelector(".tooltip-desc")!.textContent = doc.description;
+        tooltip.querySelector(".tooltip-usage")!.textContent = doc.usage;
+
+        const rect = button.getBoundingClientRect();
+        tooltip.style.left = rect.left + "px";
+        tooltip.style.top = rect.bottom + 8 + "px";
+        tooltip.classList.add("show");
+      }
+    });
+
+    button.addEventListener("mouseleave", () => {
+      tooltip.classList.remove("show");
+    });
+  });
+
+  // Initialize
+  function init(): void {
+    renderGrid();
+    renderGuides();
+    saveToHistory(pathEl.getAttribute("d") || "");
+  }
+
+  function niceStep(size: number, targetSteps: number = 10): number {
+    const rough = size / targetSteps;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const frac = rough / mag;
+    if (frac < 1.5) return mag;
+    if (frac < 3) return 2 * mag;
+    if (frac < 7) return 5 * mag;
+    return 10 * mag;
+  }
+
+  function renderGrid(): void {
+    const gridToggle = document.getElementById(
+      "grid-toggle"
+    ) as HTMLInputElement;
+
+    if (!gridToggle.checked) {
+      gridLayer.innerHTML = "";
+      gridBackground.setAttribute("opacity", "0");
+      return;
+    }
+
+    gridBackground.setAttribute("opacity", "1");
+
+    const viewBox = svg.getAttribute("viewBox")!.split(" ").map(Number);
+    const [minX, minY, width, height] = viewBox;
+
+    const gridX = Math.max(5, niceStep(width, 10));
+    const gridY = Math.max(5, niceStep(height, 8));
+
+    const fragment = document.createDocumentFragment();
+
+    for (
+      let x = Math.ceil(minX / gridX) * gridX;
+      x <= minX + width;
+      x += gridX
+    ) {
+      const isMajor = x % (gridX * 2) === 0;
+      const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+      );
+      line.setAttribute("class", isMajor ? "grid-line major" : "grid-line");
+      line.setAttribute("x1", x.toString());
+      line.setAttribute("y1", minY.toString());
+      line.setAttribute("x2", x.toString());
+      line.setAttribute("y2", (minY + height).toString());
+      fragment.appendChild(line);
+
+      if (isMajor) {
+        const text = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+        text.setAttribute("class", "grid-label");
+        text.setAttribute("x", x.toString());
+        text.setAttribute("y", (minY + height - 3).toString());
+        text.setAttribute("text-anchor", "middle");
+        text.textContent = x.toString();
+        fragment.appendChild(text);
+      }
+    }
+
+    for (
+      let y = Math.ceil(minY / gridY) * gridY;
+      y <= minY + height;
+      y += gridY
+    ) {
+      const isMajor = y % (gridY * 2) === 0;
+      const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+      );
+      line.setAttribute("class", isMajor ? "grid-line major" : "grid-line");
+      line.setAttribute("x1", minX.toString());
+      line.setAttribute("y1", y.toString());
+      line.setAttribute("x2", (minX + width).toString());
+      line.setAttribute("y2", y.toString());
+      fragment.appendChild(line);
+
+      if (isMajor) {
+        const text = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "text"
+        );
+        text.setAttribute("class", "grid-label");
+        text.setAttribute("x", (minX + 3).toString());
+        text.setAttribute("y", y.toString());
+        text.setAttribute("dominant-baseline", "middle");
+        text.textContent = y.toString();
+        fragment.appendChild(text);
+      }
+    }
+
+    gridLayer.innerHTML = "";
+    gridLayer.appendChild(fragment);
+  }
+
+  function renderGuides(): void {
+    const guidesToggle = document.getElementById(
+      "guides-toggle"
+    ) as HTMLInputElement;
+
+    if (!guidesToggle.checked) {
+      guidesLayer.innerHTML = "";
+      pointsLayer.innerHTML = "";
+      return;
+    }
+
+    const guidesFragment = document.createDocumentFragment();
+    const pointsFragment = document.createDocumentFragment();
+
+    const d = pathEl.getAttribute("d") || "";
+    commands = parsePathCommands(d);
+    let currentX = 0,
+      currentY = 0;
+
+    commands.forEach((cmd, idx) => {
+      if (cmd.type === "M" || cmd.type === "L") {
+        pointsFragment.appendChild(
+          createControlPoint(cmd.x, cmd.y, idx, "point")
+        );
+        if (idx > 0) {
+          guidesFragment.appendChild(
+            createGuideLine(currentX, currentY, cmd.x, cmd.y)
+          );
+        }
+        currentX = cmd.x;
+        currentY = cmd.y;
+      } else if (cmd.type === "C") {
+        pointsFragment.appendChild(createControlHandle(cmd.x1, cmd.y1, idx, 0));
+        pointsFragment.appendChild(createControlHandle(cmd.x2, cmd.y2, idx, 1));
+        pointsFragment.appendChild(
+          createControlPoint(cmd.x, cmd.y, idx, "point")
+        );
+        guidesFragment.appendChild(
+          createGuideLine(currentX, currentY, cmd.x1, cmd.y1)
+        );
+        guidesFragment.appendChild(
+          createGuideLine(cmd.x2, cmd.y2, cmd.x, cmd.y)
+        );
+        currentX = cmd.x;
+        currentY = cmd.y;
+      } else if (cmd.type === "Q") {
+        pointsFragment.appendChild(createControlHandle(cmd.x1, cmd.y1, idx, 0));
+        pointsFragment.appendChild(
+          createControlPoint(cmd.x, cmd.y, idx, "point")
+        );
+        guidesFragment.appendChild(
+          createGuideLine(currentX, currentY, cmd.x1, cmd.y1)
+        );
+        guidesFragment.appendChild(
+          createGuideLine(cmd.x1, cmd.y1, cmd.x, cmd.y)
+        );
+        currentX = cmd.x;
+        currentY = cmd.y;
+      } else if (cmd.type === "S") {
+        pointsFragment.appendChild(createControlHandle(cmd.x1, cmd.y1, idx, 0));
+        pointsFragment.appendChild(
+          createControlPoint(cmd.x, cmd.y, idx, "point")
+        );
+        guidesFragment.appendChild(
+          createGuideLine(cmd.x1, cmd.y1, cmd.x, cmd.y)
+        );
+        currentX = cmd.x;
+        currentY = cmd.y;
+      } else if (cmd.type === "T" || cmd.type === "H" || cmd.type === "V") {
+        pointsFragment.appendChild(
+          createControlPoint(cmd.x, cmd.y, idx, "point")
+        );
+        if (idx > 0) {
+          guidesFragment.appendChild(
+            createGuideLine(currentX, currentY, cmd.x, cmd.y)
+          );
+        }
+        currentX = cmd.x;
+        currentY = cmd.y;
+      } else if (cmd.type === "A") {
+        pointsFragment.appendChild(
+          createControlPoint(cmd.x, cmd.y, idx, "point")
+        );
+        if (idx > 0) {
+          guidesFragment.appendChild(
+            createGuideLine(currentX, currentY, cmd.x, cmd.y)
+          );
+        }
+        currentX = cmd.x;
+        currentY = cmd.y;
+      }
+    });
+
+    guidesLayer.innerHTML = "";
+    pointsLayer.innerHTML = "";
+    guidesLayer.appendChild(guidesFragment);
+    pointsLayer.appendChild(pointsFragment);
+  }
+
+  function createGuideLine(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): SVGLineElement {
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("class", "guide-line");
+    line.setAttribute("x1", x1.toString());
+    line.setAttribute("y1", y1.toString());
+    line.setAttribute("x2", x2.toString());
+    line.setAttribute("y2", y2.toString());
+    return line;
+  }
+
+  function createControlPoint(
+    x: number,
+    y: number,
+    cmdIndex: number,
+    type: string
+  ): SVGCircleElement {
+    const circle = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle"
+    );
+    circle.setAttribute("class", "control-point");
+    circle.setAttribute("cx", x.toString());
+    circle.setAttribute("cy", y.toString());
+    circle.setAttribute("r", "4");
+    circle.setAttribute("data-cmd-index", cmdIndex.toString());
+    circle.setAttribute("data-type", type);
+
+    circle.addEventListener("mousedown", (e: MouseEvent) => {
+      e.stopPropagation();
+      isDraggingPoint = true;
+      draggedElement = { el: circle, type: "point", cmdIndex };
+      circle.classList.add("dragging");
+    });
+
+    return circle;
+  }
+
+  function createControlHandle(
+    x: number,
+    y: number,
+    cmdIndex: number,
+    handleIndex: number
+  ): SVGRectElement {
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("class", "control-handle");
+    rect.setAttribute("x", (x - 3).toString());
+    rect.setAttribute("y", (y - 3).toString());
+    rect.setAttribute("width", "6");
+    rect.setAttribute("height", "6");
+    rect.setAttribute("data-cmd-index", cmdIndex.toString());
+    rect.setAttribute("data-handle-index", handleIndex.toString());
+
+    rect.addEventListener("mousedown", (e: MouseEvent) => {
+      e.stopPropagation();
+      isDraggingPoint = true;
+      draggedElement = { el: rect, type: "handle", cmdIndex, handleIndex };
+      rect.classList.add("dragging");
+    });
+
+    return rect;
+  }
+
+  function parsePathCommands(d: string): PathCommand[] {
+    const commands: PathCommand[] = [];
+    const regex = /([MLCQSTHVAZmlcqsthvaz])\s*([-\d.,\s]*)/g;
+    let match: RegExpExecArray | null;
+    let lastX = 0,
+      lastY = 0;
+    let index = 0;
+
+    while ((match = regex.exec(d)) !== null) {
+      const type = match[1].toUpperCase();
+      const isRelative = match[1] !== type;
+      const coords = match[2]
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number);
+
+      if (type === "M" || type === "L") {
+        const x = isRelative ? lastX + coords[0] : coords[0];
+        const y = isRelative ? lastY + coords[1] : coords[1];
+        commands.push({ type, x, y, index });
+        lastX = x;
+        lastY = y;
+      } else if (type === "C" && coords.length >= 6) {
+        const x1 = isRelative ? lastX + coords[0] : coords[0];
+        const y1 = isRelative ? lastY + coords[1] : coords[1];
+        const x2 = isRelative ? lastX + coords[2] : coords[2];
+        const y2 = isRelative ? lastY + coords[3] : coords[3];
+        const x = isRelative ? lastX + coords[4] : coords[4];
+        const y = isRelative ? lastY + coords[5] : coords[5];
+        commands.push({ type, x1, y1, x2, y2, x, y, index });
+        lastX = x;
+        lastY = y;
+      } else if (type === "Q" && coords.length >= 4) {
+        const x1 = isRelative ? lastX + coords[0] : coords[0];
+        const y1 = isRelative ? lastY + coords[1] : coords[1];
+        const x = isRelative ? lastX + coords[2] : coords[2];
+        const y = isRelative ? lastY + coords[3] : coords[3];
+        commands.push({ type, x1, y1, x, y, index });
+        lastX = x;
+        lastY = y;
+      } else if (type === "S" && coords.length >= 4) {
+        const x1 = isRelative ? lastX + coords[0] : coords[0];
+        const y1 = isRelative ? lastY + coords[1] : coords[1];
+        const x = isRelative ? lastX + coords[2] : coords[2];
+        const y = isRelative ? lastY + coords[3] : coords[3];
+        commands.push({ type, x1, y1, x, y, index });
+        lastX = x;
+        lastY = y;
+      } else if (type === "T" && coords.length >= 2) {
+        const x = isRelative ? lastX + coords[0] : coords[0];
+        const y = isRelative ? lastY + coords[1] : coords[1];
+        commands.push({ type, x, y, index });
+        lastX = x;
+        lastY = y;
+      } else if (type === "H") {
+        const x = isRelative ? lastX + coords[0] : coords[0];
+        commands.push({ type, x, y: lastY, index });
+        lastX = x;
+      } else if (type === "V") {
+        const y = isRelative ? lastY + coords[0] : coords[0];
+        commands.push({ type, x: lastX, y, index });
+        lastY = y;
+      } else if (type === "A" && coords.length >= 7) {
+        const rx = coords[0];
+        const ry = coords[1];
+        const rotation = coords[2];
+        const largeArc = coords[3];
+        const sweep = coords[4];
+        const x = isRelative ? lastX + coords[5] : coords[5];
+        const y = isRelative ? lastY + coords[6] : coords[6];
+        commands.push({ type, rx, ry, rotation, largeArc, sweep, x, y, index });
+        lastX = x;
+        lastY = y;
+      } else if (type === "Z") {
+        commands.push({ type, x: lastX, y: lastY, index });
+      }
+      index++;
+    }
+
+    return commands;
+  }
+
+  function updatePathFromCommands(): void {
+    let pathData = "";
+    commands.forEach((cmd) => {
+      if (cmd.type === "M" || cmd.type === "L") {
+        pathData += `${cmd.type} ${cmd.x.toFixed(1)} ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "C") {
+        pathData += `C ${cmd.x1.toFixed(1)} ${cmd.y1.toFixed(1)}, ${cmd.x2.toFixed(1)} ${cmd.y2.toFixed(1)}, ${cmd.x.toFixed(1)} ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "Q") {
+        pathData += `Q ${cmd.x1.toFixed(1)} ${cmd.y1.toFixed(1)}, ${cmd.x.toFixed(1)} ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "T") {
+        pathData += `T ${cmd.x.toFixed(1)} ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "S") {
+        pathData += `S ${cmd.x1.toFixed(1)} ${cmd.y1.toFixed(1)}, ${cmd.x.toFixed(1)} ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "H") {
+        pathData += `H ${cmd.x.toFixed(1)} `;
+      } else if (cmd.type === "V") {
+        pathData += `V ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "A") {
+        pathData += `A ${cmd.rx.toFixed(1)} ${cmd.ry.toFixed(1)} ${cmd.rotation} ${cmd.largeArc} ${cmd.sweep} ${cmd.x.toFixed(1)} ${cmd.y.toFixed(1)} `;
+      } else if (cmd.type === "Z") {
+        pathData += `Z `;
+      }
+    });
+
+    pathEl.setAttribute("d", pathData.trim());
+    const pathInput = document.getElementById(
+      "path-input"
+    ) as HTMLTextAreaElement;
+    if (pathInput) {
+      pathInput.value = pathData.trim();
+    }
+  }
+
+  function screenToSVG(clientX: number, clientY: number): DOMPoint {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    return pt.matrixTransform(svg.getScreenCTM()!.inverse());
+  }
+
+  function snapToGrid(value: number, gridSize: number = 5): number {
+    return Math.round(value / gridSize) * gridSize;
+  }
+
+  // Drawing animation
+  function startDrawAnimation(): void {
+    if (isDrawing) {
+      stopDrawAnimation();
+      return;
+    }
+
+    isDrawing = true;
+
+    const drawBtn = document.getElementById(
+      "draw-path-btn"
+    ) as HTMLButtonElement;
+    drawBtn.classList.add("drawing");
+    drawBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Stop</span>';
+
+    drawingPen.style.display = "block";
+
+    // Set up stroke-dasharray for drawing effect
+    pathEl.style.strokeDasharray = currentPathLength.toString();
+    pathEl.style.strokeDashoffset = currentPathLength.toString();
+
+    const startTime = performance.now();
+    const duration = 3000;
+
+    function animate(currentTime: number): void {
+      if (!isDrawing) return;
+
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Animate the path drawing
+      const offset = currentPathLength * (1 - progress);
+      pathEl.style.strokeDashoffset = offset.toString();
+
+      try {
+        const point = pathEl.getPointAtLength(progress * currentPathLength);
+        drawingPen.setAttribute(
+          "transform",
+          `translate(${point.x}, ${point.y})`
+        );
+
+        if (progress < 1) {
+          drawAnimationFrame = requestAnimationFrame(animate);
+        } else {
+          stopDrawAnimation();
+        }
+      } catch (e) {
+        stopDrawAnimation();
+      }
+    }
+
+    drawAnimationFrame = requestAnimationFrame(animate);
+  }
+
+  function stopDrawAnimation(): void {
+    isDrawing = false;
+
+    const drawBtn = document.getElementById(
+      "draw-path-btn"
+    ) as HTMLButtonElement;
+    drawBtn.classList.remove("drawing");
+    drawBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Draw</span>';
+
+    drawingPen.style.display = "none";
+
+    // Reset stroke properties
+    pathEl.style.strokeDasharray = "none";
+    pathEl.style.strokeDashoffset = "0";
+
+    if (drawAnimationFrame) {
+      cancelAnimationFrame(drawAnimationFrame);
+      drawAnimationFrame = null;
+    }
+  }
+
+  // Event Listeners
+  document
+    .getElementById("grid-toggle")!
+    .addEventListener("change", renderGrid);
+  document
+    .getElementById("guides-toggle")!
+    .addEventListener("change", renderGuides);
+  document.getElementById("undo-btn")!.addEventListener("click", undo);
+  document.getElementById("redo-btn")!.addEventListener("click", redo);
+  document
+    .getElementById("draw-path-btn")!
+    .addEventListener("click", startDrawAnimation);
+
+  document
+    .getElementById("copy-path-btn")!
+    .addEventListener("click", async () => {
+      const pathData = pathEl.getAttribute("d") || "";
+      try {
+        await navigator.clipboard.writeText(pathData);
+        const btn = document.getElementById("copy-path-btn")!;
+        btn.innerHTML =
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+        setTimeout(() => {
+          btn.innerHTML =
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+        }, 1500);
+      } catch (e) {
+        alert("Failed to copy path");
+      }
+    });
+
+  document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+    } else if (
+      (e.ctrlKey || e.metaKey) &&
+      (e.key === "y" || (e.key === "z" && e.shiftKey))
+    ) {
+      e.preventDefault();
+      redo();
+    }
+  });
+
+  svg.addEventListener("mousedown", (e: MouseEvent) => {
+    if (e.button === 0 && e.shiftKey) {
+      isPanning = true;
+      lastPanPoint = { x: e.clientX, y: e.clientY };
+      svg.classList.add("panning");
+      e.preventDefault();
+    }
+  });
+
+  document.addEventListener("mousemove", (e: MouseEvent) => {
+    if (isDraggingPoint && draggedElement) {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      animationFrameId = requestAnimationFrame(() => {
+        const svgCoords = screenToSVG(e.clientX, e.clientY);
+        const snappedX = e.shiftKey ? svgCoords.x : snapToGrid(svgCoords.x);
+        const snappedY = e.shiftKey ? svgCoords.y : snapToGrid(svgCoords.y);
+
+        const cmd = commands[draggedElement!.cmdIndex];
+
+        if (draggedElement?.type === "point") {
+          if (
+            cmd.type === "M" ||
+            cmd.type === "L" ||
+            cmd.type === "T" ||
+            cmd.type === "H" ||
+            cmd.type === "V"
+          ) {
+            cmd.x = snappedX;
+            cmd.y = snappedY;
+          } else if (cmd.type === "C" || cmd.type === "Q" || cmd.type === "S") {
+            cmd.x = snappedX;
+            cmd.y = snappedY;
+          } else if (cmd.type === "A") {
+            cmd.x = snappedX;
+            cmd.y = snappedY;
+          }
+        } else if (draggedElement?.type === "handle") {
+          if (cmd.type === "C") {
+            if (draggedElement.handleIndex === 0) {
+              cmd.x1 = snappedX;
+              cmd.y1 = snappedY;
+            } else {
+              cmd.x2 = snappedX;
+              cmd.y2 = snappedY;
+            }
+          } else if (cmd.type === "Q" || cmd.type === "S") {
+            cmd.x1 = snappedX;
+            cmd.y1 = snappedY;
+          }
+        }
+
+        updatePathFromCommands();
+        renderGuides();
+      });
+    } else if (isPanning) {
+      const dx = e.clientX - lastPanPoint.x;
+      const dy = e.clientY - lastPanPoint.y;
+      panOffset.x += dx;
+      panOffset.y += dy;
+      lastPanPoint = { x: e.clientX, y: e.clientY };
+
+      svg.style.transform = `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`;
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (isDraggingPoint && draggedElement) {
+      draggedElement.el.classList.remove("dragging");
+      saveToHistory(pathEl.getAttribute("d") || "");
+    }
+    isDraggingPoint = false;
+    draggedElement = null;
+    isPanning = false;
+    svg.classList.remove("panning");
+  });
+
+  // Fixed zoom without page scroll
+  svg.addEventListener(
+    "wheel",
+    (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      zoomLevel = Math.max(0.5, Math.min(3, zoomLevel * delta));
+
+      svg.style.transform = `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`;
+      zoomLevelEl.textContent = `${Math.round(zoomLevel * 100)}%`;
+    },
+    { passive: false }
+  );
+
+  const viewboxInput = document.getElementById(
+    "viewbox-input"
+  ) as HTMLInputElement;
+  viewboxInput.addEventListener("change", () => {
+    svg.setAttribute("viewBox", viewboxInput.value);
+    renderGrid();
+    renderGuides();
+  });
+
+  const canvasSizeInput = document.getElementById(
+    "canvas-size-input"
+  ) as HTMLInputElement;
+  canvasSizeInput.addEventListener("change", () => {
+    const size = canvasSizeInput.value.replace(/\s/g, "").split("×");
+    if (size.length === 2) {
+      svg.setAttribute("width", size[0]);
+      svg.setAttribute("height", size[1]);
+    }
+  });
+
+  document.getElementById("fit-viewbox-btn")!.addEventListener("click", () => {
+    try {
+      const bbox = pathEl.getBBox();
+      const padding = Math.max(10, bbox.width * 0.15);
+      const minX = Math.floor(bbox.x - padding);
+      const minY = Math.floor(bbox.y - padding);
+      const width = Math.ceil(bbox.width + padding * 2);
+      const height = Math.ceil(bbox.height + padding * 2);
+      const viewBox = `${minX} ${minY} ${width} ${height}`;
+
+      viewboxInput.value = viewBox;
+      svg.setAttribute("viewBox", viewBox);
+      renderGrid();
+      renderGuides();
+    } catch (e) {
+      alert("Cannot fit viewBox: path may be invalid");
+    }
+  });
+
+  document.getElementById("clear-btn")!.addEventListener("click", () => {
+    if (confirm("Clear the current path?")) {
+      const newPath = "";
+      const pathInput = document.getElementById(
+        "path-input"
+      ) as HTMLTextAreaElement;
+      if (pathInput) {
+        pathInput.value = newPath;
+      }
+      pathEl.setAttribute("d", newPath);
+      renderGuides();
+      saveToHistory(newPath);
+    }
+  });
+
+  // Path input updates
+  const pathInputCheck = setInterval(() => {
+    const pathInput = document.getElementById(
+      "path-input"
+    ) as HTMLTextAreaElement;
+    if (pathInput) {
+      clearInterval(pathInputCheck);
+
+      let inputTimeout: number | null = null;
+      pathInput.addEventListener("input", () => {
+        if (inputTimeout) clearTimeout(inputTimeout);
+        inputTimeout = window.setTimeout(() => {
+          const newPath = pathInput.value;
+          pathEl.setAttribute("d", newPath);
+          renderGuides();
+          saveToHistory(newPath);
+        }, 500);
+      });
+    }
+  }, 100);
+
+  document.addEventListener("DOMContentLoaded", init);
+  init();
+</script>

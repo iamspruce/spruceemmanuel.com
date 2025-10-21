@@ -1,0 +1,27 @@
+---
+// Example page: src/pages/tools/svg-path-tool.astro
+import Layout from "../../layouts/Layout.astro";
+import SVGPathTool from "../../components/tools/SVGPathTool/SVGPathTool.astro";
+
+const pageTitle = "SVG Path Tool";
+const pageDescription =
+  "Interactive tool for creating and animating SVG paths with real-time preview, control points, and CSS animations.";
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <article class="">
+    <div class="page-header">
+      <h1 class="page-header-title" style="text-align: center;">{pageTitle}</h1>
+    </div>
+
+    <section class="page-body">
+      <SVGPathTool />
+    </section>
+  </article>
+</Layout>
+
+<style is:global>
+  .site-header {
+    position: relative !important;
+  }
+</style>

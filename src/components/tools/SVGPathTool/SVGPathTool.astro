@@ -1,0 +1,266 @@
+---
+// SVGPathTool.astro - Main tool component with fixed path input
+import SVGCanvas from "./SVGCanvas.astro";
+---
+
+<div class="svg-tool">
+  <div class="tool-layout">
+    <SVGCanvas />
+  </div>
+
+  <div class="path-bar-wrapper">
+    <div class="path-bar-content">
+      <div class="path-bar-header">
+        <div class="path-info">
+          <span id="path-stats" class="path-stats">Ready</span>
+        </div>
+      </div>
+      <textarea
+        id="path-input"
+        class="control-textarea"
+        rows="2"
+        spellcheck="false"
+        placeholder="Enter SVG path commands... (e.g., M 20 60 L 80 20)"
+        >M 20 60 L 80 20 L 140 60 L 200 20</textarea
+      >
+    </div>
+  </div>
+</div>
+
+<style>
+  .svg-tool {
+    display: flex;
+    flex-direction: column;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  .tool-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-m);
+    align-items: start;
+  }
+
+  /* Fixed Path Bar */
+  .path-bar-wrapper {
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 50;
+  }
+
+  .path-bar-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-s) var(--space-m);
+  }
+
+  .path-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2xs);
+  }
+
+  .path-stats {
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    color: var(--pink-9);
+    font-weight: 600;
+    padding: var(--space-3xs) var(--space-2xs);
+    background: var(--pink-3);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--pink-5);
+  }
+
+  .control-textarea {
+    width: 100%;
+    min-width: 300px;
+    font-size: var(--step-0);
+    font-family: var(--font-mono);
+    padding: var(--space-s);
+    background: var(--gray-1);
+    border: 2px solid var(--pink-6);
+    border-radius: var(--radius-m);
+    color: var(--gray-12);
+    resize: vertical;
+    min-height: 60px;
+    max-height: 120px;
+    line-height: 1.6;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.1);
+  }
+
+  .control-textarea::placeholder {
+    color: var(--gray-9);
+    font-style: italic;
+  }
+
+  .control-textarea:focus {
+    outline: none;
+    border-color: var(--pink-9);
+    box-shadow:
+      0 0 0 4px var(--pink-3),
+      0 4px 12px rgba(236, 72, 153, 0.2);
+    background: var(--pink-1);
+  }
+
+  .dark .control-textarea {
+    background: var(--gray-2);
+    border-color: var(--pink-7);
+    color: var(--gray-11);
+  }
+
+  .dark .control-textarea:focus {
+    background: var(--gray-3);
+    border-color: var(--pink-9);
+    box-shadow:
+      0 0 0 4px var(--pink-11),
+      0 4px 12px rgba(236, 72, 153, 0.3);
+  }
+
+  .path-bar-tips {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
+    padding: var(--space-2xs) var(--space-xs);
+    background: var(--pink-2);
+    border: 1px solid var(--pink-4);
+    border-radius: var(--radius-xs);
+    font-size: var(--step--2);
+    color: var(--pink-11);
+  }
+
+  .path-bar-tips svg {
+    flex-shrink: 0;
+    color: var(--pink-9);
+  }
+
+  .dark .path-bar-tips {
+    background: var(--pink-11);
+    border-color: var(--pink-9);
+  }
+
+  /* Responsive */
+
+  @media (max-width: 768px) {
+    .path-bar-content {
+      padding: var(--space-xs) var(--space-s);
+    }
+
+    .control-textarea {
+      font-size: var(--step--1);
+      padding: var(--space-xs);
+    }
+
+    .path-bar-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-3xs);
+    }
+  }
+
+  /* Smooth animations */
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .fixed-path-bar {
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Better focus indication */
+  .control-textarea:focus-visible {
+    outline: 3px solid var(--pink-9);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar styling */
+  .control-textarea::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .control-textarea::-webkit-scrollbar-track {
+    background: var(--gray-3);
+    border-radius: var(--radius-xs);
+  }
+
+  .control-textarea::-webkit-scrollbar-thumb {
+    background: var(--pink-7);
+    border-radius: var(--radius-xs);
+  }
+
+  .control-textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--pink-9);
+  }
+
+  .dark .control-textarea::-webkit-scrollbar-track {
+    background: var(--gray-4);
+  }
+
+  .dark .control-textarea::-webkit-scrollbar-thumb {
+    background: var(--pink-8);
+  }
+
+  .dark .control-textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--pink-9);
+  }
+</style>
+
+<script>
+  // Update path stats in real-time
+  function updatePathStats(): void {
+    const pathInput = document.getElementById(
+      "path-input"
+    ) as HTMLTextAreaElement;
+    const pathStats = document.getElementById("path-stats") as HTMLSpanElement;
+
+    if (pathInput && pathStats) {
+      const value = pathInput.value.trim();
+      if (value) {
+        const commandCount = value.split(/[MLHVCSQTAZ]/i).length - 1;
+
+        pathStats.textContent = `${commandCount} commands`;
+      } else {
+        pathStats.textContent = "No path data";
+      }
+    }
+  }
+
+  // Initialize
+  function init(): void {
+    updatePathStats();
+
+    const pathInput = document.getElementById(
+      "path-input"
+    ) as HTMLTextAreaElement;
+    if (pathInput) {
+      pathInput.addEventListener("input", updatePathStats);
+    }
+
+    // Update stats when path length changes
+    const observer = new MutationObserver(updatePathStats);
+    const pathLengthEl = document.getElementById("path-length");
+    if (pathLengthEl) {
+      observer.observe(pathLengthEl, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+  init();
+</script>
