@@ -3,7 +3,6 @@
 ---
 
 <div class="canvas-container">
-  <!-- Command Buttons Bar -->
   <div class="commands-bar">
     <div class="commands-label">Path Commands:</div>
     <div class="commands-grid">
@@ -85,7 +84,6 @@
     </div>
   </div>
 
-  <!-- Tooltip for command info -->
   <div id="cmd-tooltip" class="cmd-tooltip">
     <div class="tooltip-title"></div>
     <div class="tooltip-desc"></div>
@@ -120,7 +118,6 @@
         type="text"
         value="100%"
         class="toolbar-input-sm"
-        readonly
       />
     </div>
 
@@ -280,7 +277,6 @@
       </g>
       <g id="points-layer"></g>
 
-      <!-- Drawing pen cursor -->
       <g id="drawing-pen" style="display: none;">
         <circle
           class="pen-outer"
@@ -667,6 +663,20 @@
     width: 60px;
   }
 
+  /* FIX: Added styles for the new path-input textarea */
+  .path-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .toolbar-input {
+    width: 100%;
+    resize: vertical;
+    min-height: 60px;
+    font-size: var(--step-0);
+  }
+
   .toolbar-input:focus,
   .toolbar-input-med:focus,
   .toolbar-input-sm:focus {
@@ -909,7 +919,10 @@
   const pointsLayer = document.getElementById(
     "points-layer"
   ) as unknown as SVGGElement;
-  const zoomLevelEl = document.getElementById("zoom-level") as HTMLSpanElement;
+
+  // FIX: Changed type from HTMLSpanElement to HTMLInputElement
+  const zoomLevelEl = document.getElementById("zoom-level") as HTMLInputElement;
+
   const drawingPen = document.getElementById(
     "drawing-pen"
   ) as unknown as SVGGElement;
@@ -1028,9 +1041,30 @@
 
   // Initialize
   function init(): void {
+    // FIX: Moved path input logic here from the setInterval hack
+    const initialPath = pathEl.getAttribute("d") || "";
+    const pathInput = document.getElementById(
+      "path-input"
+    ) as HTMLTextAreaElement;
+
+    if (pathInput) {
+      pathInput.value = initialPath;
+
+      let inputTimeout: number | null = null;
+      pathInput.addEventListener("input", () => {
+        if (inputTimeout) clearTimeout(inputTimeout);
+        inputTimeout = window.setTimeout(() => {
+          const newPath = pathInput.value;
+          pathEl.setAttribute("d", newPath);
+          renderGuides();
+          saveToHistory(newPath);
+        }, 500);
+      });
+    }
+
     renderGrid();
     renderGuides();
-    saveToHistory(pathEl.getAttribute("d") || "");
+    saveToHistory(initialPath);
   }
 
   function niceStep(size: number, targetSteps: number = 10): number {
@@ -1047,7 +1081,6 @@
     const gridToggle = document.getElementById(
       "grid-toggle"
     ) as HTMLInputElement;
-
     if (!gridToggle.checked) {
       gridLayer.innerHTML = "";
       gridBackground.setAttribute("opacity", "0");
@@ -1055,7 +1088,6 @@
     }
 
     gridBackground.setAttribute("opacity", "1");
-
     const viewBox = svg.getAttribute("viewBox")!.split(" ").map(Number);
     const [minX, minY, width, height] = viewBox;
 
@@ -1063,7 +1095,6 @@
     const gridY = Math.max(5, niceStep(height, 8));
 
     const fragment = document.createDocumentFragment();
-
     for (
       let x = Math.ceil(minX / gridX) * gridX;
       x <= minX + width;
@@ -1080,7 +1111,6 @@
       line.setAttribute("x2", x.toString());
       line.setAttribute("y2", (minY + height).toString());
       fragment.appendChild(line);
-
       if (isMajor) {
         const text = document.createElementNS(
           "http://www.w3.org/2000/svg",
@@ -1111,7 +1141,6 @@
       line.setAttribute("x2", (minX + width).toString());
       line.setAttribute("y2", y.toString());
       fragment.appendChild(line);
-
       if (isMajor) {
         const text = document.createElementNS(
           "http://www.w3.org/2000/svg",
@@ -1134,7 +1163,6 @@
     const guidesToggle = document.getElementById(
       "guides-toggle"
     ) as HTMLInputElement;
-
     if (!guidesToggle.checked) {
       guidesLayer.innerHTML = "";
       pointsLayer.innerHTML = "";
@@ -1148,7 +1176,6 @@
     commands = parsePathCommands(d);
     let currentX = 0,
       currentY = 0;
-
     commands.forEach((cmd, idx) => {
       if (cmd.type === "M" || cmd.type === "L") {
         pointsFragment.appendChild(
@@ -1222,7 +1249,6 @@
         currentY = cmd.y;
       }
     });
-
     guidesLayer.innerHTML = "";
     pointsLayer.innerHTML = "";
     guidesLayer.appendChild(guidesFragment);
@@ -1260,14 +1286,12 @@
     circle.setAttribute("r", "4");
     circle.setAttribute("data-cmd-index", cmdIndex.toString());
     circle.setAttribute("data-type", type);
-
     circle.addEventListener("mousedown", (e: MouseEvent) => {
       e.stopPropagation();
       isDraggingPoint = true;
       draggedElement = { el: circle, type: "point", cmdIndex };
       circle.classList.add("dragging");
     });
-
     return circle;
   }
 
@@ -1285,14 +1309,12 @@
     rect.setAttribute("height", "6");
     rect.setAttribute("data-cmd-index", cmdIndex.toString());
     rect.setAttribute("data-handle-index", handleIndex.toString());
-
     rect.addEventListener("mousedown", (e: MouseEvent) => {
       e.stopPropagation();
       isDraggingPoint = true;
       draggedElement = { el: rect, type: "handle", cmdIndex, handleIndex };
       rect.classList.add("dragging");
     });
-
     return rect;
   }
 
@@ -1311,7 +1333,6 @@
         .trim()
         .split(/[\s,]+/)
         .map(Number);
-
       if (type === "M" || type === "L") {
         const x = isRelative ? lastX + coords[0] : coords[0];
         const y = isRelative ? lastY + coords[1] : coords[1];
@@ -1437,19 +1458,29 @@
     drawBtn.classList.add("drawing");
     drawBtn.innerHTML =
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Stop</span>';
-
     drawingPen.style.display = "block";
+
+    // *** FIX: Calculate the path length before starting the animation ***
+    try {
+      currentPathLength = pathEl.getTotalLength();
+      if (currentPathLength === 0) {
+        stopDrawAnimation();
+        return;
+      }
+    } catch (e) {
+      // Path is likely invalid or empty
+      stopDrawAnimation();
+      return;
+    }
 
     // Set up stroke-dasharray for drawing effect
     pathEl.style.strokeDasharray = currentPathLength.toString();
     pathEl.style.strokeDashoffset = currentPathLength.toString();
-
     const startTime = performance.now();
     const duration = 3000;
 
     function animate(currentTime: number): void {
       if (!isDrawing) return;
-
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
@@ -1463,13 +1494,13 @@
           "transform",
           `translate(${point.x}, ${point.y})`
         );
-
         if (progress < 1) {
           drawAnimationFrame = requestAnimationFrame(animate);
         } else {
           stopDrawAnimation();
         }
       } catch (e) {
+        // This can happen if the path becomes invalid during animation
         stopDrawAnimation();
       }
     }
@@ -1479,20 +1510,17 @@
 
   function stopDrawAnimation(): void {
     isDrawing = false;
-
     const drawBtn = document.getElementById(
       "draw-path-btn"
     ) as HTMLButtonElement;
     drawBtn.classList.remove("drawing");
     drawBtn.innerHTML =
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Draw</span>';
-
     drawingPen.style.display = "none";
 
     // Reset stroke properties
     pathEl.style.strokeDasharray = "none";
     pathEl.style.strokeDashoffset = "0";
-
     if (drawAnimationFrame) {
       cancelAnimationFrame(drawAnimationFrame);
       drawAnimationFrame = null;
@@ -1603,7 +1631,6 @@
       panOffset.x += dx;
       panOffset.y += dy;
       lastPanPoint = { x: e.clientX, y: e.clientY };
-
       svg.style.transform = `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`;
     }
   });
@@ -1630,7 +1657,9 @@
       zoomLevel = Math.max(0.5, Math.min(3, zoomLevel * delta));
 
       svg.style.transform = `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`;
-      zoomLevelEl.textContent = `${Math.round(zoomLevel * 100)}%`;
+
+      // FIX: Set .value on the input, not .textContent
+      zoomLevelEl.value = `${Math.round(zoomLevel * 100)}%`;
     },
     { passive: false }
   );
@@ -1652,6 +1681,20 @@
     if (size.length === 2) {
       svg.setAttribute("width", size[0]);
       svg.setAttribute("height", size[1]);
+    }
+  });
+
+  // FIX: Add event listener for the zoom input field
+  zoomLevelEl.addEventListener("change", () => {
+    const newZoom = parseInt(zoomLevelEl.value.replace("%", ""));
+    if (!isNaN(newZoom)) {
+      // Clamp zoom level between 50% (0.5) and 300% (3)
+      zoomLevel = Math.max(0.5, Math.min(3, newZoom / 100));
+      zoomLevelEl.value = `${Math.round(zoomLevel * 100)}%`;
+      svg.style.transform = `scale(${zoomLevel}) translate(${panOffset.x}px, ${panOffset.y}px)`;
+    } else {
+      // Reset to current value if input is invalid
+      zoomLevelEl.value = `${Math.round(zoomLevel * 100)}%`;
     }
   });
 
@@ -1689,26 +1732,7 @@
     }
   });
 
-  // Path input updates
-  const pathInputCheck = setInterval(() => {
-    const pathInput = document.getElementById(
-      "path-input"
-    ) as HTMLTextAreaElement;
-    if (pathInput) {
-      clearInterval(pathInputCheck);
-
-      let inputTimeout: number | null = null;
-      pathInput.addEventListener("input", () => {
-        if (inputTimeout) clearTimeout(inputTimeout);
-        inputTimeout = window.setTimeout(() => {
-          const newPath = pathInput.value;
-          pathEl.setAttribute("d", newPath);
-          renderGuides();
-          saveToHistory(newPath);
-        }, 500);
-      });
-    }
-  }, 100);
+  // FIX: Removed the setInterval hack, as this logic is now in init()
 
   document.addEventListener("DOMContentLoaded", init);
   init();
