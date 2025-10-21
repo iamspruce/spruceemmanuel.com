@@ -1374,21 +1374,19 @@ body {
   background: radial-gradient(
     ellipse at top,
     var(--gray-2) 0%,
-    var(--gray-2) 20%,
-    var(--gray-1) 50%,
     var(--gray-1) 100%
   );
-  background-repeat: no-repeat; /* don't tile */
-  background-position: top right; /* anchor */
-  background-size: 100vw 100vh;
-  background-attachment: fixed;
-  min-height: 100%;
+  background-attachment: fixed; /* ensures it covers the full viewport smoothly */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top center;
+
   position: relative;
   font-size: var(--step-0);
   font-family: var(--font-sans);
   font-weight: var(--font-weight-normal);
   line-height: var(--line-height-body);
-  text-rendering: optimizelegibility;
+  text-rendering: optimizeLegibility;
   font-synthesis: none;
   display: flex;
   flex-direction: column;
