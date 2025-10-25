@@ -1,12 +1,13 @@
 ---
 import D3SiteLayout from "../../layouts/D3jsLayout.astro";
-
+import { getCourseStructure } from "../../utils/courseUtils";
 import ElectronRing from "../../components/ElectronRing.astro";
+
 const myRings = [
   {
     rotation: 0,
     color: "#00f3ff",
-    speed: 0.5, // Slower
+    speed: 0.5,
     electrons: [
       { angle: 0, link: "/page-1", label: "Go to Page 1" },
       { angle: 180, link: "/page-2", label: "Go to Page 2" },
@@ -15,7 +16,7 @@ const myRings = [
   {
     rotation: 60,
     color: "#ff00ea",
-    speed: -0.8, // Faster, opposite direction
+    speed: -0.8,
     electrons: [{ angle: 90, link: "/page-3", label: "Go to Page 3" }],
   },
   {
@@ -30,6 +31,8 @@ const myRings = [
     ],
   },
 ];
+
+const courseStructure = await getCourseStructure();
 ---
 
 <D3SiteLayout
@@ -114,7 +117,71 @@ const myRings = [
       >
     </nav>
 
-    <button class="btn">View The Course Outline</button>
+    <div class="outline-wrapper">
+      <button class="toggle-btn" id="toggleOutline" aria-expanded="false">
+        View The Course Outline
+        <!-- collapsed icon (default) -->
+        <svg
+          viewBox="0 0 24 24"
+          class="icon-collapsed"
+          width="20"
+          height="20"
+          xmlns="http://www.w3.org/2000/svg"
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+        >
+          <path
+            d="M23.245 4l-11.245 14.374-11.219-14.374-.781.619 12 15.381 12-15.391-.755-.609z"
+          ></path>
+        </svg>
+
+        <!-- expanded icon (shown when aria-expanded="true") -->
+        <svg
+          viewBox="0 0 24 24"
+          class="icon-expanded"
+          width="20"
+          height="20"
+          xmlns="http://www.w3.org/2000/svg"
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+        >
+          <path
+            d="M23.245 20l-11.245-14.374-11.219 14.374-.781-.619 12-15.381 12 15.391-.755.609z"
+          ></path>
+        </svg>
+      </button>
+
+      <div class="outline-content" id="outlineContent">
+        <table>
+          <thead>
+            <tr>
+              <th>Chapter</th>
+              <th>Lessons</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              courseStructure.map((chapter) => (
+                <tr>
+                  <td class="chapter-cell">
+                    <strong>{chapter.title}</strong>
+                  </td>
+                  <td class="lessons-cell">
+                    <ul>
+                      {chapter.lessons.map((lesson) => (
+                        <li>
+                          <a href={lesson.href}>{lesson.title}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 </D3SiteLayout>
 
@@ -127,14 +194,17 @@ const myRings = [
     gap: var(--space-3xs);
     align-items: center;
   }
+
   header {
     text-align: center;
     margin-block: var(--space-s);
   }
+
   hgroup h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
   }
+
   hgroup h2 {
     font-size: 1.5rem;
     color: var(--gray-11);
@@ -143,23 +213,22 @@ const myRings = [
   .central-featured {
     position: relative;
     height: calc(var(--space-2xl-3xl) * 2.6);
+    min-height: 400px;
     width: calc(var(--space-2xl-3xl) * 4.6);
+    min-width: 300px;
     max-width: 100%;
     margin: 0 auto;
     text-align: center;
   }
 
-  /* Center ring component */
   .central-featured > :global(.electron-container) {
     position: absolute;
     top: 50%;
     left: 50%;
     z-index: 1;
     transform: translate(-50%, -80%);
-    z-index: 1;
   }
 
-  /* Main list layout */
   .central-featured ul {
     position: relative;
     list-style: none;
@@ -167,10 +236,9 @@ const myRings = [
     padding: 0;
     width: 100%;
     height: 100%;
-    display: block; /* remove flexbox here */
+    display: block;
   }
 
-  /* Position each list item around the center */
   .central-featured li {
     position: absolute;
   }
@@ -216,14 +284,6 @@ const myRings = [
     left: 60%;
   }
 
-  /* Link box styling */
-  .central-featured a {
-  }
-
-  .central-featured a:hover {
-  }
-
-  /* Typography inside links */
   .central-featured strong {
     display: block;
     font-size: 1rem;
@@ -236,7 +296,6 @@ const myRings = [
     color: var(--gray-11);
   }
 
-  /* Optional: make responsive */
   @media (max-width: 700px) {
     .central-featured ul {
       height: 400px;
@@ -249,18 +308,214 @@ const myRings = [
     }
   }
 
-  :global(.btn) {
-    margin-block: var(--space-s);
+  /* Outline wrapper - contains button and expanding content */
+  .outline-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin-block-start: var(--space-s);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* Toggle button */
+  .toggle-btn {
     padding: var(--space-3xs) var(--space-m);
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--gray-12);
+    background: var(--gray-6);
     border: none;
     border-radius: var(--radius-xs);
     cursor: pointer;
     box-shadow: var(--shadow-m);
-    transition:
-      background-color 0.3s ease,
-      box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3xs);
+  }
+
+  .toggle-btn svg {
+    fill: var(--gray-11);
+  }
+
+  .toggle-btn::before,
+  .toggle-btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2px;
+    background: linear-gradient(90deg, var(--gray-7), var(--gray-9));
+    width: 0;
+    transition: width 0.6s ease-out;
+  }
+
+  .toggle-btn::before {
+    right: 100%;
+    margin-right: 2px;
+  }
+
+  .toggle-btn::after {
+    left: 100%;
+    margin-left: 2px;
+  }
+
+  .toggle-btn[aria-expanded="true"]::before,
+  .toggle-btn[aria-expanded="true"]::after {
+    width: 300px;
+  }
+
+  .toggle-btn:hover {
+    box-shadow: var(--shadow-l);
+  }
+
+  .toggle-btn .icon-expanded {
+    display: none;
+  }
+  .toggle-btn[aria-expanded="true"] .icon-collapsed {
+    display: none;
+  }
+  .toggle-btn[aria-expanded="true"] .icon-expanded {
+    display: inline;
+  }
+  .toggle-btn svg {
+    vertical-align: middle;
+  }
+
+  /* Outline content - the expanding table */
+  .outline-content {
+    width: 100%;
+    max-width: 918px;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.8s ease-out;
+    margin-top: calc(-1.5 * var(--space-s));
+    padding-top: var(--space-s);
+  }
+
+  .toggle-btn[aria-expanded="true"] ~ .outline-content {
+    grid-template-rows: 1fr;
+  }
+
+  .outline-content > table {
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease-out 0.2s;
+  }
+
+  .toggle-btn[aria-expanded="true"] ~ .outline-content > table {
+    opacity: 1;
+  }
+
+  /* Table styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--gray-6);
+    border-radius: 2px;
+    box-shadow: var(--shadow-m);
+  }
+
+  thead {
+    border-bottom: 1px solid var(--gray-4);
+  }
+
+  th {
+    padding: var(--space-xs) var(--space-s);
+    text-align: left;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--gray-12);
+    border-right: 1px solid var(--gray-4);
+  }
+
+  td {
+    padding: var(--space-s);
+    border-right: 1px solid var(--gray-4);
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .chapter-cell {
+    width: 30%;
+    font-size: 1rem;
+  }
+
+  .chapter-cell strong {
+    color: var(--gray-12);
+  }
+
+  .lessons-cell {
+    width: 70%;
+  }
+
+  .lessons-cell ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .lessons-cell li {
+    padding: var(--space-3xs) var(--space-2xs);
+    border-radius: var(--radius-xs);
+    transition: background-color 0.2s ease;
+  }
+
+  .lessons-cell li:hover {
+    background-color: var(--gray-4);
+  }
+
+  .lessons-cell a {
+    color: var(--pink-11);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .lessons-cell a:hover {
+    color: var(--gray-12);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 700px) {
+    table {
+      font-size: 0.9rem;
+    }
+
+    th,
+    td {
+      padding: var(--space-2xs) var(--space-xs);
+    }
+
+    .chapter-cell {
+      width: 35%;
+    }
+
+    .lessons-cell {
+      width: 65%;
+    }
+
+    .toggle-btn[aria-expanded="true"]::before,
+    .toggle-btn[aria-expanded="true"]::after {
+      width: 100px;
+    }
   }
 </style>
+
+<script>
+  const btn = document.getElementById("toggleOutline");
+
+  btn?.addEventListener("click", () => {
+    const isExpanded = btn.getAttribute("aria-expanded") === "true";
+    btn.setAttribute("aria-expanded", String(!isExpanded));
+  });
+</script>

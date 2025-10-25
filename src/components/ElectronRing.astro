@@ -80,6 +80,10 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const electronsToAnimate = [];
+    let animationId = null;
+    let lastTime = performance.now();
+    const TARGET_FPS = 60;
+    const FRAME_DURATION = 1000 / TARGET_FPS;
 
     document.querySelectorAll(".electron").forEach((el) => {
       const orbit = el.closest(".orbit");
@@ -93,33 +97,61 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
       electronsToAnimate.push({ el, rx, ry, speed, angle });
     });
 
-    function animate() {
-      electronsToAnimate.forEach((e) => {
-        e.angle += e.speed;
-        if (e.angle > 360) e.angle -= 360;
-        if (e.angle < 0) e.angle += 360;
+    // Pre-calculate transformation matrix for better performance
+    function updatePosition(e) {
+      const rad = (e.angle * Math.PI) / 180;
+      const x = e.rx * Math.cos(rad);
+      const y = e.ry * Math.sin(rad);
 
-        const rad = (e.angle * Math.PI) / 180;
-        const x = e.rx * Math.cos(rad);
-        const y = e.ry * Math.sin(rad);
-
-        e.el.style.translate = `${x}px ${y}px`;
-      });
-
-      requestAnimationFrame(animate);
+      // Use transform instead of translate for better performance
+      e.el.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
     }
 
-    requestAnimationFrame(animate);
+    function animate(currentTime) {
+      // Throttle to target FPS
+      const elapsed = currentTime - lastTime;
+
+      if (elapsed >= FRAME_DURATION) {
+        lastTime = currentTime - (elapsed % FRAME_DURATION);
+
+        // Batch DOM updates
+        electronsToAnimate.forEach((e) => {
+          e.angle += e.speed;
+
+          // Faster angle normalization
+          if (e.angle >= 360) e.angle -= 360;
+          else if (e.angle < 0) e.angle += 360;
+
+          updatePosition(e);
+        });
+      }
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // Start animation
+    animationId = requestAnimationFrame(animate);
+
+    // Pause animation when page is hidden
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (animationId) cancelAnimationFrame(animationId);
+      } else {
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(animate);
+      }
+    });
   });
 </script>
 
 <style>
   .electron-container {
     position: relative;
-
     display: flex;
     justify-content: center;
     align-items: center;
+    /* GPU acceleration hint */
+    transform: translateZ(0);
   }
 
   .center-text {
@@ -142,6 +174,8 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
     width: var(--orbit-width);
     height: var(--orbit-height);
     transform: translate(-50%, -50%) rotate(var(--orbit-rotation));
+    /* GPU acceleration */
+    will-change: auto;
   }
 
   .orbit svg {
@@ -182,11 +216,15 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
       0 0 15px var(--orbit-color),
       0 4px 8px rgba(0, 0, 0, 0.3);
     opacity: 0;
-    z-index: 15; /* Above orbits */
+    z-index: 15;
 
-    translate: 0 0;
-    transform: translate(-50%, -50%) scale(1);
-    will-change: translate, transform, box-shadow;
+    /* Consolidated transform - JavaScript will override this */
+    transform: translate(-50%, -50%);
+
+    /* Optimize will-change - only specify what changes */
+    will-change: transform;
+
+    /* Use transform instead of translate for better performance */
     transition:
       transform 0.3s ease,
       box-shadow 0.3s ease;
@@ -194,6 +232,10 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
     animation:
       fadeInElectron 0.5s ease-out var(--electron-fade-delay) forwards,
       pulseElectron 2.5s infinite ease-in-out var(--electron-fade-delay);
+
+    /* Force GPU acceleration */
+    backface-visibility: hidden;
+    perspective: 1000px;
   }
 
   @keyframes fadeInElectron {
@@ -205,13 +247,11 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
   @keyframes pulseElectron {
     0%,
     100% {
-      transform: translate(-50%, -50%) scale(1);
       box-shadow:
         0 0 15px var(--orbit-color),
         0 4px 8px rgba(0, 0, 0, 0.3);
     }
     50% {
-      transform: translate(-50%, -50%) scale(1.1);
       box-shadow:
         0 0 25px var(--orbit-color),
         0 6px 16px rgba(0, 0, 0, 0.4);
@@ -224,14 +264,11 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
     box-shadow:
       0 0 25px var(--orbit-color),
       0 6px 12px rgba(0, 0, 0, 0.4);
-
-    /* NEW: Pause the animations on hover */
     animation-play-state: paused;
   }
 
   .electron:active {
     transform: translate(-50%, -50%) scale(1.2);
-    /* NEW: Also pause on click */
     animation-play-state: paused;
   }
 
@@ -244,5 +281,16 @@ const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in second
     padding: 0;
     position: absolute;
     width: 1px;
+  }
+
+  /* Reduce animations on low-end devices */
+  @media (prefers-reduced-motion: reduce) {
+    .electron {
+      animation: fadeInElectron 0.5s ease-out var(--electron-fade-delay)
+        forwards;
+    }
+    .orbit-path {
+      animation-duration: 1s;
+    }
   }
 </style>

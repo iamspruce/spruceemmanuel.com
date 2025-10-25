@@ -16,10 +16,7 @@ const { lesson } = Astro.props;
 const { Content, headings } = await lesson.render();
 const navigation = await getLessonNavigation(lesson.slug);
 
-// --- MODIFICATION ---
-// Use the 'hasQuiz' flag from the lesson's frontmatter [cite: 2]
 const hasQuiz = lesson.data.hasQuiz ?? false;
-// --- END MODIFICATION ---
 
 const layoutProps = {
   title: lesson.data.title,
@@ -28,6 +25,15 @@ const layoutProps = {
   lessonSlug: lesson.slug,
   prevLesson: navigation.prev,
   nextLesson: navigation.next,
+};
+
+// Format dates for display
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
 };
 ---
 
@@ -38,20 +44,39 @@ const layoutProps = {
     data-chapter-slug={lesson.data.chapter}
     data-has-quiz={hasQuiz.toString()}
   >
-    <article class="lesson-content">
+    <article
+      class="lesson-content"
+      itemscope
+      itemtype="https://schema.org/LearningResource"
+    >
       <header class="lesson-header">
-        <h1>{lesson.data.title}</h1>
-        <p class="lesson-description">{lesson.data.description}</p>
+        <h1 itemprop="name">{lesson.data.title}</h1>
+        <p class="lesson-description" itemprop="description">
+          {lesson.data.description}
+        </p>
+
+        <div class="lesson-meta">
+          <time
+            datetime={lesson.data.pubDate.toISOString()}
+            itemprop="datePublished"
+            class="lesson-date"
+          >
+            <span class="date-label">Published:</span>
+            {formatDate(lesson.data.pubDate)}
+          </time>
+        </div>
       </header>
 
-      <Content />
+      <main class="lesson-main" itemprop="text">
+        <Content />
+      </main>
 
       {/* Auto-completion section for lessons without quiz */}
       {
         !hasQuiz && navigation.next && (
-          <div class="lesson-completion" id="lesson-completion">
+          <footer class="lesson-completion" id="lesson-completion">
             <div class="completion-message">
-              <h3>Ready to continue?</h3>
+              <h2>Ready to continue?</h2>
               <p>
                 Click below to mark this lesson as complete and move to the next
                 one.
@@ -61,14 +86,29 @@ const layoutProps = {
               href={navigation.next.href}
               class="complete-btn"
               id="mark-complete-btn"
+              rel="next"
             >
               Mark Complete & Continue
             </a>
-          </div>
+          </footer>
+        )
+      }
+
+      {
+        lesson.data.updatedDate && (
+          <time
+            datetime={lesson.data.updatedDate.toISOString()}
+            itemprop="dateModified"
+            style="display: flex; align-items: center; flex-direction: column; gap: 0.5rem; margin-top: 2rem; font-size: 0.9rem; opacity: 0.7; text-align: center;"
+          >
+            <span class="date-label">last Updated On</span>
+            <strong>{formatDate(lesson.data.updatedDate)}</strong>
+          </time>
         )
       }
     </article>
-    <aside class="lesson-sidebar">
+
+    <aside class="lesson-sidebar" aria-label="Table of contents">
       <TableOfContents headings={headings} />
     </aside>
   </div>
@@ -163,7 +203,7 @@ const layoutProps = {
           console.log("[Lesson Progress] Displaying completion message.");
           completionEl.innerHTML = `
             <div class="completion-success">
-              <h3>🎉 Lesson Completed!</h3>
+              <h2>🎉 Lesson Completed!</h2>
               <p>You've passed the quiz with ${percentage.toFixed(0)}%</p>
             </div>
           `;
@@ -261,8 +301,9 @@ const layoutProps = {
   }
 
   .lesson-content {
-    padding-block: var(--space-3xs);
-    padding-inline: var(--space-3xs);
+    padding-block-start: var(--space-l);
+    padding-block-end: var(--space-2xs);
+    padding-inline: var(--space-xs);
     max-width: 800px;
     margin: 0 auto;
   }
@@ -274,12 +315,38 @@ const layoutProps = {
 
   .lesson-header h1 {
     font-size: 2.5rem;
+    margin-bottom: var(--space-s, 1rem);
   }
 
   .lesson-description {
     font-size: 1.125rem;
     opacity: 0.8;
     line-height: 1.6;
+    margin-bottom: var(--space-m, 1.5rem);
+  }
+
+  .lesson-meta {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-m, 1.5rem);
+    flex-wrap: wrap;
+    margin-top: var(--space-s, 1rem);
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+
+  .lesson-date {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .date-label {
+    font-weight: 600;
+  }
+
+  .lesson-main {
+    margin-block: var(--space-l, 2rem);
   }
 
   .lesson-content :global(h1),
@@ -298,6 +365,7 @@ const layoutProps = {
   .lesson-content :global(h2) {
     font-size: calc(var(--step-1) * 0.7);
   }
+
   .lesson-content :global(h3) {
     font-size: calc(var(--step-1) * 0.6);
   }
@@ -337,8 +405,9 @@ const layoutProps = {
     margin-bottom: 0.5rem;
   }
 
-  .completion-message h3 {
+  .completion-message h2 {
     margin-bottom: 1rem;
+    font-size: 1.5rem;
   }
 
   .quiz-requirement {
@@ -367,12 +436,17 @@ const layoutProps = {
     padding: 1rem;
   }
 
-  .completion-success h3 {
+  .completion-success h2 {
     color: #22c55e;
     margin-bottom: 0.5rem;
+    font-size: 1.5rem;
   }
 
   @media print {
+    body {
+      background: white;
+      color: black;
+    }
     .lesson-sidebar,
     .lesson-completion {
       display: none;
