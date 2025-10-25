@@ -1,0 +1,480 @@
+---
+import CodePanel from "./playground/CodePanel.astro";
+import OutputPanel from "./playground/OutputPanel.astro";
+import ControlsPanel from "./playground/ControlsPanel.astro";
+
+export interface Props {
+  lessonSlug: string;
+  exampleName: string;
+  title?: string;
+  controls?: string;
+  defaultTab?: "html" | "css" | "js";
+  resultOnly?: boolean;
+  showGrid?: boolean;
+  gridSize?: number;
+  showLineNumbers?: boolean;
+  editable?: boolean;
+  githubRepo?: string;
+  githubBranch?: string;
+}
+
+const {
+  lessonSlug,
+  exampleName,
+  title = "D3.js Example",
+  controls,
+  defaultTab = "js",
+  resultOnly = false,
+  showGrid = false,
+  gridSize = 50,
+  showLineNumbers = true,
+  editable = false,
+  githubRepo = "yourusername/yourrepo",
+  githubBranch = "main",
+} = Astro.props;
+
+// Load files
+const allHtml = import.meta.glob("/src/content/d3-course/**/*.html", {
+  query: "?raw",
+  import: "default",
+});
+const allCss = import.meta.glob("/src/content/d3-course/**/*.css", {
+  query: "?raw",
+  import: "default",
+});
+const allJs = import.meta.glob("/src/content/d3-course/**/*.js", {
+  query: "?raw",
+  import: "default",
+});
+
+const findFile = (files: Record<string, any>, patterns: string[]) => {
+  for (const pattern of patterns) {
+    const key = Object.keys(files).find((k) =>
+      k.toLowerCase().replace(/\\/g, "/").includes(pattern.toLowerCase())
+    );
+    if (key) return key;
+  }
+  return null;
+};
+
+const htmlPatterns = [`/${lessonSlug}/examples/${exampleName}/index.html`];
+const cssPatterns = [`/${lessonSlug}/examples/${exampleName}/style.css`];
+const jsPatterns = [`/${lessonSlug}/examples/${exampleName}/script.js`];
+
+const htmlKey = findFile(allHtml, htmlPatterns);
+const cssKey = findFile(allCss, cssPatterns);
+const jsKey = findFile(allJs, jsPatterns);
+
+let htmlContent = htmlKey ? ((await allHtml[htmlKey]()) as string) : "";
+let cssContent = cssKey ? ((await allCss[cssKey]()) as string) : "";
+let jsContent = jsKey ? ((await allJs[jsKey]()) as string) : "";
+
+// Store the control-handling portion of the JS separately
+let jsContentFull = jsContent;
+let jsControlsContent = "";
+const controlMarker = "// === CONTROLS ===";
+const markerIndex = jsContent.indexOf(controlMarker);
+
+if (markerIndex !== -1) {
+  jsControlsContent = jsContent.substring(markerIndex);
+  jsContent = jsContent.substring(0, markerIndex).trim();
+}
+
+const hasHtml = !!htmlContent;
+const hasCss = !!cssContent;
+const hasJs = !!jsContent;
+
+// --- FIX ---
+// Use a type guard in .filter() to correctly narrow the array type
+// This solves the: "Property 'id' does not exist on type 'false | ...'" error
+const availableTabs = [
+  hasHtml && { id: "html", label: "HTML" },
+  hasCss && { id: "css", label: "CSS" },
+  hasJs && { id: "js", label: "JavaScript" },
+].filter((tab): tab is { id: string; label: string } => !!tab);
+
+const validDefaultTab = availableTabs.some((tab) => tab.id === defaultTab)
+  ? defaultTab
+  : hasJs
+    ? "js"
+    : availableTabs[0]?.id || "html";
+// --- END FIX ---
+
+// Generate unique ID for this playground instance
+const playgroundId = `playground-${lessonSlug}-${exampleName}-${Math.random()
+  .toString(36)
+  .substring(2, 9)}`;
+
+const githubUrl = `https://github.com/${githubRepo}/tree/${githubBranch}/d3-course/${lessonSlug}/examples/${exampleName}`;
+---
+
+<div
+  class:list={["d3-playground", { "result-only": resultOnly }]}
+  data-playground-id={playgroundId}
+  data-default-tab={validDefaultTab}
+  data-show-grid={showGrid}
+  data-grid-size={gridSize}
+  data-editable={editable}
+  data-js-controls={jsControlsContent}
+  data-has-controls={!!controls}
+>
+  {
+    !resultOnly && (
+      <>
+        <div class="playground-header">
+          <h6 class="playground-title">{title}</h6>
+          <div class="playground-actions">
+            <button
+              class="action-btn reset-btn"
+              aria-label="Reset"
+              title="Reset"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              class="action-btn fullscreen-btn"
+              aria-label="Fullscreen"
+              title="Toggle Fullscreen"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5h-4m4 0v-4m0 4l-5-5"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="action-btn github-btn"
+              aria-label="View on GitHub"
+              title="View on GitHub"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="playground-content">
+          <div class="playground-grid">
+            <div class="code-section">
+              <div class="code-tabs">
+                {availableTabs.map((tab) => (
+                  <button
+                    class:list={[
+                      "tab-btn",
+                      { active: tab.id === validDefaultTab },
+                    ]}
+                    data-tab={tab.id}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <div class="code-panels">
+                {hasHtml && (
+                  <CodePanel
+                    type="html"
+                    content={htmlContent}
+                    active={validDefaultTab === "html"}
+                    showLineNumbers={showLineNumbers}
+                    editable={editable}
+                  />
+                )}
+                {hasCss && (
+                  <CodePanel
+                    type="css"
+                    content={cssContent}
+                    active={validDefaultTab === "css"}
+                    showLineNumbers={showLineNumbers}
+                    editable={editable}
+                  />
+                )}
+                {hasJs && (
+                  <CodePanel
+                    type="js"
+                    content={jsContent}
+                    active={validDefaultTab === "js"}
+                    showLineNumbers={showLineNumbers}
+                    editable={editable}
+                  />
+                )}
+              </div>
+            </div>
+            <div class="output-section">
+              <div class="output-header">Output</div>
+              <OutputPanel
+                htmlContent={htmlContent}
+                cssContent={cssContent}
+                jsContent={jsContentFull}
+                showGrid={showGrid}
+                gridSize={gridSize}
+                playgroundId={playgroundId}
+              />
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+  {
+    resultOnly && (
+      <div class="result-only-content">
+        <OutputPanel
+          htmlContent={htmlContent}
+          cssContent={cssContent}
+          jsContent={jsContentFull}
+          showGrid={showGrid}
+          gridSize={gridSize}
+          playgroundId={playgroundId}
+        />
+      </div>
+    )
+  }
+  {
+    controls && (
+      <ControlsPanel controls={controls} playgroundId={playgroundId} />
+    )
+  }
+  {
+    resultOnly && (
+      <button class="reset-btn-large" aria-label="Reset" title="Reset">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          width="24px"
+          height="24px"
+        >
+          <path
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+
+        <span>Reset</span>
+      </button>
+    )
+  }
+</div>
+
+<script>
+  import { initPlayground } from "./playground/playground.ts";
+
+  function initializeAllPlaygrounds() {
+    const playgrounds = document.querySelectorAll(".d3-playground");
+    if (!(window as any).initializedPlaygrounds) {
+      (window as any).initializedPlaygrounds = new Set();
+    }
+    playgrounds.forEach((pg) => {
+      const pgId = pg.getAttribute("data-playground-id");
+      if (pgId && !(window as any).initializedPlaygrounds.has(pgId)) {
+        initPlayground(pg);
+        (window as any).initializedPlaygrounds.add(pgId);
+      }
+    });
+  }
+
+  // Handle both Astro page transitions and initial load
+  document.addEventListener("astro:page-load", () => {
+    (window as any).initializedPlaygrounds = new Set();
+    initializeAllPlaygrounds();
+  });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeAllPlaygrounds);
+  } else {
+    initializeAllPlaygrounds();
+  }
+</script>
+
+<style>
+  .d3-playground {
+    overflow: hidden;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    margin-block: 1rem;
+  }
+
+  .playground-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px var(--space-s);
+    border-bottom: 1px solid var(--gray-4);
+    background: var(--gray-3);
+    color: var(--gray-12);
+  }
+  .playground-title {
+    font-size: medium;
+  }
+
+  .playground-actions {
+    display: flex;
+    gap: var(--space-2xs);
+  }
+  .playground-content {
+    border: 1px solid var(--gray-6);
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    color: var(--gray-11);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: var(--space-3xs);
+  }
+
+  .action-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .action-btn:hover {
+    background: var(--gray-4);
+    color: var(--pink-10);
+    border-color: var(--gray-7);
+  }
+
+  .action-btn:active {
+    transform: scale(0.95);
+  }
+
+  .playground-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    gap: 0;
+    min-height: 500px;
+  }
+
+  .code-section {
+    border-right: 1px solid var(--gray-6);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .output-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .output-header {
+    padding: var(--space-2xs) var(--space-s);
+    background: var(--gray-1);
+    border-bottom: 1px solid var(--gray-6);
+    color: var(--gray-11);
+    font-size: 0.975rem;
+    font-weight: var(--font-weight-bold);
+  }
+
+  .code-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--gray-6);
+    background: var(--gray-1);
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--gray-10);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    padding: var(--space-2xs) var(--space-s);
+  }
+
+  .tab-btn.active {
+    border-bottom-color: var(--pink-9);
+    color: var(--gray-12);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .tab-btn:hover:not(.active) {
+    background: var(--gray-4);
+    color: var(--gray-12);
+  }
+
+  .code-panels {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .result-only-content {
+    position: relative;
+    border: 1px solid var(--gray-6);
+    border-radius: 4px;
+    box-shadow: var(--shadow-s);
+  }
+
+  .reset-btn-large {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: var(--gray-1);
+    border: 2px solid var(--gray-6);
+    color: var(--gray-12);
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+    padding: 2px;
+    margin-block-start: var(--space-3xs);
+  }
+
+  .reset-btn-large:hover {
+    background: var(--gray-3);
+    color: var(--pink-10);
+  }
+
+  .reset-btn-large:active {
+    transform: scale(0.98);
+  }
+
+  .reset-btn-large svg {
+    width: 50px;
+    height: 50px;
+    background: var(--gray-3);
+    padding: var(--space-3xs);
+  }
+
+  .reset-btn-large span {
+    flex: 1 1 0%;
+    display: flex;
+    justify-content: center;
+    padding: 0px calc(20px) 0px 16px;
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+  }
+
+  @container (max-width: 768px) {
+    .playground-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .code-section {
+      border-right: none;
+      border-bottom: 1px solid var(--gray-6);
+      min-height: 400px;
+    }
+  }
+</style>

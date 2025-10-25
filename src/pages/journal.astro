@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content"; // Import getCollection
+import { getCollection } from "astro:content";
 import ContentLayout from "../layouts/Pagelayout.astro";
 import PostCard from "../components/writing/PostCard.astro";
 
@@ -7,11 +7,8 @@ const title = "My Journal.";
 const description = "My little corner on the web where i document things.";
 const pubDate = "2025-08-15";
 
-// Use getCollection to query your "writing" collection
 const allPosts = await getCollection("writing");
-const allProjects = await getCollection("projects");
 
-// Sort posts by date, using post.data instead of post.frontmatter
 const sortedPosts = allPosts.sort(
   (a, b) =>
     new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf()
@@ -25,13 +22,8 @@ const sortedPosts = allPosts.sort(
       {sortedPosts.map((post) => <PostCard post={post} />)}
     </div>
   </div>
-  <div class="flex">
-    <h2>Projects</h2>
-    <div class="post-list">
-      {allProjects.map((post) => <PostCard post={post} />)}
-    </div>
-  </div>
 </ContentLayout>
+
 <style>
   .flex {
     display: flex;

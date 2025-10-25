@@ -1,0 +1,553 @@
+---
+export interface Props {
+  chapterSlug: string;
+  lessonSlug: string;
+  structure: any;
+}
+
+const { chapterSlug, lessonSlug, structure } = Astro.props;
+---
+
+<header
+  class="d3-header"
+  id="d3-header"
+  data-structure={JSON.stringify(structure)}
+>
+  <nav class="d3-nav">
+    <button
+      class="nav-btn"
+      id="course-progress-btn"
+      aria-label="Course Progress"
+      data-chapter={chapterSlug}
+      data-lesson={lessonSlug}
+    >
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          class="icon-path"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <button
+      class="nav-btn"
+      id="reaction-btn"
+      aria-label="Reactions"
+      disabled
+      title="Coming soon"
+    >
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          class="icon-path"
+          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <button
+      class="nav-btn"
+      id="edit-btn"
+      aria-label="Edit on GitHub"
+      data-chapter={chapterSlug}
+      data-lesson={lessonSlug}
+    >
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          class="icon-path"
+          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <button class="nav-btn" id="export-btn" aria-label="Export as PDF">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path
+          class="icon-path"
+          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+        <path
+          class="icon-path"
+          d="M10 10h4m-4 4h4"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </button>
+  </nav>
+</header>
+<div class="course-progress-panel" id="course-progress-panel">
+  <div class="panel-header">
+    <h2>Course Progress</h2>
+    <button class="close-btn" id="close-progress-panel" aria-label="Close">
+      <svg
+        class="icon-close"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M18 6L6 18M6 6l12 12"></path>
+      </svg></button
+    >
+  </div>
+  <div class="progress-summary">
+    <div class="stat">
+      <span class="stat-label">Total <br /> Chapters</span>
+      <span class="stat-value" id="total-count">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Completed <br />Lessons</span>
+      <span class="stat-value" id="completed-count">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Skipped <br />Lessons</span>
+      <span class="stat-value" id="skipped-count">0</span>
+    </div>
+  </div>
+
+  <div class="chapters-list" id="chapters-list"></div>
+</div>
+
+<script>
+  import {
+    courseProgressManager,
+    initializeCourseProgress,
+  } from "../../utils/courseProgress";
+
+  const GITHUB_REPO_URL = "https://github.com/YOUR_USERNAME/YOUR_REPO";
+
+  function initializeHeader() {
+    const header = document.getElementById("d3-header");
+    const progressBtn = document.getElementById("course-progress-btn");
+    const editBtn = document.getElementById("edit-btn");
+    const exportBtn = document.getElementById("export-btn");
+    const progressPanel = document.getElementById("course-progress-panel");
+    const closeBtn = document.getElementById("close-progress-panel");
+
+    if (!header) return;
+
+    // Get structure from data attribute
+    const structureData = header.dataset.structure;
+    if (!structureData) return;
+
+    const structure = JSON.parse(structureData);
+    initializeCourseProgress(structure);
+
+    window.dispatchEvent(new CustomEvent("course-progress-ready"));
+
+    // Sticky header on scroll
+    let lastScroll = 0;
+    const handleScroll = () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll > lastScroll && currentScroll > 100) {
+        header?.classList.add("hidden");
+      } else {
+        header?.classList.remove("hidden");
+      }
+      lastScroll = currentScroll;
+    };
+    window.addEventListener("scroll", handleScroll);
+
+    // Toggle progress panel
+    const togglePanel = () => {
+      progressPanel?.classList.toggle("open");
+      if (progressPanel?.classList.contains("open")) {
+        renderProgressPanel();
+      }
+    };
+    progressBtn?.addEventListener("click", togglePanel);
+
+    const closePanel = () => {
+      progressPanel?.classList.remove("open");
+    };
+    closeBtn?.addEventListener("click", closePanel);
+
+    // Close panel when clicking outside
+    const handleOutsideClick = (e) => {
+      if (
+        progressPanel?.classList.contains("open") &&
+        !progressPanel.contains(e.target) &&
+        !progressBtn?.contains(e.target)
+      ) {
+        progressPanel.classList.remove("open");
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+
+    // Edit on GitHub
+    const handleEdit = () => {
+      const lesson = editBtn?.dataset.lesson;
+      const githubUrl = `${GITHUB_REPO_URL}/tree/main/src/content/d3-course/${lesson}.mdx`;
+      window.open(githubUrl, "_blank");
+    };
+    editBtn?.addEventListener("click", handleEdit);
+
+    // Export as PDF
+    const handleExport = () => {
+      window.print();
+    };
+    exportBtn?.addEventListener("click", handleExport);
+
+    function renderProgressPanel() {
+      const progress = courseProgressManager.getAllProgress();
+      const completedCount = document.getElementById("completed-count");
+      const skippedCount = document.getElementById("skipped-count");
+      const totalCount = document.getElementById("total-count");
+      const chaptersList = document.getElementById("chapters-list");
+
+      if (completedCount)
+        completedCount.textContent = progress.completed.toString();
+      if (skippedCount) skippedCount.textContent = progress.skipped.toString();
+      if (totalCount) totalCount.textContent = progress.total.toString();
+
+      if (chaptersList) {
+        chaptersList.innerHTML = "";
+        structure.forEach((chapter) => {
+          const chapterProgress = progress.chapters[chapter.slug];
+          const chapterEl = document.createElement("div");
+          chapterEl.className = "chapter-item";
+
+          // Calculate chapter completion stats
+          let completedLessons = 0;
+          let totalLessons = chapter.lessons.length;
+
+          if (chapterProgress) {
+            Object.values(chapterProgress.lessons).forEach((lesson) => {
+              if (lesson.completed) completedLessons++;
+            });
+          }
+
+          chapterEl.innerHTML = `
+            <div class="chapter-header">
+              <h3 class="chapter-title">${chapter.title}</h3>
+              <span class="chapter-progress-badge">${completedLessons}/${totalLessons}</span>
+            </div>
+            <div class="lessons-list">
+              ${chapter.lessons
+                .map((lesson) => {
+                  const lessonProgress = chapterProgress?.lessons[lesson.slug];
+                  const status = lessonProgress?.completed
+                    ? "completed"
+                    : lessonProgress?.skipped
+                      ? "skipped"
+                      : "pending";
+                  const statusIcon = lessonProgress?.completed
+                    ? "✓"
+                    : lessonProgress?.skipped
+                      ? "⊘"
+                      : "○";
+                  return `
+                  <a href="${lesson.href}" class="lesson-item ${status}">
+                    <span class="lesson-status-icon">${statusIcon}</span>
+                    <span class="lesson-title">${lesson.title}</span>
+                  </a>
+                `;
+                })
+                .join("")}
+            </div>
+          `;
+          chaptersList.appendChild(chapterEl);
+        });
+      }
+    }
+
+    // Listen for progress updates from lesson page
+    window.addEventListener("lesson-progress-updated", () => {
+      if (progressPanel?.classList.contains("open")) {
+        renderProgressPanel();
+      }
+    });
+
+    // SVG animation on hover
+    const navButtons = document.querySelectorAll(".nav-btn");
+    navButtons.forEach((btn) => {
+      const handleMouseEnter = () => {
+        const paths = btn.querySelectorAll(".icon-path");
+        paths.forEach((path) => {
+          path.classList.add("animated");
+        });
+      };
+      const handleMouseLeave = () => {
+        const paths = btn.querySelectorAll(".icon-path");
+        paths.forEach((path) => {
+          path.classList.remove("animated");
+        });
+      };
+      btn.addEventListener("mouseenter", handleMouseEnter);
+      btn.addEventListener("mouseleave", handleMouseLeave);
+    });
+  }
+
+  // Initialize on Astro page load
+  document.addEventListener("astro:page-load", () => {
+    initializeHeader();
+  });
+  // Also initialize on DOMContentLoaded as fallback
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeHeader);
+  } else {
+    initializeHeader();
+  }
+</script>
+
+<style is:global>
+  .d3-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding-block: var(--space-xs);
+    padding-inline: var(--space-xs);
+    transition: transform 0.3s ease;
+  }
+
+  .d3-header.hidden {
+    transform: translateY(-100%);
+  }
+
+  .d3-nav {
+    background: var(--gray-12);
+    border: 1px solid var(--gray-3);
+    transition: transform 0.3s ease;
+    position: relative;
+    transform: rotate(3deg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-left: auto;
+    border-radius: var(--radius-xs);
+    box-shadow: var(--shadow-m);
+  }
+
+  .nav-btn {
+    border: none;
+    background: none;
+    color: var(--gray-1);
+    padding: var(--space-2xs) var(--space-3xs);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .nav-btn:hover:not(:disabled) {
+    background: var(--hover-bg);
+    transform: translateY(-2px);
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .icon-path {
+    transition: all 0.3s ease;
+  }
+
+  .icon-path.animated {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawPath 0.6s ease forwards;
+  }
+
+  @keyframes drawPath {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .course-progress-panel {
+    position: fixed;
+    top: 70px;
+    right: 10px;
+    opacity: 0;
+    visibility: hidden;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    z-index: 999;
+    background: var(--gray-12);
+    color: var(--gray-1);
+    border-radius: var(--radius-m);
+    padding: var(--space-s);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: calc(var(--space-2xl) * 3);
+    transform-origin: top right;
+    transform: scale(0.95) translateY(22px) rotate(3deg);
+    transition:
+      opacity 0.2s ease-in-out,
+      visibility 0.2s ease-in-out,
+      transform 0.2s ease-in-out;
+  }
+
+  .course-progress-panel.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-6);
+  }
+
+  .panel-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    color: var(--gray-1);
+  }
+  .close-btn svg {
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
+  .progress-summary {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 1px solid var(--gray-6);
+    padding-bottom: var(--space-3xs);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3xs);
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .chapters-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .chapter-item {
+    border-bottom: 1px solid var(--gray-6);
+    padding-bottom: var(--space-xs);
+  }
+
+  .chapter-item:last-child {
+    border-bottom: none;
+  }
+
+  .chapter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .chapter-title {
+    font-size: var(--step-1);
+    margin: 0;
+  }
+
+  .chapter-progress-badge {
+    font-size: calc(var(--step-0) * 0.5);
+    padding: var(--space-3xs) var(--space-2xs);
+    background: var(--gray-3);
+    color: var(--gray-12);
+    border-radius: var(--radius-m);
+    font-weight: 600;
+  }
+
+  .lessons-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .lesson-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    padding-block: var(--space-3xs);
+    padding-inline: var(--space-2xs);
+    border-radius: var(--radius-xs);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    color: var(--gray-1);
+  }
+
+  .lesson-item:hover {
+    background: var(--gray-3);
+    color: var(--gray-12);
+  }
+
+  .lesson-status-icon {
+    font-size: 1rem;
+    min-width: 1.5rem;
+  }
+
+  .lesson-item.completed {
+    background: var(--green-11);
+  }
+
+  .lesson-item.completed .lesson-status-icon {
+    color: var(--green-1);
+  }
+
+  .lesson-item.skipped {
+    background: var(--amber-11);
+  }
+
+  .lesson-item.skipped .lesson-status-icon {
+    color: var(--amber-1);
+  }
+
+  .lesson-item.pending .lesson-status-icon {
+    opacity: 0.5;
+  }
+
+  .lesson-title {
+    flex: 1;
+  }
+
+  @media print {
+    .d3-header {
+      display: none;
+    }
+  }
+</style>

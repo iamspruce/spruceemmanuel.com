@@ -1,0 +1,266 @@
+---
+import D3SiteLayout from "../../layouts/D3jsLayout.astro";
+
+import ElectronRing from "../../components/ElectronRing.astro";
+const myRings = [
+  {
+    rotation: 0,
+    color: "#00f3ff",
+    speed: 0.5, // Slower
+    electrons: [
+      { angle: 0, link: "/page-1", label: "Go to Page 1" },
+      { angle: 180, link: "/page-2", label: "Go to Page 2" },
+    ],
+  },
+  {
+    rotation: 60,
+    color: "#ff00ea",
+    speed: -0.8, // Faster, opposite direction
+    electrons: [{ angle: 90, link: "/page-3", label: "Go to Page 3" }],
+  },
+  {
+    rotation: 120,
+    color: "#ffea00",
+    speed: 0.6,
+    electrons: [
+      { angle: 45, link: "/page-4", label: "Go to Page 4" },
+      { angle: 135, link: "/page-5", label: "Go to Page 5" },
+      { angle: 225, link: "/page-6", label: "Go to Page 6" },
+      { angle: 315, link: "/page-7", label: "Go to Page 7" },
+    ],
+  },
+];
+---
+
+<D3SiteLayout
+  title="D3.js Course"
+  description="Learn D3.js from the ground up with interactive lessons and quizzes"
+  chapterSlug=""
+  lessonSlug=""
+>
+  <section>
+    <header>
+      <hgroup>
+        <h1>learn D3.js Practically</h1>
+        <h2>A Practical hands on course to learn D3</h2>
+      </hgroup>
+    </header>
+    <nav class="central-featured" aria-label="D3.js Course Topics">
+      <ul>
+        <li>
+          <a href="#intro" title="Introduction to D3.js">
+            <strong>Introduction</strong>
+            <small>Get started</small>
+          </a>
+        </li>
+        <li>
+          <a href="#bar-chart" title="Bar Chart">
+            <strong>Bar Chart</strong>
+            <small>Scales & axes</small>
+          </a>
+        </li>
+        <li>
+          <a href="#line-chart" title="Line Chart">
+            <strong>Line Chart</strong>
+            <small>Trends & paths</small>
+          </a>
+        </li>
+        <li>
+          <a href="#pie-chart" title="Pie Chart">
+            <strong>Pie Chart</strong>
+            <small>Arcs & colors</small>
+          </a>
+        </li>
+        <li>
+          <a href="#scatterplot" title="Scatterplot">
+            <strong>Scatterplot</strong>
+            <small>Dots & data</small>
+          </a>
+        </li>
+        <li>
+          <a href="#bubble-chart" title="Bubble Chart">
+            <strong>Bubble Chart</strong>
+            <small>Size & color</small>
+          </a>
+        </li>
+        <li>
+          <a href="#hierarchical" title="Hierarchical Charts">
+            <strong>Hierarchical</strong>
+            <small>Tree & sunburst</small>
+          </a>
+        </li>
+        <li>
+          <a href="#geo" title="Geographical Maps">
+            <strong>Geo Maps</strong>
+            <small>World data</small>
+          </a>
+        </li>
+        <li>
+          <a href="#animation" title="Animation & Interaction">
+            <strong>Animation</strong>
+            <small>Motion & events</small>
+          </a>
+        </li>
+        <li>
+          <a href="#dashboard" title="Interactive Dashboard">
+            <strong>Dashboard</strong>
+            <small>All in one</small>
+          </a>
+        </li>
+      </ul>
+      <ElectronRing text="D3.js" rings={myRings} />
+      <a style="display: block; margin-block-start: -30px;" href="http://"
+        >Get Started</a
+      >
+    </nav>
+
+    <button class="btn">View The Course Outline</button>
+  </section>
+</D3SiteLayout>
+
+<style>
+  :global(section) {
+    padding: var(--space-2xs) var(--space-3xs);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    align-items: center;
+  }
+  header {
+    text-align: center;
+    margin-block: var(--space-s);
+  }
+  hgroup h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  hgroup h2 {
+    font-size: 1.5rem;
+    color: var(--gray-11);
+  }
+
+  .central-featured {
+    position: relative;
+    height: calc(var(--space-2xl-3xl) * 2.6);
+    width: calc(var(--space-2xl-3xl) * 4.6);
+    max-width: 100%;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  /* Center ring component */
+  .central-featured > :global(.electron-container) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -80%);
+    z-index: 1;
+  }
+
+  /* Main list layout */
+  .central-featured ul {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: block; /* remove flexbox here */
+  }
+
+  /* Position each list item around the center */
+  .central-featured li {
+    position: absolute;
+  }
+
+  .central-featured li:nth-child(1) {
+    top: 0%;
+    right: 60%;
+  }
+  .central-featured li:nth-child(2) {
+    top: 0%;
+    left: 60%;
+  }
+  .central-featured li:nth-child(3) {
+    top: 20%;
+    left: 70%;
+  }
+  .central-featured li:nth-child(4) {
+    top: 20%;
+    right: 70%;
+  }
+  .central-featured li:nth-child(5) {
+    top: 40%;
+    right: 72%;
+  }
+  .central-featured li:nth-child(6) {
+    top: 40%;
+    left: 72%;
+  }
+  .central-featured li:nth-child(7) {
+    top: 60%;
+    right: 70%;
+  }
+  .central-featured li:nth-child(8) {
+    top: 60%;
+    left: 70%;
+  }
+  .central-featured li:nth-child(9) {
+    top: 80%;
+    right: 60%;
+  }
+  .central-featured li:nth-child(10) {
+    top: 80%;
+    left: 60%;
+  }
+
+  /* Link box styling */
+  .central-featured a {
+  }
+
+  .central-featured a:hover {
+  }
+
+  /* Typography inside links */
+  .central-featured strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .central-featured small {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--gray-11);
+  }
+
+  /* Optional: make responsive */
+  @media (max-width: 700px) {
+    .central-featured ul {
+      height: 400px;
+    }
+    .central-featured li {
+      position: static;
+      display: inline-block;
+      margin: 10px;
+      transform: none;
+    }
+  }
+
+  :global(.btn) {
+    margin-block: var(--space-s);
+    padding: var(--space-3xs) var(--space-m);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-12);
+    border: none;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    box-shadow: var(--shadow-m);
+    transition:
+      background-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+</style>

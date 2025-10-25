@@ -1,0 +1,419 @@
+---
+// src/components/Face.astro
+
+import type { HTMLAttributes } from "astro/types";
+
+// --- Props ---
+interface Props extends HTMLAttributes<"div"> {
+  mood?: "normal" | "happy" | "smiling" | "sad";
+  size?: number;
+}
+const { mood = "normal", size = 100, ...rest } = Astro.props;
+
+// --- Server-Side Definitions ---
+const mouthPaths = {
+  normal: "M 30 70 Q 50 70 70 70", // Straight line
+  smiling: "M 30 70 Q 50 80 70 70", // Gentle curve
+  happy: "M 30 68 Q 50 90 70 68", // Big open smile
+  sad: "M 30 75 Q 50 60 70 75", // Frown
+};
+const currentMouthPath = mouthPaths[mood];
+const uniqueId = `face-${crypto.randomUUID()}`;
+
+// --- Client-Side Script Variables ---
+const eyeLeftCenter = { x: 35, y: 40 };
+const eyeRightCenter = { x: 65, y: 40 };
+const maxPupilMove = 6; // Increased for more movement range
+---
+
+<div
+  id={uniqueId}
+  class:list={["face-wrapper", rest.class]}
+  style={`width: ${size}px; height: ${size}px;`}
+  {...rest}
+>
+  <svg
+    id={`${uniqueId}-svg`}
+    class="face-svg"
+    viewBox="0 0 100 100"
+    width="100%"
+    height="100%"
+    overflow="visible"
+  >
+    <circle cx="50" cy="50" r="45" fill="#FFD700" stroke="#333" stroke-width="2"
+    ></circle>
+
+    <g id={`${uniqueId}-eye-left-group`} class="eye-group">
+      <circle cx={eyeLeftCenter.x} cy={eyeLeftCenter.y} r="10" fill="white"
+      ></circle>
+      <circle
+        id={`${uniqueId}-pupil-left`}
+        class="pupil"
+        cx={eyeLeftCenter.x}
+        cy={eyeLeftCenter.y}
+        r="5"
+        fill="#333"></circle>
+    </g>
+
+    <g id={`${uniqueId}-eye-right-group`} class="eye-group">
+      <circle cx={eyeRightCenter.x} cy={eyeRightCenter.y} r="10" fill="white"
+      ></circle>
+      <circle
+        id={`${uniqueId}-pupil-right`}
+        class="pupil"
+        cx={eyeRightCenter.x}
+        cy={eyeRightCenter.y}
+        r="5"
+        fill="#333"></circle>
+    </g>
+
+    <path
+      class="mouth"
+      d={currentMouthPath}
+      fill="none"
+      stroke="#333"
+      stroke-width="3"
+      stroke-linecap="round"></path>
+
+    <!-- Sleep indicator (zzz) -->
+    <g id={`${uniqueId}-sleep`} class="sleep-indicator" style="opacity: 0;">
+      <text x="75" y="20" class="zzz zzz-1">z</text>
+      <text x="80" y="15" class="zzz zzz-2">z</text>
+      <text x="85" y="10" class="zzz zzz-3">z</text>
+    </g>
+  </svg>
+</div>
+
+<script define:vars={{ uniqueId, eyeLeftCenter, eyeRightCenter, maxPupilMove }}>
+  function initFace() {
+    // --- Get All Elements ---
+    const faceSvg = document.getElementById(`${uniqueId}-svg`);
+    const pupilLeft = document.getElementById(`${uniqueId}-pupil-left`);
+    const pupilRight = document.getElementById(`${uniqueId}-pupil-right`);
+    const eyeLeftGroup = document.getElementById(`${uniqueId}-eye-left-group`);
+    const eyeRightGroup = document.getElementById(
+      `${uniqueId}-eye-right-group`
+    );
+
+    // Guard clause
+    if (
+      !faceSvg ||
+      !pupilLeft ||
+      !pupilRight ||
+      !eyeLeftGroup ||
+      !eyeRightGroup
+    ) {
+      return;
+    }
+
+    let currentLeftX = eyeLeftCenter.x;
+    let currentLeftY = eyeLeftCenter.y;
+    let currentRightX = eyeRightCenter.x;
+    let currentRightY = eyeRightCenter.y;
+
+    let targetLeftX = eyeLeftCenter.x;
+    let targetLeftY = eyeLeftCenter.y;
+    let targetRightX = eyeRightCenter.x;
+    let targetRightY = eyeRightCenter.y;
+
+    let animationFrameId = null;
+    let lastActivityTime = Date.now();
+    let isAsleep = false;
+    let sleepCheckInterval = null;
+
+    const SLEEP_DELAY = 5000; // 5 seconds of inactivity
+    const sleepIndicator = document.getElementById(`${uniqueId}-sleep`);
+
+    // --- Enhanced Eye Following Logic ---
+    function updatePupilPositions() {
+      // If asleep, keep eyes closed
+      if (isAsleep) {
+        return;
+      }
+
+      // Smooth interpolation (lerp) for fluid movement
+      const smoothing = 0.2;
+
+      currentLeftX += (targetLeftX - currentLeftX) * smoothing;
+      currentLeftY += (targetLeftY - currentLeftY) * smoothing;
+      currentRightX += (targetRightX - currentRightX) * smoothing;
+      currentRightY += (targetRightY - currentRightY) * smoothing;
+
+      pupilLeft.setAttribute("cx", currentLeftX.toString());
+      pupilLeft.setAttribute("cy", currentLeftY.toString());
+      pupilRight.setAttribute("cx", currentRightX.toString());
+      pupilRight.setAttribute("cy", currentRightY.toString());
+
+      // Continue animation if not at target
+      const threshold = 0.1;
+      if (
+        Math.abs(targetLeftX - currentLeftX) > threshold ||
+        Math.abs(targetLeftY - currentLeftY) > threshold ||
+        Math.abs(targetRightX - currentRightX) > threshold ||
+        Math.abs(targetRightY - currentRightY) > threshold
+      ) {
+        animationFrameId = requestAnimationFrame(updatePupilPositions);
+      } else {
+        animationFrameId = null;
+      }
+    }
+
+    document.addEventListener("mousemove", (event) => {
+      // Wake up on mouse movement
+      wakeUp();
+
+      const rect = faceSvg.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      const svgX = (mouseX / rect.width) * 100;
+      const svgY = (mouseY / rect.height) * 100;
+
+      // Calculate angle from eye center to cursor position
+      const angleLeft = Math.atan2(
+        svgY - eyeLeftCenter.y,
+        svgX - eyeLeftCenter.x
+      );
+      const angleRight = Math.atan2(
+        svgY - eyeRightCenter.y,
+        svgX - eyeRightCenter.x
+      );
+
+      // Move pupils in the direction of cursor
+      // Constrained within the white part of the eye
+      targetLeftX = eyeLeftCenter.x + Math.cos(angleLeft) * maxPupilMove;
+      targetLeftY = eyeLeftCenter.y + Math.sin(angleLeft) * maxPupilMove;
+
+      targetRightX = eyeRightCenter.x + Math.cos(angleRight) * maxPupilMove;
+      targetRightY = eyeRightCenter.y + Math.sin(angleRight) * maxPupilMove;
+
+      // Start animation loop if not already running
+      if (!animationFrameId) {
+        animationFrameId = requestAnimationFrame(updatePupilPositions);
+      }
+    });
+
+    // --- Enhanced Blinking Logic ---
+    function performBlink() {
+      // Don't blink while asleep
+      if (isAsleep) return;
+
+      eyeLeftGroup.classList.add("blinking");
+      eyeRightGroup.classList.add("blinking");
+
+      setTimeout(() => {
+        eyeLeftGroup.classList.remove("blinking");
+        eyeRightGroup.classList.remove("blinking");
+      }, 150);
+    }
+
+    function scheduleNextBlink() {
+      const randomDelay = Math.random() * 4000 + 2500;
+
+      setTimeout(() => {
+        performBlink();
+        scheduleNextBlink();
+      }, randomDelay);
+    }
+
+    scheduleNextBlink();
+
+    // --- Sleep/Wake Logic ---
+    function fallAsleep() {
+      isAsleep = true;
+
+      // Close eyes
+      eyeLeftGroup.classList.add("sleeping");
+      eyeRightGroup.classList.add("sleeping");
+
+      // Show zzz
+      if (sleepIndicator) {
+        sleepIndicator.style.opacity = "1";
+      }
+    }
+
+    function wakeUp() {
+      lastActivityTime = Date.now();
+
+      if (isAsleep) {
+        isAsleep = false;
+
+        // Open eyes
+        eyeLeftGroup.classList.remove("sleeping");
+        eyeRightGroup.classList.remove("sleeping");
+
+        // Hide zzz
+        if (sleepIndicator) {
+          sleepIndicator.style.opacity = "0";
+        }
+      }
+    }
+
+    // Check for inactivity
+    function checkSleep() {
+      const timeSinceActivity = Date.now() - lastActivityTime;
+
+      if (timeSinceActivity >= SLEEP_DELAY && !isAsleep) {
+        fallAsleep();
+      }
+    }
+
+    // Start sleep check interval
+    sleepCheckInterval = setInterval(checkSleep, 1000);
+
+    // Wake up on any user interaction
+    ["click", "keydown", "scroll", "touchstart"].forEach((eventType) => {
+      document.addEventListener(eventType, wakeUp);
+    });
+
+    // --- Hover Bounce Animation ---
+    const wrapper = document.getElementById(uniqueId);
+    if (wrapper) {
+      wrapper.addEventListener("mouseenter", () => {
+        faceSvg.classList.add("bounce");
+        setTimeout(() => {
+          faceSvg.classList.remove("bounce");
+        }, 600);
+      });
+    }
+  }
+
+  // Run immediately for normal page loads
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFace);
+  } else {
+    initFace();
+  }
+
+  // Also run on Astro page transitions if View Transitions are enabled
+  document.addEventListener("astro:page-load", initFace);
+</script>
+
+<style is:global>
+  .face-wrapper {
+    cursor: pointer;
+    backface-visibility: hidden;
+    display: inline-block;
+  }
+
+  .face-svg {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+    transition: filter 0.3s ease;
+  }
+
+  .face-wrapper:hover .face-svg {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+  }
+
+  /* --- Bounce Animation on Hover --- */
+  .face-svg.bounce {
+    animation: bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: scale(1) translateY(0);
+    }
+    25% {
+      transform: scale(1.05) translateY(-4px);
+    }
+    50% {
+      transform: scale(0.95) translateY(2px);
+    }
+    75% {
+      transform: scale(1.02) translateY(-2px);
+    }
+  }
+
+  /* --- Pupil Smooth Movement --- */
+  .pupil {
+    /* Removed transition - now handled by JS animation loop */
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  }
+
+  /* --- Mouth Draw Animation --- */
+  .mouth {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: draw 1s ease-out 0.2s forwards;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* --- Eye Blink Animation --- */
+  .eye-group {
+    transform-origin: center;
+    transition: transform 0.08s ease-in-out;
+  }
+
+  .eye-group.blinking {
+    transform: scaleY(0.05);
+  }
+
+  /* --- Sleeping Animation --- */
+  .eye-group.sleeping {
+    transform: scaleY(0.1);
+  }
+
+  /* --- Sleep Indicator (zzz) Styles --- */
+  .sleep-indicator {
+    transition: opacity 0.5s ease;
+  }
+
+  .zzz {
+    fill: var(--gray-12);
+    font-size: 12px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    opacity: 0;
+  }
+
+  .zzz-1 {
+    animation: float-zzz 2s ease-in-out infinite;
+  }
+
+  .zzz-2 {
+    animation: float-zzz 2s ease-in-out 0.3s infinite;
+  }
+
+  .zzz-3 {
+    animation: float-zzz 2s ease-in-out 0.6s infinite;
+  }
+
+  @keyframes float-zzz {
+    0%,
+    100% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(-15px);
+    }
+  }
+
+  /* --- Face Glow Effect --- */
+  .face-wrapper:active .face-svg circle:first-child {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+    transition: filter 0.2s ease;
+  }
+
+  /* --- Pupil Highlight --- */
+  .pupil {
+    transition: r 0.2s ease;
+  }
+
+  .face-wrapper:hover .pupil {
+    r: 5.5;
+  }
+</style>

@@ -1,0 +1,182 @@
+---
+export interface Props {
+  type: "html" | "css" | "js";
+  content: string;
+  active?: boolean;
+  showLineNumbers?: boolean;
+  editable?: boolean;
+}
+
+const {
+  type,
+  content,
+  active = false,
+  showLineNumbers = true,
+  editable = false,
+} = Astro.props;
+
+const languageMap = {
+  html: "markup",
+  css: "css",
+  js: "javascript",
+};
+
+// Escape content to prevent XSS when editable
+const sanitizedContent = content;
+---
+
+<div class:list={["code-panel", { active }]} data-panel={type}>
+  <div class="code-editor" data-language={languageMap[type]}>
+    <pre
+      class:list={[
+        { "line-numbers": showLineNumbers },
+      ]}><code class={`language-${languageMap[type]}`} contenteditable={editable} spellcheck="false" autocapitalize="off">{sanitizedContent}</code></pre>
+  </div>
+</div>
+
+<style>
+  .code-panel {
+    display: none;
+    height: 100%;
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .code-panel.active {
+    display: block;
+  }
+
+  .code-editor {
+    height: 100%;
+    background: var(--gray-1);
+    overflow: auto;
+  }
+
+  .code-editor pre {
+    margin: 0 !important;
+    padding: 1rem !important;
+    min-height: 100%;
+    overflow: auto;
+    background: transparent !important;
+    box-sizing: border-box;
+  }
+
+  /* Adjust padding for line numbers if active */
+  :global(.code-editor pre.line-numbers) {
+    padding-left: 3.8em !important;
+  }
+
+  .code-editor code {
+    font-family: "Consolas", "Monaco", "Courier New", monospace !important;
+    font-size: 0.875rem !important;
+    line-height: 1.6 !important;
+    white-space: pre;
+    display: block;
+    color: var(--gray-12);
+    min-height: 100%;
+  }
+
+  .code-editor code[contenteditable="true"] {
+    outline: none;
+    cursor: text;
+  }
+
+  .code-editor code[contenteditable="true"]:focus {
+    background: var(--gray-2);
+  }
+
+  /* Improve scrollbar styling */
+  .code-editor::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .code-editor::-webkit-scrollbar-track {
+    background: var(--gray-2);
+  }
+
+  .code-editor::-webkit-scrollbar-thumb {
+    background: var(--gray-6);
+    border-radius: 5px;
+  }
+
+  .code-editor::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-7);
+  }
+
+  /* Highlighting styles (Prism) override for theme */
+  :global(.token.comment),
+  :global(.token.prolog),
+  :global(.token.doctype),
+  :global(.token.cdata) {
+    color: var(--gray-9);
+    font-style: italic;
+  }
+
+  :global(.token.punctuation) {
+    color: var(--gray-11);
+  }
+
+  :global(.token.property),
+  :global(.token.tag),
+  :global(.token.boolean),
+  :global(.token.number),
+  :global(.token.constant),
+  :global(.token.symbol),
+  :global(.token.deleted) {
+    color: var(--pink-9);
+  }
+
+  :global(.token.selector),
+  :global(.token.attr-name),
+  :global(.token.string),
+  :global(.token.char),
+  :global(.token.builtin),
+  :global(.token.inserted) {
+    color: var(--jade-9);
+  }
+
+  :global(.token.operator),
+  :global(.token.entity),
+  :global(.token.url),
+  :global(.language-css .token.string),
+  :global(.style .token.string) {
+    color: var(--gray-11);
+  }
+
+  :global(.token.atrule),
+  :global(.token.attr-value),
+  :global(.token.keyword) {
+    color: var(--purple-9);
+  }
+
+  :global(.token.function),
+  :global(.token.class-name) {
+    color: var(--blue-9);
+  }
+
+  :global(.token.regex),
+  :global(.token.important),
+  :global(.token.variable) {
+    color: var(--amber-10);
+  }
+
+  /* Line numbers styling */
+  :global(.line-numbers .line-numbers-rows) {
+    border-right: 1px solid var(--gray-6);
+    background: var(--gray-2);
+  }
+
+  :global(.line-numbers-rows > span:before) {
+    color: var(--gray-9);
+  }
+
+  /* Selection styling */
+  .code-editor code::selection {
+    background: var(--pink-a4);
+  }
+</style>

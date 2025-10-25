@@ -1,0 +1,130 @@
+---
+export interface Props {
+  prevLesson?: { href: string; title: string } | null;
+  nextLesson?: { href: string; title: string } | null;
+}
+
+const { prevLesson, nextLesson } = Astro.props;
+---
+
+<footer class="d3-footer">
+  <nav class="lesson-navigation">
+    {
+      prevLesson ? (
+        <a href={prevLesson.href} class="nav-link prev">
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M15 18l-6-6 6-6"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <div class="nav-content">
+            <span class="nav-label">Previous</span>
+            <span class="nav-title">{prevLesson.title}</span>
+          </div>
+        </a>
+      ) : (
+        <div />
+      )
+    }
+
+    {
+      nextLesson ? (
+        <a href={nextLesson.href} class="nav-link next">
+          <div class="nav-content">
+            <span class="nav-label">Next</span>
+            <span class="nav-title">{nextLesson.title}</span>
+          </div>
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M9 18l6-6-6-6"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      ) : (
+        <div />
+      )
+    }
+  </nav>
+</footer>
+
+<style>
+  .d3-footer {
+    padding: var(--space-2xs);
+  }
+
+  .lesson-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-s);
+    text-decoration: underline;
+    transition: all 0.2s ease;
+    max-width: 300px;
+  }
+
+  .nav-link:hover {
+    transform: translateY(-6px);
+  }
+
+  .nav-link.prev {
+    margin-right: auto;
+  }
+
+  .nav-link.next {
+    margin-left: auto;
+  }
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .nav-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .nav-label {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+
+  .nav-title {
+    font-weight: 500;
+  }
+
+  .next .nav-content {
+    text-align: right;
+  }
+
+  @media print {
+    .d3-footer {
+      display: none;
+    }
+  }
+</style>

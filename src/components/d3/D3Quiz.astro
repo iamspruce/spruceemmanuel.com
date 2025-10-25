@@ -1,0 +1,672 @@
+---
+import Face from "../Face.astro"; // Adjust path as needed
+
+export interface Props {
+  quizId: string;
+  chapterSlug: string;
+  lessonSlug: string;
+  quizFileName: string;
+  title?: string;
+}
+
+const {
+  quizId,
+  chapterSlug,
+  lessonSlug,
+  quizFileName,
+  title = "Quiz",
+} = Astro.props;
+
+// Load quiz modules
+const allQuizzesNoRaw = import.meta.glob("/src/content/d3-course/**/*.ts");
+
+// More flexible matching
+const findQuizFile = (files: Record<string, any>, patterns: string[]) => {
+  for (const pattern of patterns) {
+    const key = Object.keys(files).find((k) => {
+      const normalized = k.toLowerCase().replace(/\\/g, "/");
+      const patternNormalized = pattern.toLowerCase();
+      return normalized.includes(patternNormalized);
+    });
+    if (key) {
+      return key;
+    }
+  }
+  return null;
+};
+
+// Try multiple path patterns
+const quizPatterns = [
+  `/${lessonSlug}/quizzes/${quizFileName}.ts`,
+  `/quizzes/${quizFileName}.ts`,
+  `${quizFileName}.ts`,
+];
+
+const quizKeyNoRaw = findQuizFile(allQuizzesNoRaw, quizPatterns);
+
+// Load the quiz data
+let quizData = null;
+if (quizKeyNoRaw) {
+  try {
+    const quizModule = await allQuizzesNoRaw[quizKeyNoRaw]();
+    quizData = (quizModule as any).default || (quizModule as any).quizData;
+  } catch (e) {
+    // Failed to load quiz module
+  }
+}
+---
+
+<div
+  class="quiz-container"
+  data-quiz-id={quizId}
+  data-chapter={chapterSlug}
+  data-lesson={lessonSlug}
+  data-quiz-data={JSON.stringify(quizData)}
+>
+  <div class="quiz-header">
+    <h6 class="quiz-title">{title}</h6>
+    <div class="question-indicator">-- / --</div>
+  </div>
+
+  <div class="quiz-content">
+    {
+      quizData && (
+        <div class="quiz-face-container">
+          <Face mood="normal" size={80} class="quiz-face" />
+        </div>
+      )
+    }
+
+    {
+      !quizData ? (
+        <div class="quiz-error">
+          <h4>Failed to load quiz</h4>
+          <p>
+            Could not find: {lessonSlug}/quizzes/{quizFileName}.ts
+          </p>
+          <details>
+            <summary>Debug Info (Available Modules)</summary>
+            <pre style="font-size: 10px; max-height: 200px; overflow: auto;">
+              {Object.keys(allQuizzesNoRaw).join("\n")}
+            </pre>
+          </details>
+        </div>
+      ) : (
+        <>
+          <div class="quiz-questions" />
+          <div class="quiz-results" style="display: none;">
+            <div class="results-summary">
+              <h4 class="results-title" />
+              <div class="results-score" />
+              <p class="results-message" />
+            </div>
+            <button class="retry-btn">Try Again</button>
+          </div>
+        </>
+      )
+    }
+  </div>
+
+  {
+    quizData && (
+      <div class="quiz-actions">
+        <button class="quiz-btn prev-btn" disabled>
+          Previous
+        </button>
+        <button class="quiz-btn next-btn">Next</button>
+      </div>
+    )
+  }
+</div>
+
+<script>
+  import { courseProgressManager } from "../../utils/courseProgress";
+
+  interface QuizQuestion {
+    question: string;
+    type: "multiple-choice" | "true-false" | "code";
+    options?: string[];
+    correctAnswer: string | number;
+    explanation?: string;
+    code?: string;
+  }
+
+  interface QuizData {
+    title: string;
+    questions: QuizQuestion[];
+  }
+
+  const COMPLETION_THRESHOLD = 70;
+
+  // Fun messages for different score ranges
+  const getResultMessage = (percentage: number, passed: boolean) => {
+    if (percentage === 100) {
+      return {
+        title: "🎉 Perfect Score!",
+        message:
+          "Wow! You're absolutely crushing it! Every single answer correct. Are you secretly a D3 wizard? 🧙‍♂️✨",
+        mood: "happy" as const,
+      };
+    } else if (percentage >= 90) {
+      return {
+        title: "🌟 Outstanding!",
+        message:
+          "Amazing work! You're like the Einstein of D3. Just a tiny slip here and there, but otherwise flawless! 🚀",
+        mood: "happy" as const,
+      };
+    } else if (percentage >= 80) {
+      return {
+        title: "🎯 Excellent!",
+        message:
+          "Great job! You really know your stuff. A few more practice rounds and you'll be unstoppable! 💪",
+        mood: "smiling" as const,
+      };
+    } else if (percentage >= COMPLETION_THRESHOLD) {
+      return {
+        title: "✅ You Passed!",
+        message:
+          "Nice! You made it through. Not bad at all! Maybe review a couple things, but you're good to move forward. 😊",
+        mood: "smiling" as const,
+      };
+    } else if (percentage >= 50) {
+      return {
+        title: "📚 Almost There!",
+        message:
+          "Hey, you're halfway there! That's actually pretty good. Give the material another look and you'll nail it next time! 💡",
+        mood: "normal" as const,
+      };
+    } else {
+      return {
+        title: "🤔 Not Quite Yet",
+        message:
+          "No worries! Learning takes time. Go back, review the lesson, and come back stronger. You've got this! 💪",
+        mood: "sad" as const,
+      };
+    }
+  };
+
+  function initQuiz(container: Element) {
+    const quizId = container.getAttribute("data-quiz-id");
+    const chapterSlug = container.getAttribute("data-chapter");
+    const lessonSlug = container.getAttribute("data-lesson");
+    const quizDataStr = container.getAttribute("data-quiz-data");
+
+    if (!quizId || !chapterSlug || !lessonSlug || !quizDataStr) return;
+
+    let quizData: QuizData | null = null;
+    try {
+      quizData = JSON.parse(quizDataStr);
+    } catch (e) {
+      return;
+    }
+
+    if (!quizData) return;
+
+    let currentQuestionIndex = 0;
+    let userAnswers: (string | number | null)[] = new Array(
+      quizData.questions.length
+    ).fill(null);
+    let score = 0;
+
+    const questionsEl = container.querySelector(
+      ".quiz-questions"
+    ) as HTMLElement;
+    const resultsEl = container.querySelector(".quiz-results") as HTMLElement;
+    const actionsEl = container.querySelector(".quiz-actions") as HTMLElement;
+    const prevBtn = container.querySelector(".prev-btn") as HTMLButtonElement;
+    const nextBtn = container.querySelector(".next-btn") as HTMLButtonElement;
+    const retryBtn = container.querySelector(".retry-btn") as HTMLButtonElement;
+    const indicator = container.querySelector(
+      ".question-indicator"
+    ) as HTMLElement;
+    const faceWrapper = container.querySelector(".face-wrapper") as HTMLElement;
+
+    renderQuestion();
+
+    function renderQuestion() {
+      if (!quizData) return;
+
+      const question = quizData.questions[currentQuestionIndex];
+      questionsEl.innerHTML = "";
+      const questionEl = document.createElement("div");
+      questionEl.className = "question";
+
+      const questionText = document.createElement("h4");
+      questionText.className = "question-text";
+      questionText.textContent = `${currentQuestionIndex + 1}. ${
+        question.question
+      }`;
+      questionEl.appendChild(questionText);
+
+      if (question.code) {
+        const codeBlock = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = question.code;
+        codeBlock.appendChild(code);
+        questionEl.appendChild(codeBlock);
+      }
+
+      if (question.type === "multiple-choice" && question.options) {
+        const optionsEl = document.createElement("div");
+        optionsEl.className = "options";
+
+        question.options.forEach((option, index) => {
+          const optionLabel = document.createElement("label");
+          optionLabel.className = "option";
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `question-${currentQuestionIndex}`;
+          input.value = index.toString();
+          input.checked = userAnswers[currentQuestionIndex] === index;
+
+          input.addEventListener("change", () => {
+            userAnswers[currentQuestionIndex] = index;
+          });
+
+          const span = document.createElement("span");
+          span.textContent = option;
+
+          optionLabel.appendChild(input);
+          optionLabel.appendChild(span);
+          optionsEl.appendChild(optionLabel);
+        });
+        questionEl.appendChild(optionsEl);
+      } else if (question.type === "true-false") {
+        const optionsEl = document.createElement("div");
+        optionsEl.className = "options";
+
+        ["True", "False"].forEach((option, index) => {
+          const optionLabel = document.createElement("label");
+          optionLabel.className = "option";
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `question-${currentQuestionIndex}`;
+          input.value = option.toLowerCase();
+          input.checked =
+            userAnswers[currentQuestionIndex] === option.toLowerCase();
+
+          input.addEventListener("change", () => {
+            userAnswers[currentQuestionIndex] = option.toLowerCase();
+          });
+
+          const span = document.createElement("span");
+          span.textContent = option;
+
+          optionLabel.appendChild(input);
+          optionLabel.appendChild(span);
+          optionsEl.appendChild(optionLabel);
+        });
+
+        questionEl.appendChild(optionsEl);
+      }
+
+      questionsEl.appendChild(questionEl);
+      updateNavigation();
+    }
+
+    function updateNavigation() {
+      if (!quizData) return;
+
+      prevBtn.disabled = currentQuestionIndex === 0;
+      if (currentQuestionIndex === quizData.questions.length - 1) {
+        nextBtn.textContent = "Submit";
+      } else {
+        nextBtn.textContent = "Next";
+      }
+
+      indicator.textContent = `${currentQuestionIndex + 1} / ${
+        quizData.questions.length
+      }`;
+    }
+
+    function calculateScore() {
+      if (!quizData) return;
+
+      score = 0;
+      quizData.questions.forEach((question, index) => {
+        const userAnswer = userAnswers[index];
+        if (userAnswer === question.correctAnswer) {
+          score++;
+        }
+      });
+    }
+
+    function updateFaceMood(mood: "normal" | "happy" | "smiling" | "sad") {
+      if (!faceWrapper) return;
+
+      // Find the SVG face and update the mouth path
+      const faceSvg = faceWrapper.querySelector(".face-svg");
+      const mouthPath = faceSvg?.querySelector(".mouth") as SVGPathElement;
+
+      if (mouthPath) {
+        const mouthPaths = {
+          normal: "M 30 70 Q 50 70 70 70",
+          smiling: "M 30 70 Q 50 80 70 70",
+          happy: "M 30 68 Q 50 90 70 68",
+          sad: "M 30 75 Q 50 60 70 75",
+        };
+
+        mouthPath.setAttribute("d", mouthPaths[mood]);
+
+        // Add a bounce animation
+        faceSvg?.classList.add("mood-change");
+        setTimeout(() => {
+          faceSvg?.classList.remove("mood-change");
+        }, 600);
+      }
+    }
+
+    function showResults() {
+      if (!quizData) return;
+
+      calculateScore();
+      const percentage = (score / quizData.questions.length) * 100;
+      const passed = percentage >= COMPLETION_THRESHOLD;
+      const result = getResultMessage(percentage, passed);
+
+      // Update face mood based on results
+      updateFaceMood(result.mood);
+
+      questionsEl.style.display = "none";
+      actionsEl.style.display = "none";
+      resultsEl.style.display = "block";
+
+      const titleEl = resultsEl.querySelector(".results-title") as HTMLElement;
+      const scoreEl = resultsEl.querySelector(".results-score") as HTMLElement;
+      const messageEl = resultsEl.querySelector(
+        ".results-message"
+      ) as HTMLElement;
+
+      titleEl.textContent = result.title;
+      titleEl.style.color = passed ? "var(--green-11)" : "var(--red-11)";
+      scoreEl.textContent = `Score: ${score} / ${
+        quizData.questions.length
+      } (${percentage.toFixed(0)}%)`;
+      messageEl.textContent = result.message;
+
+      // Save quiz result
+      courseProgressManager.saveQuizResult(
+        chapterSlug!,
+        lessonSlug!,
+        quizId!,
+        passed
+      );
+
+      // Dispatch event for lesson completion tracking
+      window.dispatchEvent(
+        new CustomEvent("quiz-completed", {
+          detail: {
+            quizId,
+            passed,
+            percentage,
+            score,
+            total: quizData.questions.length,
+          },
+        })
+      );
+    }
+
+    function resetQuiz() {
+      currentQuestionIndex = 0;
+      userAnswers = new Array(quizData?.questions.length || 0).fill(null);
+      score = 0;
+
+      // Reset face to normal
+      updateFaceMood("normal");
+
+      resultsEl.style.display = "none";
+      questionsEl.style.display = "block";
+      actionsEl.style.display = "flex";
+
+      renderQuestion();
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+      }
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      if (!quizData) return;
+
+      if (userAnswers[currentQuestionIndex] === null) {
+        alert("Please select an answer before continuing.");
+        return;
+      }
+
+      if (currentQuestionIndex < quizData.questions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    retryBtn?.addEventListener("click", resetQuiz);
+  }
+
+  function initAllQuizzes() {
+    const quizContainers = document.querySelectorAll(".quiz-container");
+    quizContainers.forEach(initQuiz);
+  }
+
+  function attemptQuizInitialization() {
+    // Check if header has already initialized the progress manager
+    if (courseProgressManager.getAllProgress().total > 0) {
+      initAllQuizzes();
+    } else {
+      // If not, wait for the header to fire its "ready" event
+      window.addEventListener("course-progress-ready", initAllQuizzes, {
+        once: true,
+      });
+    }
+  }
+
+  // Run immediately for normal page loads
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", attemptQuizInitialization);
+  } else {
+    attemptQuizInitialization();
+  }
+
+  // Also run on Astro page transitions
+  document.addEventListener("astro:page-load", attemptQuizInitialization);
+</script>
+
+<style is:global>
+  .quiz-container {
+    border: 1px solid var(--gray-3);
+    border-radius: 8px;
+    margin: 2rem 0;
+    background: var(--gray-1);
+    position: relative;
+  }
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3xs) var(--space-s);
+    border-bottom: 1px solid var(--gray-4);
+    background: var(--gray-3);
+    color: var(--gray-12);
+  }
+  .quiz-title {
+    font-size: medium;
+  }
+  .quiz-content {
+    min-height: 200px;
+    padding: var(--space-s) var(--space-2xs);
+    position: relative;
+  }
+  .quiz-face-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+  }
+  .quiz-error {
+    padding: 2rem;
+    text-align: center;
+    color: var(--red-12);
+  }
+  .quiz-error h4 {
+    margin: 0 0 0.5rem 0;
+  }
+  .quiz-error p {
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+  .quiz-error details {
+    margin-top: 1rem;
+    text-align: left;
+  }
+  .question {
+    margin-bottom: var(--space-s);
+    margin-right: 100px; /* Space for the face */
+  }
+  .question-text {
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+  }
+  .question pre {
+    background: var(--gray-3);
+    color: var(--gray-12);
+    padding: var(--space-3xs) var(--space-s);
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .question code {
+    font-family: var(--font-mono, "Courier New", monospace);
+    font-size: 0.875rem;
+  }
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    padding: var(--space-3xs) var(--space-s);
+    border: 1px solid var(--gray-3);
+    box-shadow: var(--shadow-s);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--gray-3);
+    font-size: 1.125rem;
+  }
+  .option:hover {
+    background: var(--pink-11);
+    border-color: var(--pink-1);
+  }
+  .option input[type="radio"] {
+    cursor: pointer;
+  }
+  .quiz-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3xs) var(--space-3xs);
+  }
+  .quiz-btn {
+    padding: var(--space-3xs) var(--space-s);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+  }
+  .quiz-btn:hover:not(:disabled) {
+    background: var(--pink-9);
+    transform: translateY(-2px);
+  }
+  .quiz-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .question-indicator {
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+  .quiz-results {
+    text-align: center;
+    padding: 2rem;
+    margin-right: 100px; /* Space for the face */
+  }
+  .results-summary {
+    margin-bottom: 2rem;
+  }
+  .results-title {
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    font-weight: 700;
+  }
+  .results-score {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--gray-11);
+  }
+  .results-message {
+    opacity: 0.9;
+    line-height: 1.6;
+    margin: 1rem 0;
+    font-size: 1.05rem;
+  }
+  .retry-btn {
+    padding: 0.75rem 2rem;
+    border: 2px solid var(--gray-3);
+    border-radius: 6px;
+    background: var(--gray-1);
+    color: var(--gray-12);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+  .retry-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+
+  /* Face mood change animation */
+  .face-svg.mood-change {
+    animation: mood-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes mood-bounce {
+    0%,
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+    25% {
+      transform: scale(1.2) rotate(-5deg);
+    }
+    50% {
+      transform: scale(0.9) rotate(5deg);
+    }
+    75% {
+      transform: scale(1.1) rotate(-3deg);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .quiz-face-container {
+      position: static;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .question,
+    .quiz-results {
+      margin-right: 0;
+    }
+  }
+</style>

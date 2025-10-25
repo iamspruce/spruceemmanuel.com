@@ -1,26 +1,17 @@
 ---
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
 import "../styles/global.css";
 
-// Define the properties for the layout
 export interface Props {
   title: string;
   description: string;
-  image?: string; // Optional: an image for social media previews
+  image?: string;
 }
 
-const {
-  title,
-  description,
-  image = "/social-preview.png", // A default fallback image
-} = Astro.props;
+const { title, description, image = "/social-preview.png" } = Astro.props;
 
-// Get the canonical URL for the current page
 const canonicalURL = Astro.url.href;
 const socialImageURL = new URL(image, Astro.site).href;
-
-const siteName = "Spruce Emmanuel"; // Change this to your site's name
+const siteName = "Spruce Emmanuel";
 ---
 
 <!doctype html>
@@ -72,7 +63,6 @@ const siteName = "Spruce Emmanuel"; // Change this to your site's name
     <link rel="canonical" href={canonicalURL} />
     <meta name="robots" content="index, follow" />
 
-    {/* --- SEO and Social Meta Tags --- */}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
@@ -85,6 +75,7 @@ const siteName = "Spruce Emmanuel"; // Change this to your site's name
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImageURL} />
     <meta name="twitter:creator" content="@sprucekhalifa" />
+
     <script
       type="application/ld+json"
       set:html={JSON.stringify({
@@ -98,26 +89,20 @@ const siteName = "Spruce Emmanuel"; // Change this to your site's name
 
     <script is:inline>
       const theme = (() => {
-        // We check for a saved theme in localStorage first.
         if (
           typeof localStorage !== "undefined" &&
           localStorage.getItem("theme")
         ) {
           return localStorage.getItem("theme");
         }
-        // If no saved theme, we check the user's OS preference.
         if (window.matchMedia("(prefers-color-scheme: light)").matches) {
           return "light-theme";
         }
-        // Default to dark theme.
         return "dark-theme";
       })();
-
-      // Apply the determined theme to the <html> element.
       document.documentElement.className = theme;
     </script>
 
-    {/* Your existing font styles */}
     <style>
       @font-face {
         font-style: normal;
@@ -175,23 +160,6 @@ const siteName = "Spruce Emmanuel"; // Change this to your site's name
     </style>
   </head>
   <body>
-    <Header />
-    <main>
-      <slot />
-    </main>
-    <Footer />
-    <style is:global>
-      /* Add a subtle transition for dark mode */
-      body,
-      header,
-      footer {
-        transition:
-          background-color 0.3s ease,
-          color 0.3s ease;
-      }
-      main {
-        margin-block-end: var(--space-xl);
-      }
-    </style>
+    <slot />
   </body>
 </html>

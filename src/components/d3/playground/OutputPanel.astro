@@ -1,0 +1,240 @@
+---
+export interface Props {
+  htmlContent: string;
+  cssContent: string;
+  jsContent: string;
+  showGrid?: boolean;
+  gridSize?: number;
+  playgroundId: string;
+}
+
+const {
+  htmlContent,
+  cssContent,
+  jsContent,
+  showGrid = false,
+  gridSize = 50,
+  playgroundId,
+} = Astro.props;
+
+const iframeStyleVars = `
+:root {
+  --gray-1: #fcfcfc;
+  --gray-2: #f9f9f9;
+  --gray-3: #f0f0f0;
+  --gray-4: #e8e8e8;
+  --gray-5: #e0e0e0;
+  --gray-6: #d9d9d9;
+  --gray-7: #cecece;
+  --gray-8: #bbbbbb;
+  --gray-9: #8d8d8d;
+  --gray-10: #838383;
+  --gray-11: #646464;
+  --gray-12: #202020;
+  --pink-1: #fffcfe;
+  --pink-2: #fef7fb;
+  --pink-3: #fee9f5;
+  --pink-4: #fbdcef;
+  --pink-5: #f6cee7;
+  --pink-6: #efbfdd;
+  --pink-7: #e7acd0;
+  --pink-8: #dd93c2;
+  --pink-9: #d6409f;
+  --pink-10: #cf3897;
+  --pink-11: #c2298a;
+  --pink-12: #651249;
+  --pink-a4: #e2008b23;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray-1: #111111;
+    --gray-2: #191919;
+    --gray-3: #222222;
+    --gray-4: #2a2a2a;
+    --gray-5: #313131;
+    --gray-6: #3a3a3a;
+    --gray-7: #484848;
+    --gray-8: #606060;
+    --gray-9: #6e6e6e;
+    --gray-10: #7b7b7b;
+    --gray-11: #b4b4b4;
+    --gray-12: #eeeeee;
+    --pink-1: #191117;
+    --pink-2: #21121d;
+    --pink-3: #37172f;
+    --pink-4: #4b143d;
+    --pink-5: #591c47;
+    --pink-6: #692955;
+    --pink-7: #833869;
+    --pink-8: #a84885;
+    --pink-9: #d6409f;
+    --pink-10: #de51a8;
+    --pink-11: #ff8dcc;
+    --pink-12: #fdd1ea;
+  }
+}
+`;
+
+const gridStyles = showGrid
+  ? `
+  <style>
+    body {
+      background-image:
+        linear-gradient(var(--gray-3) 1px, transparent 1px),
+        linear-gradient(90deg, var(--gray-3) 1px, transparent 1px);
+      background-size: ${gridSize}px ${gridSize}px;
+      background-position: -1px -1px;
+    }
+    .grid-labels { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      pointer-events: none; 
+      z-index: 9998; 
+      font-family: monospace; 
+      font-size: 8px; 
+      color: var(--gray-12); 
+      font-weight: 600; 
+      opacity: 0.7; 
+    }
+    .grid-label-x, .grid-label-y { position: absolute; }
+  </style>
+`
+  : "";
+
+const gridScript = showGrid
+  ? `
+  <script>
+    (function() {
+      const gridSize = ${gridSize};
+      const labels = document.createElement('div');
+      labels.className = 'grid-labels';
+      document.body.appendChild(labels);
+      const maxWidth = Math.max(document.body.scrollWidth, window.innerWidth, 2000);
+      const maxHeight = Math.max(document.body.scrollHeight, window.innerHeight, 1000);
+      for (let x = gridSize; x < maxWidth; x += gridSize) { 
+        const label = document.createElement('div'); 
+        label.className = 'grid-label-x'; 
+        label.style.left = x + 'px'; 
+        label.style.top = '2px'; 
+        label.style.transform = 'translateX(-50%)'; 
+        label.textContent = x; 
+        labels.appendChild(label); 
+      }
+      for (let y = gridSize; y < maxHeight; y += gridSize) { 
+        const label = document.createElement('div'); 
+        label.className = 'grid-label-y'; 
+        label.style.left = '2px'; 
+        label.style.top = y + 'px'; 
+        label.style.transform = 'translateY(-50%)'; 
+        label.textContent = y; 
+        labels.appendChild(label); 
+      }
+    })();
+  <\/script>
+`
+  : "";
+---
+
+<iframe
+  class="output-frame"
+  data-playground-id={playgroundId}
+  sandbox="allow-scripts"
+  allow-same-origin="true"
+  title="D3.js Output"
+  loading="lazy"
+  srcdoc={`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>${iframeStyleVars} ${cssContent}</style>
+      ${gridStyles}
+      <script src="https://d3js.org/d3.v7.min.js"><\/script>
+      <style>
+  ${iframeStyleVars} 
+  ${cssContent}
+  
+  /* Better scrollbar styling */
+* {
+  scrollbar-width: 2px;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: var(--gray-7) var(--gray-2);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: var(--gray-7);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-8);
+}
+  
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+  }
+</style>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: var(--gray-1); color: var(--gray-12);">
+      ${htmlContent}
+      <script>
+        // Listen for control changes from parent
+        window.addEventListener('message', (event) => {
+          if (event.data.type === 'd3-control-change') {
+            // Only process messages meant for this playground
+            if (event.data.playgroundId && event.data.playgroundId !== '${playgroundId}') {
+              return;
+            }
+            
+            const customEvent = new CustomEvent('playgroundControlChange', { 
+              detail: { 
+                controlId: event.data.controlId, 
+                value: event.data.value,
+                playgroundId: event.data.playgroundId
+              } 
+            });
+            window.dispatchEvent(customEvent);
+          }
+        });
+        
+        ${jsContent}
+      <\/script>
+      ${gridScript}
+    </body>
+    </html>
+  `}></iframe>
+
+<style>
+  .output-frame {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    border: none;
+    background: var(--gray-1);
+    display: block;
+    overflow: hidden;
+  }
+</style>

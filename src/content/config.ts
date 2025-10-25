@@ -26,7 +26,23 @@ const projectsCollection = defineCollection({
     }),
 });
 
+const d3CourseCollection = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    chapter: z.string(),
+    order: z.number(),
+    chapterOrder: z.number(),
+    chapterTitle: z.string(),
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    hasQuiz: z.boolean().optional().default(false),
+  }),
+});
+
 export const collections = {
   writing: writingCollection,
   projects: projectsCollection,
+  "d3-course": d3CourseCollection,
 };

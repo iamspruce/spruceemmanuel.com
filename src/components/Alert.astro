@@ -1,0 +1,142 @@
+---
+export interface Props {
+  type?: "info" | "warning" | "error" | "success";
+  title?: string;
+}
+
+const { type = "info", title } = Astro.props;
+
+const config = {
+  info: {
+    bg: "var(--blue-3)",
+    border: "var(--blue-7)",
+    text: "var(--blue-11)",
+    titleColor: "var(--blue-12)",
+    icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
+  },
+  warning: {
+    bg: "var(--amber-3)",
+    border: "var(--amber-7)",
+    text: "var(--amber-11)",
+    titleColor: "var(--amber-12)",
+    icon: "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
+  },
+  error: {
+    bg: "var(--red-3)",
+    border: "var(--red-7)",
+    text: "var(--red-11)",
+    titleColor: "var(--red-12)",
+    icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",
+  },
+  success: {
+    bg: "var(--green-3)",
+    border: "var(--green-7)",
+    text: "var(--green-11)",
+    titleColor: "var(--green-12)",
+    icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
+  },
+};
+
+const currentConfig = config[type];
+---
+
+<div class="alert" data-type={type}>
+  <div class="alert-icon">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d={currentConfig.icon}></path>
+    </svg>
+  </div>
+  <div class="alert-content">
+    {title && <div class="alert-title">{title}</div>}
+    <div class="alert-body">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<style
+  define:vars={{
+    alertBg: currentConfig.bg,
+    alertBorder: currentConfig.border,
+    alertText: currentConfig.text,
+    alertTitle: currentConfig.titleColor,
+  }}
+>
+  .alert {
+    position: relative;
+    display: flex;
+    gap: var(--space-xs);
+    padding: var(--space-s);
+    margin-block: var(--space-m);
+    background: var(--alertBg);
+    border: 2px solid var(--alertBorder);
+    border-radius: var(--radius-m);
+    color: var(--alertText);
+  }
+
+  .alert-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--alertBorder);
+    position: relative;
+  }
+
+  .alert-icon svg {
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(
+      30% 0%,
+      70% 0%,
+      100% 30%,
+      100% 70%,
+      70% 100%,
+      30% 100%,
+      0% 70%,
+      0% 30%
+    );
+  }
+
+  .alert-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .alert-title {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--step-0);
+    margin-bottom: var(--space-3xs);
+    color: var(--alertTitle);
+  }
+
+  .alert-body {
+    font-size: var(--step--1);
+    line-height: var(--line-height-body);
+  }
+
+  .alert-body :global(p) {
+    margin-block: var(--space-2xs);
+  }
+
+  .alert-body :global(p:first-child) {
+    margin-block-start: 0;
+  }
+
+  .alert-body :global(p:last-child) {
+    margin-block-end: 0;
+  }
+
+  .alert-body :global(a) {
+    color: inherit;
+    text-decoration-color: var(--alertBorder);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .alert-body :global(code) {
+    background: var(--alertBorder);
+    color: var(--alertTitle);
+    padding: 0.125em 0.375em;
+    border-radius: var(--radius-xs);
+    font-size: 0.9em;
+  }
+</style>

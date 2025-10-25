@@ -1,0 +1,100 @@
+---
+import D3JSLayout from "../../../layouts/D3jsLayout.astro";
+import ChapterSummary from "../../../components/d3/D3ChapterSummary.astro";
+import {
+  getCourseStructure,
+  getNextChapter,
+  getChapterLessons,
+} from "../../../utils/courseUtils";
+
+export async function getStaticPaths() {
+  const structure = await getCourseStructure();
+
+  return structure.map((chapter) => ({
+    params: { slug: chapter.slug },
+    props: { chapter },
+  }));
+}
+
+const { chapter } = Astro.props;
+const nextChapter = await getNextChapter(chapter.slug);
+const lessons = await getChapterLessons(chapter.slug);
+
+const layoutProps = {
+  title: `${chapter.title} - Complete`,
+  description: `You've completed the ${chapter.title} chapter`,
+  chapterSlug: chapter.slug,
+  lessonSlug: "summary",
+  prevLesson: {
+    href: lessons[lessons.length - 1].data.chapterTitle,
+    title: lessons[lessons.length - 1].data.title,
+  },
+  nextLesson: nextChapter,
+};
+---
+
+<D3JSLayout {...layoutProps}>
+  <div class="chapter-end-layout">
+    <ChapterSummary
+      chapterSlug={chapter.slug}
+      chapterTitle={chapter.title}
+      nextChapter={nextChapter}
+    />
+
+    <section class="chapter-review">
+      <h2>Chapter Review</h2>
+      <p>In this chapter, you learned about:</p>
+      <ul class="lessons-completed">
+        {
+          lessons.map((lesson) => (
+            <li>
+              <a href={`/d3-course/${lesson.slug}`}>{lesson.data.title}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</D3JSLayout>
+
+<style>
+  .chapter-end-layout {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .chapter-review {
+    margin-top: 3rem;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  .chapter-review h2 {
+    margin-bottom: 1rem;
+  }
+
+  .lessons-completed {
+    list-style: none;
+    padding: 0;
+    margin-top: 1.5rem;
+  }
+
+  .lessons-completed li {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid var(--primary);
+    background: var(--background);
+  }
+
+  .lessons-completed a {
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .lessons-completed a:hover {
+    text-decoration: underline;
+  }
+</style>

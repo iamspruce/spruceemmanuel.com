@@ -1,0 +1,49 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import D3Header from "../components/d3/D3Header.astro";
+import D3Footer from "../components/d3/D3Footer.astro";
+import { getCourseStructure } from "../utils/courseUtils";
+
+export interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  chapterSlug: string;
+  lessonSlug: string;
+  prevLesson?: { href: string; title: string } | null;
+  nextLesson?: { href: string; title: string } | null;
+}
+
+const {
+  title,
+  description,
+  image,
+  chapterSlug,
+  lessonSlug,
+  prevLesson,
+  nextLesson,
+} = Astro.props;
+
+const structure = await getCourseStructure();
+---
+
+<link rel="stylesheet" href="/prism.css" />
+<BaseLayout title={title} description={description} image={image}>
+  <div class="page-glow"></div>
+  <D3Header
+    chapterSlug={chapterSlug}
+    lessonSlug={lessonSlug}
+    structure={structure}
+  />
+  <main class="d3-course-content">
+    <slot />
+  </main>
+  <D3Footer prevLesson={prevLesson} nextLesson={nextLesson} />
+  <style is:global>
+    .d3-course-content {
+      min-height: calc(100vh - 120px);
+    }
+  </style>
+</BaseLayout>
+
+<script src="/prism.js" is:inline></script>

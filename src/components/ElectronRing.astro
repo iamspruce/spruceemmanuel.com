@@ -1,0 +1,248 @@
+---
+interface Electron {
+  angle: number; // Initial starting angle in degrees
+  link: string;
+  label: string; // For accessibility and tooltips
+}
+
+interface Ring {
+  rotation: number; // Rotation of the orbit in degrees
+  color: string; // Hex, rgb, or CSS color name
+  speed: number; // Animation speed (degrees per frame)
+  electrons: Electron[];
+}
+
+interface Props {
+  text: string;
+  rings: Ring[];
+}
+
+const { text, rings } = Astro.props;
+
+// Define the dimensions of the orbits
+const ORBIT_WIDTH = 280;
+const ORBIT_HEIGHT = 140;
+const ORBIT_RX = ORBIT_WIDTH / 2;
+const ORBIT_RY = ORBIT_HEIGHT / 2;
+const ORBIT_DRAW_DURATION = 3; // Duration of the orbit draw animation in seconds
+---
+
+<div class="electron-container">
+  <div class="center-text">{text}</div>
+
+  {
+    rings.map((ring, i) => (
+      <div
+        class="orbit"
+        id={`orbit-${i}`}
+        data-rx={ORBIT_RX}
+        data-ry={ORBIT_RY}
+        style={`
+            --orbit-width: ${ORBIT_WIDTH}px;
+            --orbit-height: ${ORBIT_HEIGHT}px;
+            --orbit-rotation: ${ring.rotation}deg;
+            --orbit-color: ${ring.color};
+            --orbit-draw-delay: ${i * 0.3}s;
+            --electron-fade-delay: calc(${i * 0.3}s + ${ORBIT_DRAW_DURATION}s);
+          `}
+      >
+        <svg
+          width={ORBIT_WIDTH}
+          height={ORBIT_HEIGHT}
+          viewBox={`0 0 ${ORBIT_WIDTH} ${ORBIT_HEIGHT}`}
+        >
+          <ellipse
+            class="orbit-path"
+            cx={ORBIT_RX}
+            cy={ORBIT_RY}
+            rx={ORBIT_RX - 1}
+            ry={ORBIT_RY - 1}
+            style={`--orbit-draw-duration: ${ORBIT_DRAW_DURATION}s;`}
+          />
+        </svg>
+
+        {ring.electrons.map((electron) => (
+          <a
+            href={electron.link}
+            class="electron"
+            title={electron.label}
+            data-initial-angle={electron.angle}
+            data-speed={ring.speed}
+          >
+            <span class="visually-hidden">{electron.label}</span>
+          </a>
+        ))}
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const electronsToAnimate = [];
+
+    document.querySelectorAll(".electron").forEach((el) => {
+      const orbit = el.closest(".orbit");
+      if (!orbit) return;
+
+      const rx = parseFloat(orbit.dataset.rx);
+      const ry = parseFloat(orbit.dataset.ry);
+      const speed = parseFloat(el.dataset.speed);
+      let angle = parseFloat(el.dataset.initialAngle);
+
+      electronsToAnimate.push({ el, rx, ry, speed, angle });
+    });
+
+    function animate() {
+      electronsToAnimate.forEach((e) => {
+        e.angle += e.speed;
+        if (e.angle > 360) e.angle -= 360;
+        if (e.angle < 0) e.angle += 360;
+
+        const rad = (e.angle * Math.PI) / 180;
+        const x = e.rx * Math.cos(rad);
+        const y = e.ry * Math.sin(rad);
+
+        e.el.style.translate = `${x}px ${y}px`;
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  });
+</script>
+
+<style>
+  .electron-container {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .center-text {
+    position: relative;
+    z-index: 10;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--gray-12);
+    text-align: center;
+    text-shadow: var(--shadow-s);
+    pointer-events: none;
+  }
+
+  .orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    opacity: 0.7;
+    width: var(--orbit-width);
+    height: var(--orbit-height);
+    transform: translate(-50%, -50%) rotate(var(--orbit-rotation));
+  }
+
+  .orbit svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+  }
+
+  .orbit-path {
+    fill: none;
+    stroke: var(--orbit-color);
+    stroke-width: 2;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawOrbit var(--orbit-draw-duration, 3s) ease-out
+      var(--orbit-draw-delay) forwards;
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4));
+  }
+
+  @keyframes drawOrbit {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .electron {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: var(--orbit-color);
+    box-shadow:
+      0 0 15px var(--orbit-color),
+      0 4px 8px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    z-index: 15; /* Above orbits */
+
+    translate: 0 0;
+    transform: translate(-50%, -50%) scale(1);
+    will-change: translate, transform, box-shadow;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+
+    animation:
+      fadeInElectron 0.5s ease-out var(--electron-fade-delay) forwards,
+      pulseElectron 2.5s infinite ease-in-out var(--electron-fade-delay);
+  }
+
+  @keyframes fadeInElectron {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulseElectron {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      box-shadow:
+        0 0 15px var(--orbit-color),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow:
+        0 0 25px var(--orbit-color),
+        0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .electron:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 100;
+    box-shadow:
+      0 0 25px var(--orbit-color),
+      0 6px 12px rgba(0, 0, 0, 0.4);
+
+    /* NEW: Pause the animations on hover */
+    animation-play-state: paused;
+  }
+
+  .electron:active {
+    transform: translate(-50%, -50%) scale(1.2);
+    /* NEW: Also pause on click */
+    animation-play-state: paused;
+  }
+
+  .visually-hidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+</style>
