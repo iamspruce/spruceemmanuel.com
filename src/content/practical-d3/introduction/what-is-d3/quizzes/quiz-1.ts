@@ -1,5 +1,3 @@
-// src/content/d3-course/what-is-d3/quizzes/quiz-1.ts
-
 export interface QuizQuestion {
   question: string;
   type: "multiple-choice" | "true-false" | "code";

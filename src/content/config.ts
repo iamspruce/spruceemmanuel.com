@@ -44,5 +44,5 @@ const d3CourseCollection = defineCollection({
 export const collections = {
   writing: writingCollection,
   projects: projectsCollection,
-  "d3-course": d3CourseCollection,
+  "practical-d3": d3CourseCollection,
 };

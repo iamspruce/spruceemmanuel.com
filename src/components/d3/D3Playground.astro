@@ -34,15 +34,15 @@ const {
 } = Astro.props;
 
 // Load files
-const allHtml = import.meta.glob("/src/content/d3-course/**/*.html", {
+const allHtml = import.meta.glob("/src/content/practical-d3/**/*.html", {
   query: "?raw",
   import: "default",
 });
-const allCss = import.meta.glob("/src/content/d3-course/**/*.css", {
+const allCss = import.meta.glob("/src/content/practical-d3/**/*.css", {
   query: "?raw",
   import: "default",
 });
-const allJs = import.meta.glob("/src/content/d3-course/**/*.js", {
+const allJs = import.meta.glob("/src/content/practical-d3/**/*.js", {
   query: "?raw",
   import: "default",
 });
@@ -105,7 +105,7 @@ const playgroundId = `playground-${lessonSlug}-${exampleName}-${Math.random()
   .toString(36)
   .substring(2, 9)}`;
 
-const githubUrl = `https://github.com/${githubRepo}/tree/${githubBranch}/d3-course/${lessonSlug}/examples/${exampleName}`;
+const githubUrl = `https://github.com/${githubRepo}/tree/${githubBranch}/practical-d3/${lessonSlug}/examples/${exampleName}`;
 ---
 
 <div

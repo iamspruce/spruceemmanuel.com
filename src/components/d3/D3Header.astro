@@ -190,7 +190,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     // Edit on GitHub
     const handleEdit = () => {
       const lesson = editBtn?.dataset.lesson;
-      const githubUrl = `${GITHUB_REPO_URL}/tree/main/src/content/d3-course/${lesson}.mdx`;
+      const githubUrl = `${GITHUB_REPO_URL}/tree/main/practical-d3/${lesson}.mdx`;
       window.open(githubUrl, "_blank");
     };
     editBtn?.addEventListener("click", handleEdit);

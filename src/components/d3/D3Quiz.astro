@@ -18,7 +18,7 @@ const {
 } = Astro.props;
 
 // Load quiz modules
-const allQuizzesNoRaw = import.meta.glob("/src/content/d3-course/**/*.ts");
+const allQuizzesNoRaw = import.meta.glob("/src/content/practical-d3/**/*.ts");
 
 // More flexible matching
 const findQuizFile = (files: Record<string, any>, patterns: string[]) => {

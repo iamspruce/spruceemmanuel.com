@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import type { LessonData, ChapterData } from "./courseTypes";
 
 export async function getCourseStructure(): Promise<ChapterData[]> {
-  const lessons = await getCollection("d3-course");
+  const lessons = await getCollection("practical-d3");
 
   // Sort lessons by chapter order and lesson order
   const sortedLessons = lessons.sort((a, b) => {
@@ -33,7 +33,7 @@ export async function getCourseStructure(): Promise<ChapterData[]> {
       slug: lesson.slug,
       title: lesson.data.title,
       description: lesson.data.description,
-      href: `/d3-course/${lesson.slug}`,
+      href: `/practical-d3/${lesson.slug}`,
       order: lesson.data.order,
     });
   });
@@ -42,7 +42,7 @@ export async function getCourseStructure(): Promise<ChapterData[]> {
 }
 
 export async function getLessonNavigation(currentSlug: string) {
-  const lessons = await getCollection("d3-course");
+  const lessons = await getCollection("practical-d3");
   const sortedLessons = lessons.sort((a, b) => {
     if (a.data.chapterOrder !== b.data.chapterOrder) {
       return a.data.chapterOrder - b.data.chapterOrder;
@@ -58,7 +58,7 @@ export async function getLessonNavigation(currentSlug: string) {
   if (currentIndex > 0) {
     const prevLesson = sortedLessons[currentIndex - 1];
     prev = {
-      href: `/d3-course/${prevLesson.slug}`,
+      href: `/practical-d3/${prevLesson.slug}`,
       title: prevLesson.data.title,
     };
   }
@@ -66,7 +66,7 @@ export async function getLessonNavigation(currentSlug: string) {
   if (currentIndex < sortedLessons.length - 1) {
     const nextLesson = sortedLessons[currentIndex + 1];
     next = {
-      href: `/d3-course/${nextLesson.slug}`,
+      href: `/practical-d3/${nextLesson.slug}`,
       title: nextLesson.data.title,
     };
   }
@@ -75,7 +75,7 @@ export async function getLessonNavigation(currentSlug: string) {
 }
 
 export async function getChapterLessons(chapterSlug: string) {
-  const lessons = await getCollection("d3-course", (lesson) => {
+  const lessons = await getCollection("practical-d3", (lesson) => {
     return lesson.data.chapter === chapterSlug;
   });
 

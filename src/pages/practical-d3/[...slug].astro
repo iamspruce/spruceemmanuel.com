@@ -5,7 +5,7 @@ import TableOfContents from "../../components/TableOfContents.astro";
 import { getLessonNavigation } from "../../utils/courseUtils";
 
 export async function getStaticPaths() {
-  const lessons = await getCollection("d3-course");
+  const lessons = await getCollection("practical-d3");
   return lessons.map((lesson) => ({
     params: { slug: lesson.slug },
     props: { lesson },
