@@ -2,7 +2,7 @@
 title: "Learn D3.js Practically"
 description: "An upcoming, hands-on D3.js course designed to take you from the fundamentals of data visualization to creating complex, interactive, and mind-blowing graphics. Master the skills to turn raw data into compelling stories."
 image: ""
-link: ""
+link: "/practical-d3"
 ---
 
 ### From Data to Visualization 📊

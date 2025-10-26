@@ -112,8 +112,10 @@ const courseStructure = await getCourseStructure();
         </li>
       </ul>
       <ElectronRing text="D3.js" rings={myRings} />
-      <a style="display: block; margin-block-start: -30px;" href="http://"
-        >Get Started</a
+      <a
+        style="display: block; margin-block-start: -10px;"
+        href="/practical-d3/introduction/getting-started"
+        class="get-started-btn">Get Started</a
       >
     </nav>
 
@@ -191,7 +193,7 @@ const courseStructure = await getCourseStructure();
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: var(--space-3xs);
+    gap: var(--space-xs);
     align-items: center;
   }
 
@@ -212,11 +214,9 @@ const courseStructure = await getCourseStructure();
 
   .central-featured {
     position: relative;
-    height: calc(var(--space-2xl-3xl) * 2.6);
-    min-height: 400px;
-    width: calc(var(--space-2xl-3xl) * 4.6);
-    min-width: 300px;
-    max-width: 100%;
+    height: 325px;
+    max-width: 546px;
+    width: 100%;
     margin: 0 auto;
     text-align: center;
   }
@@ -225,8 +225,8 @@ const courseStructure = await getCourseStructure();
     position: absolute;
     top: 50%;
     left: 50%;
-    z-index: 1;
-    transform: translate(-50%, -80%);
+    z-index: -1;
+    transform: translate(-50%, -50%);
   }
 
   .central-featured ul {
@@ -286,13 +286,13 @@ const courseStructure = await getCourseStructure();
 
   .central-featured strong {
     display: block;
-    font-size: 1rem;
+    font-size: 16px;
     font-weight: 600;
   }
 
   .central-featured small {
     display: block;
-    font-size: 0.8rem;
+    font-size: 14px;
     color: var(--gray-11);
   }
 
@@ -326,10 +326,6 @@ const courseStructure = await getCourseStructure();
     gap: var(--space-3xs);
   }
 
-  .toggle-btn svg {
-    fill: var(--gray-11);
-  }
-
   .toggle-btn::before,
   .toggle-btn::after {
     content: "";
@@ -354,7 +350,8 @@ const courseStructure = await getCourseStructure();
 
   .toggle-btn[aria-expanded="true"]::before,
   .toggle-btn[aria-expanded="true"]::after {
-    width: 300px;
+    width: 100vw;
+    max-width: 300px;
   }
 
   .toggle-btn:hover {
@@ -372,6 +369,9 @@ const courseStructure = await getCourseStructure();
   }
   .toggle-btn svg {
     vertical-align: middle;
+    fill: var(--gray-11);
+    width: 16px;
+    height: 16px;
   }
 
   /* Outline content - the expanding table */

@@ -92,24 +92,45 @@ const cardThemes = [
                   <p class="project-list-content-description">
                     {project.data.description}
                   </p>
-                  <a href={`/posts/${project.slug}`} class="project-link">
-                    <span>View Project</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="var(--space-l)"
-                      height="var(--space-l)"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <path
-                        d="M6 18L8.5 15.5M18 6H9M18 6V15M18 6L11.5 12.5"
-                        stroke="#1C274C"
-                        stroke-width="1.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </a>
+                  {project.data.link ? (
+                    <a href={`${project.data.link}`} class="project-link">
+                      <span>View Project</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="var(--space-l)"
+                        height="var(--space-l)"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M6 18L8.5 15.5M18 6H9M18 6V15M18 6L11.5 12.5"
+                          stroke="#1C274C"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </a>
+                  ) : (
+                    <a href={`/posts/${project.slug}`} class="project-link">
+                      <span>View Project</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="var(--space-l)"
+                        height="var(--space-l)"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M6 18L8.5 15.5M18 6H9M18 6V15M18 6L11.5 12.5"
+                          stroke="#1C274C"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </a>
+                  )}
                 </div>
               </div>
             </li>
@@ -327,10 +348,13 @@ const cardThemes = [
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const container = document.querySelector(".projects-list");
+    const container = document.querySelector(".projects-list") as HTMLElement;
     if (!container) return;
-    const list = container.querySelector(".project-list-items");
-    const cards = list.querySelectorAll(".project-list-item");
+    const list = container.querySelector<HTMLUListElement>(
+      ".project-list-items"
+    );
+    if (!list) return;
+    const cards = list.querySelectorAll<HTMLLIElement>(".project-list-item");
     if (cards.length === 0) return;
 
     let isTicking = false;
@@ -341,7 +365,8 @@ const cardThemes = [
       const containerCenter = containerRect.left + containerRect.width / 2;
       const containerWidth = containerRect.width;
 
-      cards.forEach((card) => {
+      cards.forEach((card: Element) => {
+        const cardElement = card as HTMLElement;
         const cardRect = card.getBoundingClientRect();
         const cardCenter = cardRect.left + cardRect.width / 2;
         const distance = cardCenter - containerCenter;
@@ -359,12 +384,15 @@ const cardThemes = [
         const rotationY = clampedFactor * maxRotationY;
         const rotationZ = clampedFactor * maxRotationZ;
         const opacity = 1 - Math.abs(clampedFactor) * maxOpacity;
-
-        card.style.setProperty(
+        cardElement.style.setProperty(
           "--transform-scroll",
           `perspective(1000px) rotateY(${rotationY}deg) rotateZ(${rotationZ}deg) scale(${scale}) translateZ(0)`
         );
-        card.style.setProperty("--opacity", opacity);
+        cardElement.style.setProperty("--opacity", opacity.toString());
+        (card as HTMLElement).style.setProperty(
+          "--opacity",
+          opacity.toString()
+        );
       });
 
       isTicking = false;
@@ -380,7 +408,7 @@ const cardThemes = [
     function centerMiddleCard() {
       if (cards.length > 0) {
         const middleIndex = Math.floor(cards.length / 2);
-        const middleCard = cards[middleIndex];
+        const middleCard = cards[middleIndex] as HTMLElement;
         const containerCenter = container.offsetWidth / 2;
         const cardCenter = middleCard.offsetLeft + middleCard.offsetWidth / 2;
         const scrollTarget = cardCenter - containerCenter;
@@ -389,8 +417,8 @@ const cardThemes = [
     }
 
     function initCarousel() {
-      const firstCard = cards[0];
-      if (firstCard) {
+      const firstCard = cards[0] as HTMLElement;
+      if (firstCard && list) {
         const scrollPadding =
           (container.offsetWidth - firstCard.offsetWidth) / 2;
         list.style.paddingInline = `${scrollPadding}px`;

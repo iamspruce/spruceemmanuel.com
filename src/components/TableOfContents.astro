@@ -85,10 +85,7 @@ const { headings } = Astro.props;
   .table-of-contents {
     position: sticky;
     top: 100px;
-    padding: 1.5rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
+    padding: var(--space-2xs);
     max-height: calc(100vh - 150px);
     overflow-y: auto;
   }
@@ -134,13 +131,13 @@ const { headings } = Astro.props;
   }
 
   .toc-link:hover {
-    background: var(--hover-bg);
+    background: var(--gray-12);
   }
 
   .toc-link.active {
-    background: var(--hover-bg);
+    background: var(--gray-12);
     font-weight: 600;
-    border-left: 3px solid var(--primary);
+    border-left: 3px solid var(--gray-12);
     padding-left: calc(0.75rem - 3px);
   }
 
