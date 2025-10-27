@@ -531,6 +531,14 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     transform: scale(1) rotate(3deg);
   }
 
+  @media (max-width: 700px) {
+    .course-progress-panel.open {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
   .panel-header {
     display: flex;
     justify-content: space-between;
