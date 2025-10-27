@@ -6,7 +6,7 @@ import ElectronRing from "../../components/ElectronRing.astro";
 const myRings = [
   {
     rotation: 0,
-    color: "#00f3ff",
+    color: "var(--pink-10)",
     speed: 0.5,
     electrons: [
       { angle: 0, link: "/page-1", label: "Go to Page 1" },
@@ -15,13 +15,13 @@ const myRings = [
   },
   {
     rotation: 60,
-    color: "#ff00ea",
+    color: "var(--amber-8)",
     speed: -0.8,
     electrons: [{ angle: 90, link: "/page-3", label: "Go to Page 3" }],
   },
   {
     rotation: 120,
-    color: "#ffea00",
+    color: "var(--green-8)",
     speed: 0.6,
     electrons: [
       { angle: 45, link: "/page-4", label: "Go to Page 4" },
@@ -112,11 +112,6 @@ const courseStructure = await getCourseStructure();
         </li>
       </ul>
       <ElectronRing text="D3.js" rings={myRings} />
-      <a
-        style="display: block; margin-block-start: -10px;"
-        href="/practical-d3/introduction/getting-started"
-        class="get-started-btn">Get Started</a
-      >
     </nav>
 
     <div class="outline-wrapper">
@@ -193,7 +188,7 @@ const courseStructure = await getCourseStructure();
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
+    gap: var(--space-3xs);
     align-items: center;
   }
 
@@ -221,11 +216,23 @@ const courseStructure = await getCourseStructure();
     text-align: center;
   }
 
+  @media (min-width: 800px) {
+    .central-featured {
+      height: 345px;
+      max-width: 566px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .central-featured {
+      height: 385px;
+      max-width: 644px;
+    }
+  }
   .central-featured > :global(.electron-container) {
     position: absolute;
     top: 50%;
     left: 50%;
-    z-index: -1;
+    z-index: 1;
     transform: translate(-50%, -50%);
   }
 
@@ -288,6 +295,7 @@ const courseStructure = await getCourseStructure();
     display: block;
     font-size: 16px;
     font-weight: 600;
+    text-decoration: none;
   }
 
   .central-featured small {
@@ -300,7 +308,6 @@ const courseStructure = await getCourseStructure();
   .outline-wrapper {
     width: 100%;
     max-width: 1200px;
-    margin-block-start: var(--space-s);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -333,7 +340,7 @@ const courseStructure = await getCourseStructure();
     top: 50%;
     transform: translateY(-50%);
     height: 2px;
-    background: linear-gradient(90deg, var(--gray-7), var(--gray-9));
+    background: linear-gradient(90deg, var(--gray-6), var(--gray-7));
     width: 0;
     transition: width 0.6s ease-out;
   }
@@ -350,12 +357,11 @@ const courseStructure = await getCourseStructure();
 
   .toggle-btn[aria-expanded="true"]::before,
   .toggle-btn[aria-expanded="true"]::after {
-    width: 100vw;
-    max-width: 300px;
+    width: 300px;
   }
 
   .toggle-btn:hover {
-    box-shadow: var(--shadow-l);
+    box-shadow: var(--shadow-s);
   }
 
   .toggle-btn .icon-expanded {
@@ -369,7 +375,7 @@ const courseStructure = await getCourseStructure();
   }
   .toggle-btn svg {
     vertical-align: middle;
-    fill: var(--gray-11);
+    fill: var(--gray-12);
     width: 16px;
     height: 16px;
   }
@@ -391,12 +397,12 @@ const courseStructure = await getCourseStructure();
 
   .outline-content > table {
     overflow: hidden;
-    opacity: 0;
+    display: none;
     transition: opacity 0.5s ease-out 0.2s;
   }
 
   .toggle-btn[aria-expanded="true"] ~ .outline-content > table {
-    opacity: 1;
+    display: table;
   }
 
   /* Table styles */
@@ -454,7 +460,7 @@ const courseStructure = await getCourseStructure();
   }
 
   .lessons-cell li {
-    padding: var(--space-3xs) var(--space-2xs);
+    padding: var(--space-2xs) var(--space-2xs);
     border-radius: var(--radius-xs);
     transition: background-color 0.2s ease;
   }
@@ -481,7 +487,7 @@ const courseStructure = await getCourseStructure();
 
     th,
     td {
-      padding: var(--space-2xs) var(--space-xs);
+      padding: var(--space-s) var(--space-xs);
     }
 
     .chapter-cell {
@@ -491,7 +497,6 @@ const courseStructure = await getCourseStructure();
     .lessons-cell {
       width: 65%;
     }
-
     .toggle-btn[aria-expanded="true"]::before,
     .toggle-btn[aria-expanded="true"]::after {
       width: 100px;

@@ -218,14 +218,13 @@ const ORBIT_DRAW_DURATION = 3;
   .center-text {
     position: relative;
     z-index: 10;
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-size: var(--step-0);
     font-weight: bold;
-    color: var(--gray-12, #1a1a1a);
+    color: var(--gray-12);
     text-align: center;
     text-shadow: var(--shadow-s, 0 2px 4px rgba(0, 0, 0, 0.1));
     pointer-events: none;
     max-width: 90%;
-    word-wrap: break-word;
   }
 
   .orbit {
@@ -334,7 +333,6 @@ const ORBIT_DRAW_DURATION = 3;
     animation-play-state: paused;
   }
 
-  /* ... rest of your CSS ... */
   @media (hover: none) and (pointer: coarse) {
     .electron {
       width: clamp(14px, 3vw, 20px);
