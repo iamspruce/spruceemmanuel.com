@@ -344,8 +344,13 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   }
 
   .nav-btn:hover:not(:disabled) {
-    background: var(--hover-bg);
+    background: var(--pink-10);
+    color: var(--pink-1);
     transform: translateY(-2px);
+  }
+
+  .nav-btn:hover:not(:disabled) svg {
+    stroke: var(--pink-1);
   }
 
   .nav-btn:disabled {
