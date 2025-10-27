@@ -29,7 +29,7 @@ const {
   gridSize = 50,
   showLineNumbers = true,
   editable = false,
-  githubRepo = "yourusername/yourrepo",
+  githubRepo = "iamspruce/learn-d3.js-practically",
   githubBranch = "main",
 } = Astro.props;
 
@@ -84,9 +84,6 @@ const hasHtml = !!htmlContent;
 const hasCss = !!cssContent;
 const hasJs = !!jsContent;
 
-// --- FIX ---
-// Use a type guard in .filter() to correctly narrow the array type
-// This solves the: "Property 'id' does not exist on type 'false | ...'" error
 const availableTabs = [
   hasHtml && { id: "html", label: "HTML" },
   hasCss && { id: "css", label: "CSS" },
@@ -98,14 +95,25 @@ const validDefaultTab = availableTabs.some((tab) => tab.id === defaultTab)
   : hasJs
     ? "js"
     : availableTabs[0]?.id || "html";
-// --- END FIX ---
 
 // Generate unique ID for this playground instance
 const playgroundId = `playground-${lessonSlug}-${exampleName}-${Math.random()
   .toString(36)
   .substring(2, 9)}`;
 
-const githubUrl = `https://github.com/${githubRepo}/tree/${githubBranch}/practical-d3/${lessonSlug}/examples/${exampleName}`;
+// Extract the full path from the matched file to construct correct GitHub URL
+let githubPath = `${lessonSlug}/examples/${exampleName}`;
+
+if (htmlKey) {
+  // Match the path between 'practical-d3/' and '/examples/'
+  // This captures the full chapter/lesson structure
+  const match = htmlKey.match(/practical-d3\/(.*?)\/examples\//);
+  if (match) {
+    githubPath = `${match[1]}/examples/${exampleName}`;
+  }
+}
+
+const githubUrl = `https://github.com/${githubRepo}/tree/${githubBranch}/${githubPath}`;
 ---
 
 <div

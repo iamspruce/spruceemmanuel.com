@@ -157,7 +157,8 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     initializeCourseProgress,
   } from "@utils/courseProgress";
 
-  const GITHUB_REPO_URL = "https://github.com/iamspruce/practical-d3";
+  const GITHUB_REPO_URL =
+    "https://github.com/iamspruce/learn-d3.js-practically";
 
   function initializeHeader() {
     const header = document.getElementById("d3-header");
@@ -226,8 +227,9 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
 
     // Edit on GitHub
     const handleEdit = () => {
+      const chapter = editBtn?.dataset.lesson;
       const lesson = editBtn?.dataset.lesson;
-      const githubUrl = `${GITHUB_REPO_URL}/tree/main/practical-d3/${lesson}.mdx`;
+      const githubUrl = `${GITHUB_REPO_URL}/tree/main/practical-d3/${chapter}/${lesson}/index.mdx`;
       window.open(githubUrl, "_blank");
     };
     editBtn?.addEventListener("click", handleEdit);
@@ -755,15 +757,15 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   }
 
   .panel-footer {
-    padding-top: var(--space-xs);
+    padding-top: var(--space-2xs);
     border-top: 1px solid var(--gray-6);
     display: flex;
   }
 
   .reset-btn {
     background: none;
-    border: 1px solid var(--red-11);
-    color: var(--red-11);
+    border: 1px solid var(--red-10);
+    color: var(--red-10);
     padding: var(--space-3xs) var(--space-s);
     border-radius: var(--radius-xs);
     cursor: pointer;
