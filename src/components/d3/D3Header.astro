@@ -106,7 +106,11 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   <div class="progress-summary">
     <div class="stat">
       <span class="stat-label">Total <br /> Chapters</span>
-      <span class="stat-value" id="total-count">0</span>
+      <span class="stat-value" id="total-chapters-count">0</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Total <br /> Lessons</span>
+      <span class="stat-value" id="total-lessons-count">0</span>
     </div>
     <div class="stat">
       <span class="stat-label">Completed <br />Lessons</span>
@@ -118,16 +122,42 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     </div>
   </div>
 
-  <div class="chapters-list" id="chapters-list"></div>
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" id="overall-progress-fill"></div>
+  </div>
+
+  <div class="panel-content">
+    <div class="chapters-list" id="chapters-list"></div>
+  </div>
+
+  <div class="panel-footer">
+    <button class="reset-btn" id="reset-progress-btn">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4"></path>
+        <path d="M4 13a8.1 8.1 0 0 0 15.5 2l-4 4v-4"></path>
+      </svg>
+      Reset Progress
+    </button>
+  </div>
 </div>
 
 <script>
   import {
     courseProgressManager,
     initializeCourseProgress,
-  } from "../../utils/courseProgress";
+  } from "@utils/courseProgress";
 
-  const GITHUB_REPO_URL = "https://github.com/YOUR_USERNAME/YOUR_REPO";
+  const GITHUB_REPO_URL = "https://github.com/iamspruce/practical-d3";
 
   function initializeHeader() {
     const header = document.getElementById("d3-header");
@@ -136,6 +166,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     const exportBtn = document.getElementById("export-btn");
     const progressPanel = document.getElementById("course-progress-panel");
     const closeBtn = document.getElementById("close-progress-panel");
+    const resetBtn = document.getElementById("reset-progress-btn");
 
     if (!header) return;
 
@@ -144,9 +175,15 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     if (!structureData) return;
 
     const structure = JSON.parse(structureData);
+    // Initialize the progress manager with the course structure
     initializeCourseProgress(structure);
 
+    // Let other scripts (like D3Quiz) know the manager is ready
     window.dispatchEvent(new CustomEvent("course-progress-ready"));
+
+    // Get current page slugs
+    const chapterSlug = progressBtn?.dataset.chapter;
+    const lessonSlug = progressBtn?.dataset.lesson;
 
     // Sticky header on scroll
     let lastScroll = 0;
@@ -165,7 +202,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     const togglePanel = () => {
       progressPanel?.classList.toggle("open");
       if (progressPanel?.classList.contains("open")) {
-        renderProgressPanel();
+        renderProgressPanel(chapterSlug, lessonSlug);
       }
     };
     progressBtn?.addEventListener("click", togglePanel);
@@ -201,18 +238,59 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     };
     exportBtn?.addEventListener("click", handleExport);
 
-    function renderProgressPanel() {
+    // Reset Progress
+    const handleReset = () => {
+      if (
+        window.confirm(
+          "Are you sure you want to reset all your course progress? This action cannot be undone."
+        )
+      ) {
+        courseProgressManager.resetProgress();
+        // Re-initialize to repopulate default state
+        initializeCourseProgress(structure);
+        // Re-render the panel with cleared state
+        renderProgressPanel(chapterSlug, lessonSlug);
+        // Dispatch an event so other components (like the footer) update
+        window.dispatchEvent(new CustomEvent("lesson-progress-updated"));
+      }
+    };
+    resetBtn?.addEventListener("click", handleReset);
+
+    /**
+     * Renders the content of the progress panel
+     */
+    function renderProgressPanel(currentChapterSlug, currentLessonSlug) {
       const progress = courseProgressManager.getAllProgress();
+
+      // Get summary elements
+      const totalChaptersCount = document.getElementById(
+        "total-chapters-count"
+      );
+      const totalLessonsCount = document.getElementById("total-lessons-count");
       const completedCount = document.getElementById("completed-count");
       const skippedCount = document.getElementById("skipped-count");
-      const totalCount = document.getElementById("total-count");
+      const overallProgressFill = document.getElementById(
+        "overall-progress-fill"
+      );
       const chaptersList = document.getElementById("chapters-list");
 
+      // Update summary stats
+      if (totalChaptersCount)
+        totalChaptersCount.textContent = structure.length.toString();
+      if (totalLessonsCount)
+        totalLessonsCount.textContent = progress.total.toString();
       if (completedCount)
         completedCount.textContent = progress.completed.toString();
       if (skippedCount) skippedCount.textContent = progress.skipped.toString();
-      if (totalCount) totalCount.textContent = progress.total.toString();
 
+      // Update overall progress bar
+      if (overallProgressFill) {
+        const overallPercentage =
+          progress.total > 0 ? (progress.completed / progress.total) * 100 : 0;
+        overallProgressFill.style.width = `${overallPercentage}%`;
+      }
+
+      // Render chapters list
       if (chaptersList) {
         chaptersList.innerHTML = "";
         structure.forEach((chapter) => {
@@ -230,10 +308,27 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
             });
           }
 
+          // Get chapter-level quiz summary
+          courseProgressManager.calculateChapterQuizSummary(chapter.slug);
+          const quizSummary = courseProgressManager.getChapterQuizSummary(
+            chapter.slug
+          );
+          let quizSummaryHtml = "";
+          if (quizSummary && quizSummary.totalQuizzes > 0) {
+            quizSummaryHtml = `
+              <span class="chapter-quiz-summary" title="${quizSummary.totalPassed} / ${quizSummary.totalQuizzes} quizzes passed">
+                Quiz Score: <strong>${quizSummary.percentage.toFixed(0)}%</strong>
+              </span>
+            `;
+          }
+
           chapterEl.innerHTML = `
             <div class="chapter-header">
               <h3 class="chapter-title">${chapter.title}</h3>
-              <span class="chapter-progress-badge">${completedLessons}/${totalLessons}</span>
+              <div class="chapter-meta">
+                ${quizSummaryHtml}
+                <span class="chapter-progress-badge">${completedLessons}/${totalLessons}</span>
+              </div>
             </div>
             <div class="lessons-list">
               ${chapter.lessons
@@ -244,13 +339,18 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
                     : lessonProgress?.skipped
                       ? "skipped"
                       : "pending";
+
+                  const isCurrent = lesson.slug === currentLessonSlug;
+
                   const statusIcon = lessonProgress?.completed
-                    ? "✓"
+                    ? "✓" // Checkmark
                     : lessonProgress?.skipped
-                      ? "⊘"
-                      : "○";
+                      ? "⊘" // Skipped symbol
+                      : "○"; // Circle
                   return `
-                  <a href="${lesson.href}" class="lesson-item ${status}">
+                  <a href="${lesson.href}" class="lesson-item ${status} ${
+                    isCurrent ? "current" : ""
+                  }">
                     <span class="lesson-status-icon">${statusIcon}</span>
                     <span class="lesson-title">${lesson.title}</span>
                   </a>
@@ -267,7 +367,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     // Listen for progress updates from lesson page
     window.addEventListener("lesson-progress-updated", () => {
       if (progressPanel?.classList.contains("open")) {
-        renderProgressPanel();
+        renderProgressPanel(chapterSlug, lessonSlug);
       }
     });
 
@@ -333,6 +433,18 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     box-shadow: var(--shadow-m);
   }
 
+  .nav-logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--gray-1);
+    text-decoration: none;
+    padding: var(--space-2xs) var(--space-3xs);
+    transition: all 0.2s ease;
+  }
+  .nav-logo:hover {
+    color: var(--pink-1);
+  }
+
   .nav-btn {
     border: none;
     background: none;
@@ -344,7 +456,6 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   }
 
   .nav-btn:hover:not(:disabled) {
-    background: var(--pink-10);
     color: var(--pink-1);
     transform: translateY(-2px);
   }
@@ -385,28 +496,39 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     right: 10px;
     opacity: 0;
     visibility: hidden;
-    height: calc(100vh - 70px);
-    overflow-y: auto;
+    height: calc(100vh - 90px);
+    overflow: hidden;
     z-index: 999;
     background: var(--gray-12);
     color: var(--gray-1);
     border-radius: var(--radius-m);
-    padding: var(--space-s);
+    box-shadow: var(--shadow-l);
+    border: 1px solid var(--gray-10);
+    padding: var(--space-2xs);
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-    min-width: calc(var(--space-2xl) * 3);
+    min-width: 350px;
+    max-width: 400px;
     transform-origin: top right;
-    transform: scale(0.95) translateY(22px) rotate(3deg);
+    transform: scale(0.95) translateY(22px);
     transition:
       opacity 0.2s ease-in-out,
       visibility 0.2s ease-in-out,
       transform 0.2s ease-in-out;
   }
 
+  @media (max-width: 480px) {
+    .course-progress-panel {
+      min-width: calc(100vw - 20px);
+      max-width: calc(100vw - 20px);
+    }
+  }
+
   .course-progress-panel.open {
     opacity: 1;
     visibility: visible;
+    transform: scale(1) rotate(3deg);
   }
 
   .panel-header {
@@ -414,6 +536,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--gray-6);
+    padding-bottom: var(--space-3xs);
   }
 
   .panel-header h2 {
@@ -430,16 +553,20 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     width: 32px;
     height: 32px;
     color: var(--gray-1);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+  .close-btn:hover {
+    opacity: 1;
   }
   .close-btn svg {
-    fill: currentColor;
     stroke: currentColor;
   }
 
   .progress-summary {
-    display: flex;
-    justify-content: space-around;
-    border-bottom: 1px solid var(--gray-6);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3xs);
     padding-bottom: var(--space-3xs);
   }
 
@@ -452,8 +579,9 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   }
 
   .stat-label {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     opacity: 0.7;
+    line-height: 1.3;
   }
 
   .stat-value {
@@ -461,10 +589,43 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     font-weight: bold;
   }
 
+  .progress-bar-container {
+    width: 100%;
+    background-color: var(--gray-6);
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--green-11);
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  .panel-content {
+    flex: 1;
+    overflow-y: auto;
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-6) transparent;
+  }
+
+  .panel-content::-webkit-scrollbar {
+    width: 8px;
+  }
+  .panel-content::-webkit-scrollbar-thumb {
+    background-color: var(--gray-6);
+    border-radius: 4px;
+  }
+
   .chapters-list {
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+    padding-right: var(--space-3xs);
   }
 
   .chapter-item {
@@ -479,7 +640,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   .chapter-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-xs);
     margin-bottom: var(--space-2xs);
   }
@@ -487,6 +648,26 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   .chapter-title {
     font-size: var(--step-1);
     margin: 0;
+    line-height: 1.3;
+  }
+
+  .chapter-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-3xs);
+    flex-shrink: 0;
+  }
+
+  .chapter-quiz-summary {
+    font-size: 0.8rem;
+    color: var(--gray-1);
+    opacity: 0.8;
+  }
+  .chapter-quiz-summary strong {
+    color: var(--gray-1);
+    opacity: 1;
+    font-weight: 600;
   }
 
   .chapter-progress-badge {
@@ -514,6 +695,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     text-decoration: none;
     transition: all 0.2s ease;
     color: var(--gray-1);
+    border: 1px solid transparent;
   }
 
   .lesson-item:hover {
@@ -521,25 +703,38 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     color: var(--gray-12);
   }
 
+  .lesson-item.current {
+    background: var(--pink-10);
+    color: var(--pink-1);
+    border-color: var(--pink-1);
+  }
+
   .lesson-status-icon {
     font-size: 1rem;
     min-width: 1.5rem;
+    text-align: center;
   }
 
   .lesson-item.completed {
-    background: var(--green-11);
+    opacity: 0.7;
   }
 
   .lesson-item.completed .lesson-status-icon {
-    color: var(--green-1);
+    color: var(--green-11);
+  }
+  .lesson-item.completed:hover {
+    opacity: 1;
   }
 
   .lesson-item.skipped {
-    background: var(--amber-11);
+    opacity: 0.8;
   }
 
   .lesson-item.skipped .lesson-status-icon {
-    color: var(--amber-1);
+    color: var(--amber-11);
+  }
+  .lesson-item.skipped:hover {
+    opacity: 1;
   }
 
   .lesson-item.pending .lesson-status-icon {
@@ -548,6 +743,34 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
 
   .lesson-title {
     flex: 1;
+    font-size: 0.95rem;
+  }
+
+  .panel-footer {
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--gray-6);
+    display: flex;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--red-11);
+    color: var(--red-11);
+    padding: var(--space-3xs) var(--space-s);
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    margin-left: auto;
+  }
+
+  .reset-btn:hover {
+    background: var(--red-11);
+    color: var(--red-1);
   }
 
   @media print {

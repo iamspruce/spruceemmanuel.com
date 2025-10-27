@@ -2,16 +2,21 @@
 export interface Props {
   prevLesson?: { href: string; title: string } | null;
   nextLesson?: { href: string; title: string } | null;
+  // Added props to handle completion logic
+  hasQuiz?: boolean;
+  chapterSlug?: string;
+  lessonSlug?: string;
 }
 
-const { prevLesson, nextLesson } = Astro.props;
+const { prevLesson, nextLesson, hasQuiz, chapterSlug, lessonSlug } =
+  Astro.props;
 ---
 
-<footer class="d3-footer">
-  <nav class="lesson-navigation">
+<footer class="lesson-footer">
+  <nav class="lesson-nav" aria-label="Lesson">
     {
       prevLesson ? (
-        <a href={prevLesson.href} class="nav-link prev">
+        <a href={prevLesson.href} class="prev-link" rel="prev">
           <svg
             class="nav-icon"
             viewBox="0 0 24 24"
@@ -25,23 +30,26 @@ const { prevLesson, nextLesson } = Astro.props;
               stroke-linejoin="round"
             />
           </svg>
-          <div class="nav-content">
-            <span class="nav-label">Previous</span>
-            <span class="nav-title">{prevLesson.title}</span>
-          </div>
+          <span>Previous</span>
+          <strong>{prevLesson.title}</strong>
         </a>
       ) : (
-        <div />
+        <span class="empty-link" />
       )
     }
-
     {
       nextLesson ? (
-        <a href={nextLesson.href} class="nav-link next">
-          <div class="nav-content">
-            <span class="nav-label">Next</span>
-            <span class="nav-title">{nextLesson.title}</span>
-          </div>
+        <a
+          href={nextLesson.href}
+          class="next-link"
+          id="next-lesson-btn"
+          rel="next"
+          data-has-quiz={hasQuiz?.toString() ?? "false"}
+          data-chapter-slug={chapterSlug ?? ""}
+          data-lesson-slug={lessonSlug ?? ""}
+        >
+          <span>Next</span>
+          <strong>{nextLesson.title}</strong>
           <svg
             class="nav-icon"
             viewBox="0 0 24 24"
@@ -57,44 +65,124 @@ const { prevLesson, nextLesson } = Astro.props;
           </svg>
         </a>
       ) : (
-        <div />
+        <span class="empty-link" />
       )
     }
   </nav>
 </footer>
 
-<style>
-  .d3-footer {
-    padding: var(--space-2xs);
+<script>
+  import { courseProgressManager } from "@utils/courseProgress";
+
+  function setupNextButtonListener() {
+    const nextBtn = document.getElementById("next-lesson-btn");
+    if (!nextBtn) return;
+
+    // Clone to remove old listeners from Astro's view transitions
+    const newBtn = nextBtn.cloneNode(true) as HTMLAnchorElement;
+    nextBtn.parentNode?.replaceChild(newBtn, nextBtn);
+
+    newBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      console.log("[Footer] Next button clicked.");
+
+      const hasQuiz = newBtn.dataset.hasQuiz === "true";
+      const chapterSlug = newBtn.dataset.chapterSlug;
+      const lessonSlug = newBtn.dataset.lessonSlug;
+      const href = newBtn.href;
+
+      if (!chapterSlug || !lessonSlug) {
+        console.error("[Footer] Missing slugs, navigating anyway.");
+        window.location.href = href;
+        return;
+      }
+
+      if (hasQuiz) {
+        // Access the global variable set by [...slug].astro
+        const percentage = (window as any).latestQuizPercentage;
+        console.log(`[Footer] Quiz lesson. Score: ${percentage}`);
+
+        if (percentage !== null && percentage >= 70) {
+          console.log("[Footer] Marking COMPLETE.");
+          courseProgressManager.markLessonCompleted(chapterSlug, lessonSlug);
+        } else {
+          // Mark as skipped if score is < 70 or quiz was never taken (percentage is null)
+          console.log("[Footer] Marking SKIPPED.");
+          courseProgressManager.markLessonSkipped(chapterSlug, lessonSlug);
+        }
+      } else {
+        console.log("[Footer] Non-quiz lesson. Marking COMPLETE.");
+        // Lesson without quiz, mark complete
+        courseProgressManager.markLessonCompleted(chapterSlug, lessonSlug);
+      }
+
+      // Dispatch event so sidebar can update
+      window.dispatchEvent(new CustomEvent("lesson-progress-updated"));
+
+      // Give time for storage to save
+      setTimeout(() => {
+        window.location.href = href;
+      }, 100);
+    });
   }
 
-  .lesson-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  document.addEventListener("DOMContentLoaded", setupNextButtonListener);
+  document.addEventListener("astro:page-load", setupNextButtonListener);
+</script>
+
+<style is:global>
+  .lesson-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 1400px;
     margin: 0 auto;
+    gap: var(--space-3xs);
+  }
+  .prev-link,
+  .next-link,
+  .empty-link {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-xs) var(--space-s);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
   }
 
-  .nav-link {
+  .prev-link,
+  .next-link {
+    text-decoration: none;
+  }
+  .prev-link:hover,
+  .next-link:hover {
+    background: var(--pink-10);
+    color: var(--pink-1);
+    border-color: var(--pink-1);
+  }
+  .prev-link {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .next-link {
+    text-align: right;
+    align-items: flex-end;
+  }
+  .prev-link span,
+  .next-link span {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
-    gap: var(--space-2xs);
-    padding: var(--space-s);
-    text-decoration: underline;
-    transition: all 0.2s ease;
-    max-width: 300px;
+    gap: 0.5rem;
   }
-
-  .nav-link:hover {
-    transform: translateY(-6px);
+  .prev-link strong,
+  .next-link strong {
+    font-size: 1.1rem;
+    font-weight: 500;
   }
-
-  .nav-link.prev {
-    margin-right: auto;
-  }
-
-  .nav-link.next {
-    margin-left: auto;
+  .prev-link:hover strong,
+  .next-link:hover strong {
+    color: var(--primary);
   }
 
   .nav-icon {
@@ -102,29 +190,12 @@ const { prevLesson, nextLesson } = Astro.props;
     height: 24px;
     flex-shrink: 0;
   }
-
-  .nav-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3xs);
-  }
-
-  .nav-label {
-    font-size: 0.875rem;
-    opacity: 0.7;
-  }
-
-  .nav-title {
-    font-weight: 500;
-  }
-
-  .next .nav-content {
-    text-align: right;
-  }
-
-  @media print {
-    .d3-footer {
-      display: none;
+  @media (max-width: 640px) {
+    .lesson-nav {
+      grid-template-columns: 1fr;
+    }
+    .next-link {
+      border-top: 1px dashed var(--border);
     }
   }
 </style>

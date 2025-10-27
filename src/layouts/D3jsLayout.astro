@@ -1,8 +1,8 @@
 ---
-import BaseLayout from "./BaseLayout.astro";
-import D3Header from "../components/d3/D3Header.astro";
-import D3Footer from "../components/d3/D3Footer.astro";
-import { getCourseStructure } from "../utils/courseUtils";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import D3Header from "@components/d3/D3Header.astro";
+import D3Footer from "@components/d3/D3Footer.astro";
+import { getCourseStructure } from "@utils/courseUtils";
 
 export interface Props {
   title: string;
@@ -10,6 +10,7 @@ export interface Props {
   image?: string;
   chapterSlug: string;
   lessonSlug: string;
+  hasQuiz: boolean; // Added this prop
   prevLesson?: { href: string; title: string } | null;
   nextLesson?: { href: string; title: string } | null;
 }
@@ -20,6 +21,7 @@ const {
   image,
   chapterSlug,
   lessonSlug,
+  hasQuiz, // Got the new prop
   prevLesson,
   nextLesson,
 } = Astro.props;
@@ -29,6 +31,7 @@ const structure = await getCourseStructure();
 
 <link rel="stylesheet" href="/prism.css" />
 <BaseLayout title={title} description={description} image={image}>
+  <div class="page-glow"></div>
   <D3Header
     chapterSlug={chapterSlug}
     lessonSlug={lessonSlug}
@@ -37,7 +40,14 @@ const structure = await getCourseStructure();
   <main class="d3-course-content">
     <slot />
   </main>
-  <D3Footer prevLesson={prevLesson} nextLesson={nextLesson} />
+  <!-- Pass new props to the footer -->
+  <D3Footer
+    prevLesson={prevLesson}
+    nextLesson={nextLesson}
+    hasQuiz={hasQuiz}
+    chapterSlug={chapterSlug}
+    lessonSlug={lessonSlug}
+  />
   <style is:global>
     .d3-course-content {
       min-height: calc(100vh - 120px);

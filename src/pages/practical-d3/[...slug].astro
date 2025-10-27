@@ -1,8 +1,8 @@
 ---
 import { getCollection } from "astro:content";
-import D3JSLayout from "../../layouts/D3jsLayout.astro";
-import TableOfContents from "../../components/TableOfContents.astro";
-import { getLessonNavigation } from "../../utils/courseUtils";
+import D3JSLayout from "@layouts/D3jsLayout.astro";
+import TableOfContents from "@components/TableOfContents.astro";
+import { getLessonNavigation } from "@utils/courseUtils";
 
 export async function getStaticPaths() {
   const lessons = await getCollection("practical-d3");
@@ -25,6 +25,7 @@ const layoutProps = {
   lessonSlug: lesson.slug,
   prevLesson: navigation.prev,
   nextLesson: navigation.next,
+  hasQuiz: hasQuiz, // Pass hasQuiz to the layout
 };
 
 // Format dates for display
@@ -71,28 +72,8 @@ const formatDate = (date: Date) => {
         <Content />
       </main>
 
-      {/* Auto-completion section for lessons without quiz */}
-      {
-        !hasQuiz && navigation.next && (
-          <footer class="lesson-completion" id="lesson-completion">
-            <div class="completion-message">
-              <h2>Ready to continue?</h2>
-              <p>
-                Click below to mark this lesson as complete and move to the next
-                one.
-              </p>
-            </div>
-            <a
-              href={navigation.next.href}
-              class="complete-btn"
-              id="mark-complete-btn"
-              rel="next"
-            >
-              Mark Complete & Continue
-            </a>
-          </footer>
-        )
-      }
+      <!-- This div will show quiz results -->
+      <div id="lesson-completion-status" class="lesson-completion"></div>
 
       {
         lesson.data.updatedDate && (
@@ -117,8 +98,12 @@ const formatDate = (date: Date) => {
 <script>
   import { courseProgressManager } from "../../utils/courseProgress";
 
+  // Store quiz score globally for the footer script
+  (window as any).latestQuizPercentage = null;
+
   function initializeLessonProgress() {
     console.log("[Lesson Progress] Initializing...");
+    (window as any).latestQuizPercentage = null; // Reset on each load
 
     const lessonLayout = document.querySelector(".lesson-layout");
     if (!lessonLayout) {
@@ -130,61 +115,12 @@ const formatDate = (date: Date) => {
     const chapterSlug = lessonLayout.getAttribute("data-chapter-slug");
     const hasQuiz = lessonLayout.getAttribute("data-has-quiz") === "true";
 
-    console.log(`[Lesson Progress] Initializing lesson:
-      - Chapter: ${chapterSlug}
-      - Lesson: ${lessonSlug}
-      - Has Quiz: ${hasQuiz}`);
-
     if (!lessonSlug || !chapterSlug) {
       console.error("[Lesson Progress] Missing slug or chapter. Aborting.");
       return;
     }
 
-    // Handle manual completion for lessons without quiz
-    const completeBtn = document.getElementById("mark-complete-btn");
-    if (completeBtn) {
-      console.log("[Lesson Progress] 'Mark Complete' button found.");
-
-      // Remove any existing listeners
-      const newBtn = completeBtn.cloneNode(true) as HTMLElement;
-      completeBtn.parentNode?.replaceChild(newBtn, completeBtn);
-
-      newBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        console.log("[Lesson Progress] 'Mark Complete' button clicked.");
-        courseProgressManager.markLessonCompleted(chapterSlug, lessonSlug);
-
-        setTimeout(() => {
-          window.location.href = newBtn.getAttribute("href") || "/";
-        }, 100);
-      });
-    }
-
-    // Auto-mark complete on scroll (for lessons without quiz)
-    if (!hasQuiz) {
-      console.log("[Lesson Progress] Setting up auto-completion on scroll.");
-      let hasReachedBottom = false;
-
-      const checkScrollPosition = () => {
-        if (hasReachedBottom) return;
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const documentHeight = document.documentElement.scrollHeight;
-
-        if (scrollPosition >= documentHeight - 100) {
-          hasReachedBottom = true;
-          console.log(
-            "[Lesson Progress] Scrolled to bottom. Marking complete."
-          );
-          courseProgressManager.markLessonCompleted(chapterSlug, lessonSlug);
-          window.dispatchEvent(new CustomEvent("lesson-progress-updated"));
-        }
-      };
-
-      window.addEventListener("scroll", checkScrollPosition);
-      setTimeout(checkScrollPosition, 1000);
-    }
-
-    // Listen for quiz completion
+    // Listen for quiz completion to store score and show message
     const quizListener = ((e: CustomEvent) => {
       console.log(
         "[Lesson Progress] 'quiz-completed' event received!",
@@ -192,43 +128,43 @@ const formatDate = (date: Date) => {
       );
       const { passed, percentage } = e.detail;
 
-      if (passed) {
-        console.log(
-          `[Lesson Progress] Quiz PASSED (>= 70%). Marking lesson complete.`
-        );
-        courseProgressManager.markLessonCompleted(chapterSlug, lessonSlug);
+      // Store percentage for the "Next" button script
+      (window as any).latestQuizPercentage = percentage;
 
-        const completionEl = document.getElementById("lesson-completion");
-        if (completionEl) {
-          console.log("[Lesson Progress] Displaying completion message.");
+      // Show a status message to the user
+      const completionEl = document.getElementById("lesson-completion-status");
+      if (completionEl) {
+        if (passed) {
           completionEl.innerHTML = `
             <div class="completion-success">
-              <h2>🎉 Lesson Completed!</h2>
-              <p>You've passed the quiz with ${percentage.toFixed(0)}%</p>
+              <h2>🎉 Quiz Passed!</h2>
+              <p>You scored ${percentage.toFixed(
+                0
+              )}%. Click "Next" to continue.</p>
+            </div>
+          `;
+        } else {
+          completionEl.innerHTML = `
+            <div class="completion-failed">
+              <h2>🤔 Try Again?</h2>
+              <p>You scored ${percentage.toFixed(
+                0
+              )}%. You need 70% to pass. You can retry the quiz, or click "Next" to skip this lesson.</p>
             </div>
           `;
         }
-        window.dispatchEvent(new CustomEvent("lesson-progress-updated"));
-      } else if (percentage < 50) {
-        console.log(
-          `[Lesson Progress] Quiz FAILED (< 50%). Marking lesson skipped.`
-        );
-        courseProgressManager.markLessonSkipped(chapterSlug, lessonSlug);
-        window.dispatchEvent(new CustomEvent("lesson-progress-updated"));
-      } else {
-        console.log(
-          `[Lesson Progress] Quiz score (${percentage}%) is between 50-69%.`
-        );
       }
+      // We no longer mark as complete here. The footer button does.
+      // We just dispatch an event so other components (like sidebar) can update.
+      window.dispatchEvent(new CustomEvent("lesson-progress-updated"));
     }) as EventListener;
 
-    // Only add quiz listeners if the page has a quiz
     if (hasQuiz) {
       console.log("[Lesson Progress] Attaching 'quiz-completed' listener.");
       window.addEventListener("quiz-completed", quizListener);
     }
 
-    // Handle user navigating away from a quiz lesson
+    // Handle user navigating away (e.g., via sidebar)
     const beforeSwapListener = () => {
       console.log("[Lesson Progress] Navigation detected.");
       if (hasQuiz) {
@@ -240,6 +176,7 @@ const formatDate = (date: Date) => {
           console.log(
             "[Lesson Progress] Lesson not complete. Marking as SKIPPED."
           );
+          // Only mark as skipped if it's not already completed
           courseProgressManager.markLessonSkipped(chapterSlug, lessonSlug);
         }
       }
@@ -392,6 +329,7 @@ const formatDate = (date: Date) => {
     padding: 0;
   }
 
+  /* Styles for the new completion status div */
   .lesson-completion {
     margin-top: 4rem;
     padding: 2rem;
@@ -399,37 +337,10 @@ const formatDate = (date: Date) => {
     border-radius: 8px;
     background: var(--surface);
     text-align: center;
-  }
-
-  .completion-message p {
-    margin-bottom: 0.5rem;
-  }
-
-  .completion-message h2 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-  }
-
-  .quiz-requirement {
-    font-size: 0.875rem;
-    opacity: 0.7;
-    margin-bottom: 1rem;
-  }
-
-  .complete-btn {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: var(--primary);
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-  }
-
-  .complete-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
+    /* Hide if empty */
+    &:empty {
+      display: none;
+    }
   }
 
   .completion-success {
@@ -437,7 +348,17 @@ const formatDate = (date: Date) => {
   }
 
   .completion-success h2 {
-    color: #22c55e;
+    color: var(--green-11);
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  .completion-failed {
+    padding: 1rem;
+  }
+
+  .completion-failed h2 {
+    color: var(--amber-11);
     margin-bottom: 0.5rem;
     font-size: 1.5rem;
   }
