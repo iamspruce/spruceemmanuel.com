@@ -3,7 +3,7 @@ interface Electron {
   angle: number;
   link: string;
   label: string;
-  speed: number; // degrees per second (e.g., 30 = full orbit in 12s)
+  speed?: number; // degrees per second (e.g., 30 = full orbit in 12s)
   direction?: "cw" | "ccw"; // optional, default "cw"
 }
 interface Ring {
