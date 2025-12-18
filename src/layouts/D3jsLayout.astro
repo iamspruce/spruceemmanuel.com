@@ -10,7 +10,7 @@ export interface Props {
   image?: string;
   chapterSlug: string;
   lessonSlug: string;
-  hasQuiz: boolean; // Added this prop
+  hasQuiz: boolean;
   prevLesson?: { href: string; title: string } | null;
   nextLesson?: { href: string; title: string } | null;
 }
@@ -21,7 +21,7 @@ const {
   image,
   chapterSlug,
   lessonSlug,
-  hasQuiz, // Got the new prop
+  hasQuiz,
   prevLesson,
   nextLesson,
 } = Astro.props;

@@ -312,8 +312,47 @@ const formatDate = (date: Date) => {
   }
 
   .lesson-content :global(p) {
-    font-size: 1.125rem;
+    font-size: calc(var(--step-0) * 0.8);
+
     margin-block-end: var(--space-m);
+  }
+
+  .lesson-content :global(blockquote) {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--code-bg);
+    border-left: 4px solid var(--border);
+    border-radius: 8px;
+    font-style: italic;
+  }
+
+  .lesson-content :global(blockquote p) {
+    margin: 0;
+  }
+
+  .lesson-content :global(blockquote footer) {
+    margin-top: var(--space-xs);
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+  .lesson-content :global(ol),
+  .lesson-content :global(ul) {
+    font-size: calc(var(--step-0) * 0.8);
+  }
+  .lesson-content :global(ul) {
+    margin-block-end: var(--space-m);
+  }
+
+  .lesson-content :global(ul li) {
+    margin-block-end: var(--space-xs);
+  }
+
+  .lesson-content :global(ol) {
+    margin-block-end: var(--space-m);
+  }
+
+  .lesson-content :global(ol li) {
+    margin-block-end: var(--space-xs);
   }
 
   .lesson-content :global(pre) {

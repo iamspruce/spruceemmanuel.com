@@ -102,62 +102,6 @@ const siteName = "Spruce Emmanuel";
       })();
       document.documentElement.className = theme;
     </script>
-
-    <style>
-      @font-face {
-        font-style: normal;
-        font-family: "HEX Franklin";
-        font-display: swap;
-        src: url(../assets/fonts/HEX_Franklin_v0.3_Variable.woff2);
-      }
-      @font-face {
-        font-style: normal;
-        font-family: "MonoLisa";
-        font-display: swap;
-        src: url(../assets/fonts/MonoLisaVariableNormal.woff2);
-      }
-      @font-face {
-        font-style: normal;
-        font-family: "Grotesk";
-        font-display: swap;
-        src: url(../assets/fonts/LabilGrotesk-Regular.woff2);
-      }
-      @font-face {
-        font-style: normal;
-        font-family: "Grotesk Bold";
-        font-display: swap;
-        src: url(../assets/fonts/LabilGrotesk-Bold.woff2);
-      }
-      body {
-        font-family: "HEX Franklin", "_font_fallback_1709097970291", sans-serif;
-      }
-      :root {
-        --font-sans: "HEX Franklin", "_font_fallback_1709097970291", sans-serif;
-        --font-grotesk: "Grotesk Bold";
-      }
-      @font-face {
-        font-family: "_font_fallback_1709097970291";
-        size-adjust: 106.95%;
-        src: local("Arial");
-        ascent-override: 88.83%;
-        descent-override: 18.7%;
-        line-gap-override: 0%;
-      }
-      code {
-        font-family: "MonoLisa", "_font_fallback_1207693654576", monospace;
-      }
-      :root {
-        --font-mono: "MonoLisa", "_font_fallback_1207693654576", monospace;
-      }
-      @font-face {
-        font-family: "_font_fallback_1207693654576";
-        size-adjust: 114.37%;
-        src: local("Courier New");
-        ascent-override: 92.68%;
-        descent-override: 27.98%;
-        line-gap-override: 0%;
-      }
-    </style>
   </head>
   <body>
     <slot />
