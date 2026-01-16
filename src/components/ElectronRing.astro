@@ -1,5 +1,4 @@
 ---
-// --- (Your Astro frontmatter remains unchanged) ---
 interface Electron {
   angle: number;
   link: string;
@@ -77,7 +76,7 @@ const ORBIT_DRAW_DURATION = 3;
     el: HTMLElement;
     rx: number;
     ry: number;
-    speed: number; // Now in degrees per SECOND
+    speed: number;
     angle: number;
   }
 
@@ -86,6 +85,11 @@ const ORBIT_DRAW_DURATION = 3;
     let animationId: number | null = null;
     let lastTime = performance.now();
     let scale = 1;
+    let isVisible = !document.hidden;
+
+    // Pre-calculate frequently used values
+    const PI_180 = Math.PI / 180;
+    const orbits = document.querySelectorAll(".orbit");
 
     function calculateScale() {
       const width = window.innerWidth;
@@ -98,17 +102,19 @@ const ORBIT_DRAW_DURATION = 3;
     function handleResize() {
       scale = calculateScale();
 
-      document.querySelectorAll(".orbit").forEach((orbit) => {
-        (orbit as HTMLElement).style.setProperty(
-          "--orbit-scale",
-          scale.toString()
-        );
+      // Batch DOM updates
+      requestAnimationFrame(() => {
+        orbits.forEach((orbit) => {
+          (orbit as HTMLElement).style.setProperty(
+            "--orbit-scale",
+            scale.toString()
+          );
+        });
+        electronsToAnimate.forEach(updatePosition);
       });
-
-      // Recalculate positions *without* scale, letting CSS handle it
-      electronsToAnimate.forEach(updatePosition);
     }
 
+    // Initialize electrons
     document.querySelectorAll(".electron").forEach((el) => {
       const e = el as HTMLElement;
       const orbit = e.closest(".orbit") as HTMLElement;
@@ -116,36 +122,34 @@ const ORBIT_DRAW_DURATION = 3;
 
       const rx = parseFloat(orbit.dataset.rx ?? "0");
       const ry = parseFloat(orbit.dataset.ry ?? "0");
-      let angle = parseFloat(e.dataset.initialAngle ?? "0");
-
+      const angle = parseFloat(e.dataset.initialAngle ?? "0");
       const speedPerFrame = parseFloat(e.dataset.speed ?? "0");
-      const speed = speedPerFrame * 60; // deg/sec
+      const speed = speedPerFrame * 60;
 
       electronsToAnimate.push({ el: e, rx, ry, speed, angle });
     });
 
-    // Optimized position update with responsive scaling
+    // Optimized position update using transform instead of CSS variables
     function updatePosition(e: ElectronAnimation) {
-      const rad = (e.angle * Math.PI) / 180;
-
-      /* === THIS IS THE FIX ===
-         We remove '* scale' because the parent .orbit element
-         is *already* being scaled by CSS.
-      */
+      const rad = e.angle * PI_180;
       const x = e.rx * Math.cos(rad);
       const y = e.ry * Math.sin(rad);
 
-      e.el.style.setProperty("--electron-x", `calc(-50% + ${x}px)`);
-      e.el.style.setProperty("--electron-y", `calc(-50% + ${y}px)`);
+      // Use transform for better performance (single composite operation)
+      e.el.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
     }
 
     function animate(currentTime: number) {
+      if (!isVisible) return;
+
       const deltaTime = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
+      // Batch all DOM updates
       electronsToAnimate.forEach((e) => {
         e.angle += e.speed * deltaTime;
 
+        // Normalize angle more efficiently
         if (e.angle >= 360) e.angle -= 360;
         else if (e.angle < 0) e.angle += 360;
 
@@ -155,30 +159,35 @@ const ORBIT_DRAW_DURATION = 3;
       animationId = requestAnimationFrame(animate);
     }
 
-    // Initialize scale
+    // Initialize
     scale = calculateScale();
-
-    document.querySelectorAll(".orbit").forEach((orbit) => {
+    orbits.forEach((orbit) => {
       (orbit as HTMLElement).style.setProperty(
         "--orbit-scale",
         scale.toString()
       );
     });
-
-    // Run updatePosition once on init to set starting positions correctly
     electronsToAnimate.forEach(updatePosition);
 
     // Start animation
     lastTime = performance.now();
     animationId = requestAnimationFrame(animate);
 
+    // Debounced resize handler
     let resizeTimeout: number;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = window.setTimeout(handleResize, 150);
-    });
+    window.addEventListener(
+      "resize",
+      () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = window.setTimeout(handleResize, 150);
+      },
+      { passive: true }
+    );
 
+    // Pause animation when tab is hidden
     document.addEventListener("visibilitychange", () => {
+      isVisible = !document.hidden;
+
       if (document.hidden) {
         if (animationId) cancelAnimationFrame(animationId);
       } else {
@@ -196,7 +205,8 @@ const ORBIT_DRAW_DURATION = 3;
     justify-content: center;
     align-items: center;
     min-height: 300px;
-    transform: translateZ(0); /* Promotes to its own layer */
+    transform: translateZ(0);
+    /* contain: layout style paint; */
   }
 
   @media (max-width: 1024px) {
@@ -237,8 +247,9 @@ const ORBIT_DRAW_DURATION = 3;
     height: var(--orbit-height);
     transform: translate(-50%, -50%) rotate(var(--orbit-rotation))
       scale(var(--orbit-scale, 1));
-    will-change: auto;
+    will-change: transform;
     transition: transform 0.3s ease;
+    contain: layout style paint;
   }
 
   .orbit svg {
@@ -280,23 +291,16 @@ const ORBIT_DRAW_DURATION = 3;
       0 4px 8px rgba(0, 0, 0, 0.3);
     opacity: 0;
     z-index: 15;
-
-    /* Using individual properties */
-    translate: var(--electron-x, -50%) var(--electron-y, -50%);
-    scale: 1;
-
-    will-change: translate, scale, box-shadow;
-
-    /* Only transition scale and box-shadow */
+    will-change: transform;
     transition:
       scale 0.3s ease,
       box-shadow 0.3s ease;
-
     animation:
       fadeInElectron 0.5s ease-out var(--electron-fade-delay) forwards,
       pulseElectron 2.5s infinite ease-in-out var(--electron-fade-delay);
     backface-visibility: hidden;
-    perspective: 1000px;
+    transform-origin: center center;
+    contain: layout style paint;
   }
 
   @keyframes fadeInElectron {
@@ -320,7 +324,7 @@ const ORBIT_DRAW_DURATION = 3;
   }
 
   .electron:hover {
-    scale: 1.5; /* Only change scale */
+    scale: 1.5;
     z-index: 100;
     box-shadow:
       0 0 25px var(--orbit-color),
@@ -329,7 +333,7 @@ const ORBIT_DRAW_DURATION = 3;
   }
 
   .electron:active {
-    scale: 1.2; /* Only change scale */
+    scale: 1.2;
     animation-play-state: paused;
   }
 

@@ -42,6 +42,7 @@ const courseStructure = await getCourseStructure();
   lessonSlug=""
   hasQuiz={false}
 >
+  <div class="page-glow"></div>
   <section>
     <header>
       <hgroup>
@@ -117,67 +118,52 @@ const courseStructure = await getCourseStructure();
 
     <div class="outline-wrapper">
       <button class="toggle-btn" id="toggleOutline" aria-expanded="false">
-        View The Course Outline
-        <!-- collapsed icon (default) -->
-        <svg
-          viewBox="0 0 24 24"
-          class="icon-collapsed"
-          width="20"
-          height="20"
-          xmlns="http://www.w3.org/2000/svg"
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-        >
-          <path
-            d="M23.245 4l-11.245 14.374-11.219-14.374-.781.619 12 15.381 12-15.391-.755-.609z"
-          ></path>
-        </svg>
-
-        <!-- expanded icon (shown when aria-expanded="true") -->
-        <svg
-          viewBox="0 0 24 24"
-          class="icon-expanded"
-          width="20"
-          height="20"
-          xmlns="http://www.w3.org/2000/svg"
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-        >
-          <path
-            d="M23.245 20l-11.245-14.374-11.219 14.374-.781-.619 12-15.381 12 15.391-.755.609z"
-          ></path>
-        </svg>
+        <span class="btn-text">View Course Outline</span>
+        <span class="icon-wrapper">
+          <svg
+            viewBox="0 0 24 24"
+            class="icon-arrow"
+            width="20"
+            height="20"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </span>
       </button>
 
       <div class="outline-content" id="outlineContent">
-        <table>
-          <thead>
-            <tr>
-              <th>Chapter</th>
-              <th>Lessons</th>
-            </tr>
-          </thead>
-          <tbody>
+        <div class="outline-inner">
+          <div class="outline-grid">
             {
-              courseStructure.map((chapter) => (
-                <tr>
-                  <td class="chapter-cell">
-                    <strong>{chapter.title}</strong>
-                  </td>
-                  <td class="lessons-cell">
-                    <ul>
-                      {chapter.lessons.map((lesson) => (
-                        <li>
-                          <a href={lesson.href}>{lesson.title}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                </tr>
+              courseStructure.map((chapter, index) => (
+                <article class="chapter-card">
+                  <header class="chapter-header">
+                    <span class="chapter-number">
+                      {(index + 1).toString().padStart(2, "0")}
+                    </span>
+                    <h3>{chapter.title}</h3>
+                  </header>
+                  <ul class="lesson-list">
+                    {chapter.lessons.map((lesson) => (
+                      <li>
+                        <a href={lesson.href}>
+                          <span class="icon-dot" />
+                          {lesson.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
               ))
             }
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -305,7 +291,21 @@ const courseStructure = await getCourseStructure();
     color: var(--gray-11);
   }
 
-  /* Outline wrapper - contains button and expanding content */
+  /* Local Design System for Outline */
+  .outline-wrapper {
+    --surface-1: var(--gray-1);
+    --surface-2: var(--gray-3);
+    --surface-3: var(--gray-4);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius-m: 12px;
+    --radius-s: 8px;
+  }
+
+  /* Outline wrapper */
   .outline-wrapper {
     width: 100%;
     max-width: 1200px;
@@ -315,143 +315,139 @@ const courseStructure = await getCourseStructure();
     position: relative;
   }
 
-  /* Toggle button */
+  /* Modern Toggle button */
   .toggle-btn {
-    padding: var(--space-3xs) var(--space-m);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-2xs) var(--space-xs);
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--gray-12);
-    background: var(--gray-6);
-    border: none;
-    border-radius: var(--radius-xs);
+    background: var(--surface-2);
+    border: 1px solid var(--gray-6);
+    border-radius: var(--radius-s);
     cursor: pointer;
-    box-shadow: var(--shadow-m);
-    transition: box-shadow 0.3s ease;
-    position: relative;
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3xs);
-  }
-
-  .toggle-btn::before,
-  .toggle-btn::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 2px;
-    background: linear-gradient(90deg, var(--gray-6), var(--gray-7));
-    width: 0;
-    transition: width 0.6s ease-out;
-  }
-
-  .toggle-btn::before {
-    right: 100%;
-    margin-right: 2px;
-  }
-
-  .toggle-btn::after {
-    left: 100%;
-    margin-left: 2px;
-  }
-
-  .toggle-btn[aria-expanded="true"]::before,
-  .toggle-btn[aria-expanded="true"]::after {
-    width: 300px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 10;
   }
 
   .toggle-btn:hover {
-    box-shadow: var(--shadow-s);
+    background: var(--surface-3);
+    border-color: var(--gray-8);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
-  .toggle-btn .icon-expanded {
-    display: none;
-  }
-  .toggle-btn[aria-expanded="true"] .icon-collapsed {
-    display: none;
-  }
-  .toggle-btn[aria-expanded="true"] .icon-expanded {
-    display: inline;
-  }
-  .toggle-btn svg {
-    vertical-align: middle;
-    fill: var(--gray-12);
-    width: 16px;
-    height: 16px;
+  .toggle-btn:active {
+    transform: translateY(0);
   }
 
-  /* Outline content - the expanding table */
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s ease;
+  }
+
+  .toggle-btn[aria-expanded="true"] .icon-wrapper {
+    transform: rotate(180deg);
+  }
+
+  .toggle-btn[aria-expanded="true"] {
+    background: var(--gray-12);
+    color: var(--gray-1);
+    border-color: transparent;
+  }
+
+  .icon-arrow {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Smooth Expansion Content */
   .outline-content {
     width: 100%;
-    max-width: 918px;
     display: grid;
     grid-template-rows: 0fr;
-    transition: grid-template-rows 0.8s ease-out;
-    margin-top: calc(-1.5 * var(--space-s));
-    padding-top: var(--space-s);
+    transition:
+      grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.5s ease;
+    opacity: 0;
   }
 
   .toggle-btn[aria-expanded="true"] ~ .outline-content {
     grid-template-rows: 1fr;
+    opacity: 1;
   }
 
-  .outline-content > table {
+  .outline-inner {
     overflow: hidden;
-    display: none;
-    transition: opacity 0.5s ease-out 0.2s;
   }
 
-  .toggle-btn[aria-expanded="true"] ~ .outline-content > table {
-    display: table;
-  }
-
-  /* Table styles */
-  table {
+  /* Grid Layout for Chapters */
+  .outline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-m);
+    padding: var(--space-xs);
     width: 100%;
-    border-collapse: collapse;
-    background: var(--gray-6);
-    border-radius: 2px;
-    box-shadow: var(--shadow-m);
   }
 
-  thead {
-    border-bottom: 1px solid var(--gray-4);
+  /* Chapter Card */
+  .chapter-card {
+    background: var(--surface-1);
+    border: 1px solid var(--gray-6);
+    border-radius: var(--radius-s);
+    padding: var(--space-2xs);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      border-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
   }
 
-  th {
-    padding: var(--space-xs) var(--space-s);
-    text-align: left;
+  .chapter-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--pink-8);
+  }
+
+  .chapter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding: var(--space-xs);
+    border-bottom: 2px solid var(--gray-4);
+  }
+
+  .chapter-number {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-4);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .chapter-card:hover .chapter-number {
+    color: var(--pink-9);
+  }
+
+  .chapter-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
     font-weight: 600;
-    font-size: 1.1rem;
     color: var(--gray-12);
-    border-right: 1px solid var(--gray-4);
+    line-height: 1.3;
   }
 
-  td {
-    padding: var(--space-s);
-    border-right: 1px solid var(--gray-6);
-    vertical-align: top;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  .chapter-cell {
-    width: 30%;
-    font-size: 1rem;
-  }
-
-  .chapter-cell strong {
-    color: var(--gray-12);
-  }
-
-  .lessons-cell {
-    width: 70%;
-  }
-
-  .lessons-cell ul {
+  /* Lessons List */
+  .lesson-list {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -460,47 +456,47 @@ const courseStructure = await getCourseStructure();
     gap: var(--space-2xs);
   }
 
-  .lessons-cell li {
-    padding: var(--space-2xs) var(--space-2xs);
-    border-radius: var(--radius-xs);
+  .lesson-list li {
+    width: 100%;
+  }
+
+  .lesson-list a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-s);
+    color: var(--gray-10);
+    text-decoration: none;
+    border-radius: var(--radius-s);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .icon-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--gray-6);
     transition: background-color 0.2s ease;
   }
 
-  .lessons-cell li:hover {
-    background-color: var(--gray-4);
-  }
-
-  .lessons-cell a {
-    color: var(--pink-11);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .lessons-cell a:hover {
+  .lesson-list a:hover {
     color: var(--gray-12);
-    text-decoration: underline;
+    background-color: var(--gray-3);
   }
 
-  @media (max-width: 700px) {
-    table {
-      font-size: 0.9rem;
+  .lesson-list a:hover .icon-dot {
+    background-color: var(--pink-9);
+    box-shadow: 0 0 8px var(--pink-9);
+  }
+
+  @media (max-width: 600px) {
+    .outline-grid {
+      grid-template-columns: 1fr;
     }
 
-    th,
-    td {
-      padding: var(--space-s) var(--space-xs);
-    }
-
-    .chapter-cell {
-      width: 35%;
-    }
-
-    .lessons-cell {
-      width: 65%;
-    }
-    .toggle-btn[aria-expanded="true"]::before,
-    .toggle-btn[aria-expanded="true"]::after {
-      width: 100px;
+    .chapter-card {
+      padding: var(--space-s);
     }
   }
 </style>

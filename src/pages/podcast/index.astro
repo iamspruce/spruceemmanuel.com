@@ -1,0 +1,128 @@
+---
+import MainLayout from "@layouts/MainSiteLayout.astro";
+
+const jsonUrl = import.meta.env.PODCAST_JSON_URL;
+
+interface Episode {
+  title: string;
+  description: string;
+  pubDate: string;
+  enclosureUrl: string;
+  guid: string;
+}
+
+let episodes: Episode[] = [];
+
+if (jsonUrl) {
+  try {
+    const res = await fetch(jsonUrl);
+    if (res.ok) {
+      episodes = await res.json();
+      episodes.sort(
+        (a: Episode, b: Episode) =>
+          new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+      );
+    }
+  } catch (error) {
+    console.error("Failed to fetch episodes:", error);
+  }
+}
+---
+
+<MainLayout
+  title="Tech Audio Blog | Spruce Emmanuel"
+  description="Listen to the latest tech articles read by AI."
+>
+  <header class="page-header">
+    <hgroup>
+      <h1 class="page-header-title">Tech Audio Blog</h1>
+      <p class="page-header-subtitle">
+        Interesting Tech articles converted to audio.
+        <br />
+        <a href="/podcast/rss.xml" class="rss-link">Subscribe to RSS Feed</a>
+      </p>
+    </hgroup>
+  </header>
+
+  <section class="episodes-section">
+    {
+      episodes.length === 0 ? (
+        <p class="no-episodes">No episodes generated yet. Check back soon!</p>
+      ) : (
+        <div class="episode-list">
+          {episodes.map((episode: Episode) => (
+            <article class="episode-card">
+              <div class="episode-date">
+                {new Date(episode.pubDate).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+              <h2 class="episode-title">{episode.title}</h2>
+              <p class="episode-description">{episode.description}</p>
+              <div class="audio-player">
+                <audio controls src={episode.enclosureUrl}>
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </article>
+          ))}
+        </div>
+      )
+    }
+  </section>
+</MainLayout>
+
+<style>
+  .page-header {
+    margin-block-end: var(--space-xl);
+  }
+  .rss-link {
+    display: inline-block;
+    margin-block-start: var(--space-xs);
+    color: var(--primary, #0070f3);
+    text-decoration: underline;
+    font-size: var(--step-0);
+  }
+  .episode-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+  .episode-card {
+    padding: var(--space-m);
+    background: var(--gray-2, #f4f4f4);
+    border-radius: var(--radius-m, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+  .episode-date {
+    color: var(--gray-11, #666);
+    font-size: var(--step--1);
+  }
+  .episode-title {
+    font-size: var(--step-2);
+    margin: 0;
+  }
+  .episode-description {
+    font-size: var(--step-0);
+    color: var(--gray-12);
+  }
+  .audio-player {
+    margin-block-start: var(--space-s);
+  }
+  audio {
+    width: 100%;
+  }
+  .no-episodes {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--gray-11);
+  }
+
+  :global(.dark-theme) .episode-card {
+    background: var(--gray-3, #222);
+  }
+</style>
