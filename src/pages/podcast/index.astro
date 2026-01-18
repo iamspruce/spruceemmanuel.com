@@ -1,5 +1,6 @@
 ---
 import MainLayout from "@layouts/MainSiteLayout.astro";
+import AudioPlayer from "@components/AudioPlayer.tsx";
 
 const jsonUrl = import.meta.env.PODCAST_JSON_URL;
 
@@ -20,7 +21,7 @@ if (jsonUrl) {
       episodes = await res.json();
       episodes.sort(
         (a: Episode, b: Episode) =>
-          new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+          new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
       );
     }
   } catch (error) {
@@ -30,21 +31,23 @@ if (jsonUrl) {
 ---
 
 <MainLayout
-  title="Tech Audio Blog | Spruce Emmanuel"
+  title="Audio Blog | Spruce Emmanuel"
   description="Listen to the latest tech articles read by AI."
 >
-  <header class="page-header">
+  <header class="page-header center">
     <hgroup>
-      <h1 class="page-header-title">Tech Audio Blog</h1>
+      <h1 class="page-header-title">Audio Blog</h1>
       <p class="page-header-subtitle">
-        Interesting Tech articles converted to audio.
-        <br />
-        <a href="/podcast/rss.xml" class="rss-link">Subscribe to RSS Feed</a>
+        A curated collection of articles from across the web—covering
+        technology, design, and everything in between. I handpick pieces that
+        spark my curiosity, then read them aloud(with AI) for you to enjoy on
+        the go.
       </p>
+      <a href="/podcast/rss.xml" class="rss-button">Subscribe to RSS Feed</a>
     </hgroup>
   </header>
 
-  <section class="episodes-section">
+  <section class="episodes-section center">
     {
       episodes.length === 0 ? (
         <p class="no-episodes">No episodes generated yet. Check back soon!</p>
@@ -61,10 +64,12 @@ if (jsonUrl) {
               </div>
               <h2 class="episode-title">{episode.title}</h2>
               <p class="episode-description">{episode.description}</p>
-              <div class="audio-player">
-                <audio controls src={episode.enclosureUrl}>
-                  Your browser does not support the audio element.
-                </audio>
+              <div class="audio-player-wrapper">
+                <AudioPlayer
+                  src={episode.enclosureUrl}
+                  id={episode.guid}
+                  client:load
+                />
               </div>
             </article>
           ))}
@@ -77,52 +82,95 @@ if (jsonUrl) {
 <style>
   .page-header {
     margin-block-end: var(--space-xl);
+    text-align: center;
   }
-  .rss-link {
-    display: inline-block;
-    margin-block-start: var(--space-xs);
-    color: var(--primary, #0070f3);
-    text-decoration: underline;
-    font-size: var(--step-0);
+
+  .page-header-subtitle {
+    max-width: 65ch;
+    margin-inline: auto;
   }
+
+  .rss-button {
+    display: block;
+    width: 100%;
+    margin-block-start: var(--space-l);
+    padding: var(--space-m);
+    background-color: var(--mauve-12);
+    color: var(--mauve-1);
+    font-size: var(--step-1);
+    font-weight: var(--font-weight-bold);
+    text-align: center;
+    border-radius: var(--radius-m);
+    text-decoration: none;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      transform 0.2s ease;
+    border: 1px solid var(--mauve-3);
+    box-shadow: var(--shadow-s);
+  }
+
+  .rss-button:hover {
+    background-color: var(--pink-9);
+    color: white;
+    text-decoration: none;
+    border-color: var(--pink-9);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-m);
+  }
+
+  /* Dark mode adjustment for the button border to look good */
+  :global(.dark-theme) .rss-button {
+    border-color: var(--mauve-4);
+  }
+  :global(.dark-theme) .rss-button:hover {
+    border-color: var(--pink-9);
+  }
+
   .episode-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-m);
+    gap: var(--space-l);
   }
   .episode-card {
-    padding: var(--space-m);
-    background: var(--gray-2, #f4f4f4);
-    border-radius: var(--radius-m, 8px);
+    padding: var(--space-m-l);
+    background: var(--mauve-2, #f4f4f4);
+    border-radius: var(--radius-l, 16px);
     display: flex;
     flex-direction: column;
-    gap: var(--space-3xs);
+    gap: var(--space-s);
+    transition: transform 0.2s ease;
   }
+
+  .episode-card:hover {
+    transform: scale(1.01);
+  }
+
   .episode-date {
-    color: var(--gray-11, #666);
+    color: var(--mauve-11, #666);
     font-size: var(--step--1);
+    font-weight: var(--font-weight-medium);
   }
   .episode-title {
-    font-size: var(--step-2);
+    font-size: var(--step-3);
     margin: 0;
+    line-height: var(--line-height-tight);
   }
   .episode-description {
     font-size: var(--step-0);
-    color: var(--gray-12);
+    color: var(--mauve-11);
+    line-height: var(--line-height-body);
   }
-  .audio-player {
+  .audio-player-wrapper {
     margin-block-start: var(--space-s);
-  }
-  audio {
-    width: 100%;
   }
   .no-episodes {
     text-align: center;
     padding: var(--space-xl);
-    color: var(--gray-11);
+    color: var(--mauve-11);
   }
 
   :global(.dark-theme) .episode-card {
-    background: var(--gray-3, #222);
+    background: var(--mauve-3, #222);
   }
 </style>

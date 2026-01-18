@@ -121,8 +121,7 @@ function generateSelectControl(config: SelectControlConfig): string {
   const optionsHtml = options
     .map(
       (opt) =>
-        `<option value="${opt.value}" ${
-          opt.value === value ? "selected" : ""
+        `<option value="${opt.value}" ${opt.value === value ? "selected" : ""
         }>${opt.label}</option>`
     )
     .join("");
@@ -277,7 +276,7 @@ export function buildControls(config: ControlGridConfig): string {
       .range-label {
         font-size: var(--step--1);
         font-weight: var(--font-weight-medium);
-        color: var(--gray-12);
+        color: var(--mauve-12);
       }
 
       .range-value {
@@ -295,13 +294,13 @@ export function buildControls(config: ControlGridConfig): string {
         width: 100%;
         height: 6px;
         border-radius: var(--radius-full);
-        background: var(--gray-6);
+        background: var(--mauve-6);
         outline: none;
         transition: background 0.2s ease;
       }
 
       .range-input:hover {
-        background: var(--gray-7);
+        background: var(--mauve-7);
       }
 
       .range-input::-webkit-slider-thumb {
@@ -313,7 +312,7 @@ export function buildControls(config: ControlGridConfig): string {
         background: var(--pink-9);
         cursor: pointer;
         transition: all 0.2s ease;
-        border: 2px solid var(--gray-1);
+        border: 2px solid var(--mauve-1);
         box-shadow: var(--shadow-s);
       }
 
@@ -329,7 +328,7 @@ export function buildControls(config: ControlGridConfig): string {
         background: var(--pink-9);
         cursor: pointer;
         transition: all 0.2s ease;
-        border: 2px solid var(--gray-1);
+        border: 2px solid var(--mauve-1);
         box-shadow: var(--shadow-s);
       }
 
@@ -348,7 +347,7 @@ export function buildControls(config: ControlGridConfig): string {
       .color-label {
         font-size: var(--step--1);
         font-weight: var(--font-weight-medium);
-        color: var(--gray-12);
+        color: var(--mauve-12);
       }
 
       .color-input-wrapper {
@@ -360,7 +359,7 @@ export function buildControls(config: ControlGridConfig): string {
       .color-input {
         width: 60px;
         height: 40px;
-        border: 2px solid var(--gray-7);
+        border: 2px solid var(--mauve-7);
         border-radius: var(--radius-s);
         cursor: pointer;
         transition: all 0.2s ease;
@@ -390,15 +389,15 @@ export function buildControls(config: ControlGridConfig): string {
       .select-label {
         font-size: var(--step--1);
         font-weight: var(--font-weight-medium);
-        color: var(--gray-12);
+        color: var(--mauve-12);
       }
 
       .select-input {
         padding: var(--space-2xs) var(--space-xs);
         font-size: var(--step--1);
-        color: var(--gray-12);
-        background: var(--gray-2);
-        border: 2px solid var(--gray-7);
+        color: var(--mauve-12);
+        background: var(--mauve-2);
+        border: 2px solid var(--mauve-7);
         border-radius: var(--radius-s);
         cursor: pointer;
         transition: all 0.2s ease;
@@ -406,7 +405,7 @@ export function buildControls(config: ControlGridConfig): string {
 
       .select-input:hover {
         border-color: var(--pink-9);
-        background: var(--gray-3);
+        background: var(--mauve-3);
       }
 
       /* Checkbox Control */
@@ -421,9 +420,9 @@ export function buildControls(config: ControlGridConfig): string {
         height: 20px;
         cursor: pointer;
         appearance: none;
-        border: 2px solid var(--gray-7);
+        border: 2px solid var(--mauve-7);
         border-radius: var(--radius-xs);
-        background: var(--gray-2);
+        background: var(--mauve-2);
         transition: all 0.2s ease;
         position: relative;
       }
@@ -444,7 +443,7 @@ export function buildControls(config: ControlGridConfig): string {
         top: 2px;
         width: 6px;
         height: 10px;
-        border: solid var(--gray-1);
+        border: solid var(--mauve-1);
         border-width: 0 2px 2px 0;
         transform: rotate(45deg);
       }
@@ -452,7 +451,7 @@ export function buildControls(config: ControlGridConfig): string {
       .checkbox-label {
         font-size: var(--step--1);
         font-weight: var(--font-weight-medium);
-        color: var(--gray-12);
+        color: var(--mauve-12);
         cursor: pointer;
       }
 
@@ -466,7 +465,7 @@ export function buildControls(config: ControlGridConfig): string {
       .number-label {
         font-size: var(--step--1);
         font-weight: var(--font-weight-medium);
-        color: var(--gray-12);
+        color: var(--mauve-12);
       }
 
       .number-input-wrapper {
@@ -479,21 +478,21 @@ export function buildControls(config: ControlGridConfig): string {
         flex: 1;
         padding: var(--space-2xs) var(--space-xs);
         font-size: var(--step--1);
-        color: var(--gray-12);
-        background: var(--gray-2);
-        border: 2px solid var(--gray-7);
+        color: var(--mauve-12);
+        background: var(--mauve-2);
+        border: 2px solid var(--mauve-7);
         border-radius: var(--radius-s);
         transition: all 0.2s ease;
       }
 
       .number-input:hover {
         border-color: var(--pink-9);
-        background: var(--gray-3);
+        background: var(--mauve-3);
       }
 
       .number-unit {
         font-size: var(--step--1);
-        color: var(--gray-11);
+        color: var(--mauve-11);
         font-weight: var(--font-weight-medium);
       }
 
@@ -514,7 +513,7 @@ export function buildControls(config: ControlGridConfig): string {
 
       .button-primary {
         background: var(--pink-9);
-        color: var(--gray-1);
+        color: var(--mauve-1);
         border-color: var(--pink-9);
       }
 
@@ -526,13 +525,13 @@ export function buildControls(config: ControlGridConfig): string {
       }
 
       .button-secondary {
-        background: var(--gray-3);
-        color: var(--gray-12);
-        border-color: var(--gray-7);
+        background: var(--mauve-3);
+        color: var(--mauve-12);
+        border-color: var(--mauve-7);
       }
 
       .button-secondary:hover {
-        background: var(--gray-4);
+        background: var(--mauve-4);
         border-color: var(--pink-9);
         transform: translateY(-1px);
         box-shadow: var(--shadow-s);

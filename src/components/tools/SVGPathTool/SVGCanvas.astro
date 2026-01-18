@@ -333,7 +333,7 @@
 
 <style is:inline>
   :root {
-    --grid-color: var(--gray-4);
+    --grid-color: var(--mauve-4);
   }
 
   .canvas-container {
@@ -369,7 +369,7 @@
   .cmd-btn {
     position: relative;
     padding: var(--space-xs);
-    background: var(--gray-12);
+    background: var(--mauve-12);
     border: 2px solid var(--pink-6);
     border-radius: var(--radius-xs);
     cursor: pointer;
@@ -404,7 +404,7 @@
   }
 
   .dark .cmd-btn {
-    background: var(--gray-3);
+    background: var(--mauve-3);
     border-color: var(--pink-7);
   }
 
@@ -413,14 +413,14 @@
   }
 
   .dark .cmd-btn:hover {
-    background: var(--gray-4);
+    background: var(--mauve-4);
     border-color: var(--pink-9);
   }
 
   /* Command Tooltip */
   .cmd-tooltip {
     position: fixed;
-    background: var(--gray-12);
+    background: var(--mauve-12);
     color: white;
     padding: var(--space-s);
     border-radius: var(--radius-xs);
@@ -445,7 +445,7 @@
 
   .tooltip-desc {
     font-size: var(--step--2);
-    color: var(--gray-11);
+    color: var(--mauve-11);
     margin-bottom: var(--space-2xs);
     line-height: 1.5;
   }
@@ -453,7 +453,7 @@
   .tooltip-usage {
     font-family: var(--font-mono);
     font-size: var(--step--2);
-    background: var(--gray-11);
+    background: var(--mauve-11);
     padding: var(--space-3xs) var(--space-2xs);
     border-radius: var(--radius-xs);
     color: var(--pink-9);
@@ -465,8 +465,8 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-2xs) var(--space-xs);
-    background: var(--gray-2);
-    border: 1px solid var(--gray-4);
+    background: var(--mauve-2);
+    border: 1px solid var(--mauve-4);
     border-radius: var(--radius-xs);
     flex-wrap: wrap;
     gap: var(--space-xs);
@@ -474,7 +474,7 @@
 
   .canvas-label {
     font-size: var(--step--2);
-    color: var(--gray-10);
+    color: var(--mauve-10);
     font-weight: 500;
   }
 
@@ -486,21 +486,21 @@
 
   .toolbar-btn {
     padding: var(--space-3xs) var(--space-2xs);
-    background: var(--gray-3);
-    border: 1px solid var(--gray-6);
+    background: var(--mauve-3);
+    border: 1px solid var(--mauve-6);
     border-radius: var(--radius-xs);
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gray-11);
+    color: var(--mauve-11);
   }
 
   .toolbar-btn:hover {
-    background: var(--gray-4);
-    border-color: var(--gray-7);
-    color: var(--gray-12);
+    background: var(--mauve-4);
+    border-color: var(--mauve-7);
+    color: var(--mauve-12);
     transform: translateY(-1px);
   }
 
@@ -540,13 +540,13 @@
   }
 
   .toolbar-btn-primary.drawing {
-    background: var(--gray-8);
-    border-color: var(--gray-8);
+    background: var(--mauve-8);
+    border-color: var(--mauve-8);
   }
 
   .canvas-wrapper {
-    background: var(--gray-1);
-    border: 1px solid var(--gray-4);
+    background: var(--mauve-1);
+    border: 1px solid var(--mauve-4);
     border-radius: var(--radius-m);
     padding: var(--space-s);
     display: flex;
@@ -558,8 +558,8 @@
   }
 
   #main-canvas {
-    background: linear-gradient(135deg, var(--gray-1) 0%, var(--gray-2) 100%);
-    border: 2px solid var(--gray-3);
+    background: linear-gradient(135deg, var(--mauve-1) 0%, var(--mauve-2) 100%);
+    border: 2px solid var(--mauve-3);
     border-radius: var(--radius-xs);
     box-shadow: var(--shadow-m);
     max-width: 100%;
@@ -648,10 +648,10 @@
     padding: 3px var(--space-3xs);
     font-size: var(--step--1);
     font-family: var(--font-mono);
-    background: var(--gray-1);
-    border: 1px solid var(--gray-6);
+    background: var(--mauve-1);
+    border: 1px solid var(--mauve-6);
     border-radius: var(--radius-xs);
-    color: var(--gray-12);
+    color: var(--mauve-12);
     transition: all 0.2s ease;
   }
 
@@ -701,7 +701,7 @@
   }
 
   .toggle-label:hover {
-    background: var(--gray-3);
+    background: var(--mauve-3);
   }
 
   .toggle-label input[type="checkbox"] {
@@ -713,7 +713,7 @@
 
   .toggle-label span {
     font-size: var(--step--2);
-    color: var(--gray-11);
+    color: var(--mauve-11);
     font-weight: 500;
     user-select: none;
   }
@@ -726,12 +726,12 @@
   }
 
   .grid-line.major {
-    stroke: var(--gray-6);
+    stroke: var(--mauve-6);
     stroke-width: 1;
   }
 
   .grid-label {
-    fill: var(--gray-11);
+    fill: var(--mauve-11);
     font-size: 6px;
     font-family: var(--font-mono);
     font-weight: 600;
@@ -749,7 +749,7 @@
 
   .control-point {
     fill: var(--pink-9);
-    stroke: var(--gray-1);
+    stroke: var(--mauve-1);
     stroke-width: 2.5;
     cursor: move;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -771,7 +771,7 @@
 
   .control-handle {
     fill: var(--pink-9);
-    stroke: var(--gray-1);
+    stroke: var(--mauve-1);
     stroke-width: 2;
     cursor: move;
     transition: all 0.2s ease;
@@ -903,27 +903,27 @@
 
   // DOM elements
   const svg = document.getElementById(
-    "main-canvas"
+    "main-canvas",
   ) as unknown as SVGSVGElement;
   const pathEl = document.getElementById("path-1") as unknown as SVGPathElement;
 
   const gridLayer = document.getElementById(
-    "grid-layer"
+    "grid-layer",
   ) as unknown as SVGGElement;
   const gridBackground = document.getElementById(
-    "grid-background"
+    "grid-background",
   ) as unknown as SVGRectElement;
   const guidesLayer = document.getElementById(
-    "guides-layer"
+    "guides-layer",
   ) as unknown as SVGGElement;
   const pointsLayer = document.getElementById(
-    "points-layer"
+    "points-layer",
   ) as unknown as SVGGElement;
 
   const zoomLevelEl = document.getElementById("zoom-level") as HTMLInputElement;
 
   const drawingPen = document.getElementById(
-    "drawing-pen"
+    "drawing-pen",
   ) as unknown as SVGGElement;
   const tooltip = document.getElementById("cmd-tooltip") as HTMLDivElement;
 
@@ -981,7 +981,7 @@
 
   function applyHistoryState(state: HistoryState): void {
     const pathInput = document.getElementById(
-      "path-input"
+      "path-input",
     ) as HTMLTextAreaElement;
     if (pathInput) {
       pathInput.value = state.pathData;
@@ -1007,7 +1007,7 @@
 
     button.addEventListener("click", () => {
       const pathInput = document.getElementById(
-        "path-input"
+        "path-input",
       ) as HTMLTextAreaElement;
       if (pathInput) {
         const lastChar = pathInput.value.trim().slice(-1);
@@ -1043,7 +1043,7 @@
     // FIX: Moved path input logic here from the setInterval hack
     const initialPath = pathEl.getAttribute("d") || "";
     const pathInput = document.getElementById(
-      "path-input"
+      "path-input",
     ) as HTMLTextAreaElement;
 
     if (pathInput) {
@@ -1078,7 +1078,7 @@
 
   function renderGrid(): void {
     const gridToggle = document.getElementById(
-      "grid-toggle"
+      "grid-toggle",
     ) as HTMLInputElement;
     if (!gridToggle.checked) {
       gridLayer.innerHTML = "";
@@ -1102,7 +1102,7 @@
       const isMajor = x % (gridX * 2) === 0;
       const line = document.createElementNS(
         "http://www.w3.org/2000/svg",
-        "line"
+        "line",
       );
       line.setAttribute("class", isMajor ? "grid-line major" : "grid-line");
       line.setAttribute("x1", x.toString());
@@ -1113,7 +1113,7 @@
       if (isMajor) {
         const text = document.createElementNS(
           "http://www.w3.org/2000/svg",
-          "text"
+          "text",
         );
         text.setAttribute("class", "grid-label");
         text.setAttribute("x", x.toString());
@@ -1132,7 +1132,7 @@
       const isMajor = y % (gridY * 2) === 0;
       const line = document.createElementNS(
         "http://www.w3.org/2000/svg",
-        "line"
+        "line",
       );
       line.setAttribute("class", isMajor ? "grid-line major" : "grid-line");
       line.setAttribute("x1", minX.toString());
@@ -1143,7 +1143,7 @@
       if (isMajor) {
         const text = document.createElementNS(
           "http://www.w3.org/2000/svg",
-          "text"
+          "text",
         );
         text.setAttribute("class", "grid-label");
         text.setAttribute("x", (minX + 3).toString());
@@ -1160,7 +1160,7 @@
 
   function renderGuides(): void {
     const guidesToggle = document.getElementById(
-      "guides-toggle"
+      "guides-toggle",
     ) as HTMLInputElement;
     if (!guidesToggle.checked) {
       guidesLayer.innerHTML = "";
@@ -1178,11 +1178,11 @@
     commands.forEach((cmd, idx) => {
       if (cmd.type === "M" || cmd.type === "L") {
         pointsFragment.appendChild(
-          createControlPoint(cmd.x, cmd.y, idx, "point")
+          createControlPoint(cmd.x, cmd.y, idx, "point"),
         );
         if (idx > 0) {
           guidesFragment.appendChild(
-            createGuideLine(currentX, currentY, cmd.x, cmd.y)
+            createGuideLine(currentX, currentY, cmd.x, cmd.y),
           );
         }
         currentX = cmd.x;
@@ -1191,57 +1191,57 @@
         pointsFragment.appendChild(createControlHandle(cmd.x1, cmd.y1, idx, 0));
         pointsFragment.appendChild(createControlHandle(cmd.x2, cmd.y2, idx, 1));
         pointsFragment.appendChild(
-          createControlPoint(cmd.x, cmd.y, idx, "point")
+          createControlPoint(cmd.x, cmd.y, idx, "point"),
         );
         guidesFragment.appendChild(
-          createGuideLine(currentX, currentY, cmd.x1, cmd.y1)
+          createGuideLine(currentX, currentY, cmd.x1, cmd.y1),
         );
         guidesFragment.appendChild(
-          createGuideLine(cmd.x2, cmd.y2, cmd.x, cmd.y)
+          createGuideLine(cmd.x2, cmd.y2, cmd.x, cmd.y),
         );
         currentX = cmd.x;
         currentY = cmd.y;
       } else if (cmd.type === "Q") {
         pointsFragment.appendChild(createControlHandle(cmd.x1, cmd.y1, idx, 0));
         pointsFragment.appendChild(
-          createControlPoint(cmd.x, cmd.y, idx, "point")
+          createControlPoint(cmd.x, cmd.y, idx, "point"),
         );
         guidesFragment.appendChild(
-          createGuideLine(currentX, currentY, cmd.x1, cmd.y1)
+          createGuideLine(currentX, currentY, cmd.x1, cmd.y1),
         );
         guidesFragment.appendChild(
-          createGuideLine(cmd.x1, cmd.y1, cmd.x, cmd.y)
+          createGuideLine(cmd.x1, cmd.y1, cmd.x, cmd.y),
         );
         currentX = cmd.x;
         currentY = cmd.y;
       } else if (cmd.type === "S") {
         pointsFragment.appendChild(createControlHandle(cmd.x1, cmd.y1, idx, 0));
         pointsFragment.appendChild(
-          createControlPoint(cmd.x, cmd.y, idx, "point")
+          createControlPoint(cmd.x, cmd.y, idx, "point"),
         );
         guidesFragment.appendChild(
-          createGuideLine(cmd.x1, cmd.y1, cmd.x, cmd.y)
+          createGuideLine(cmd.x1, cmd.y1, cmd.x, cmd.y),
         );
         currentX = cmd.x;
         currentY = cmd.y;
       } else if (cmd.type === "T" || cmd.type === "H" || cmd.type === "V") {
         pointsFragment.appendChild(
-          createControlPoint(cmd.x, cmd.y, idx, "point")
+          createControlPoint(cmd.x, cmd.y, idx, "point"),
         );
         if (idx > 0) {
           guidesFragment.appendChild(
-            createGuideLine(currentX, currentY, cmd.x, cmd.y)
+            createGuideLine(currentX, currentY, cmd.x, cmd.y),
           );
         }
         currentX = cmd.x;
         currentY = cmd.y;
       } else if (cmd.type === "A") {
         pointsFragment.appendChild(
-          createControlPoint(cmd.x, cmd.y, idx, "point")
+          createControlPoint(cmd.x, cmd.y, idx, "point"),
         );
         if (idx > 0) {
           guidesFragment.appendChild(
-            createGuideLine(currentX, currentY, cmd.x, cmd.y)
+            createGuideLine(currentX, currentY, cmd.x, cmd.y),
           );
         }
         currentX = cmd.x;
@@ -1258,7 +1258,7 @@
     x1: number,
     y1: number,
     x2: number,
-    y2: number
+    y2: number,
   ): SVGLineElement {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("class", "guide-line");
@@ -1273,11 +1273,11 @@
     x: number,
     y: number,
     cmdIndex: number,
-    type: string
+    type: string,
   ): SVGCircleElement {
     const circle = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "circle"
+      "circle",
     );
     circle.setAttribute("class", "control-point");
     circle.setAttribute("cx", x.toString());
@@ -1298,7 +1298,7 @@
     x: number,
     y: number,
     cmdIndex: number,
-    handleIndex: number
+    handleIndex: number,
   ): SVGRectElement {
     const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     rect.setAttribute("class", "control-handle");
@@ -1424,7 +1424,7 @@
 
     pathEl.setAttribute("d", pathData.trim());
     const pathInput = document.getElementById(
-      "path-input"
+      "path-input",
     ) as HTMLTextAreaElement;
     if (pathInput) {
       pathInput.value = pathData.trim();
@@ -1452,7 +1452,7 @@
     isDrawing = true;
 
     const drawBtn = document.getElementById(
-      "draw-path-btn"
+      "draw-path-btn",
     ) as HTMLButtonElement;
     drawBtn.classList.add("drawing");
     drawBtn.innerHTML =
@@ -1491,7 +1491,7 @@
         const point = pathEl.getPointAtLength(progress * currentPathLength);
         drawingPen.setAttribute(
           "transform",
-          `translate(${point.x}, ${point.y})`
+          `translate(${point.x}, ${point.y})`,
         );
         if (progress < 1) {
           drawAnimationFrame = requestAnimationFrame(animate);
@@ -1510,7 +1510,7 @@
   function stopDrawAnimation(): void {
     isDrawing = false;
     const drawBtn = document.getElementById(
-      "draw-path-btn"
+      "draw-path-btn",
     ) as HTMLButtonElement;
     drawBtn.classList.remove("drawing");
     drawBtn.innerHTML =
@@ -1660,11 +1660,11 @@
       // FIX: Set .value on the input, not .textContent
       zoomLevelEl.value = `${Math.round(zoomLevel * 100)}%`;
     },
-    { passive: false }
+    { passive: false },
   );
 
   const viewboxInput = document.getElementById(
-    "viewbox-input"
+    "viewbox-input",
   ) as HTMLInputElement;
   viewboxInput.addEventListener("change", () => {
     svg.setAttribute("viewBox", viewboxInput.value);
@@ -1673,7 +1673,7 @@
   });
 
   const canvasSizeInput = document.getElementById(
-    "canvas-size-input"
+    "canvas-size-input",
   ) as HTMLInputElement;
   canvasSizeInput.addEventListener("change", () => {
     const size = canvasSizeInput.value.replace(/\s/g, "").split("×");
@@ -1720,7 +1720,7 @@
     if (confirm("Clear the current path?")) {
       const newPath = "";
       const pathInput = document.getElementById(
-        "path-input"
+        "path-input",
       ) as HTMLTextAreaElement;
       if (pathInput) {
         pathInput.value = newPath;

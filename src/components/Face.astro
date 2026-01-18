@@ -92,7 +92,7 @@ const maxPupilMove = 6; // Increased for more movement range
     const pupilRight = document.getElementById(`${uniqueId}-pupil-right`);
     const eyeLeftGroup = document.getElementById(`${uniqueId}-eye-left-group`);
     const eyeRightGroup = document.getElementById(
-      `${uniqueId}-eye-right-group`
+      `${uniqueId}-eye-right-group`,
     );
 
     // Guard clause
@@ -171,11 +171,11 @@ const maxPupilMove = 6; // Increased for more movement range
       // Calculate angle from eye center to cursor position
       const angleLeft = Math.atan2(
         svgY - eyeLeftCenter.y,
-        svgX - eyeLeftCenter.x
+        svgX - eyeLeftCenter.x,
       );
       const angleRight = Math.atan2(
         svgY - eyeRightCenter.y,
-        svgX - eyeRightCenter.x
+        svgX - eyeRightCenter.x,
       );
 
       // Move pupils in the direction of cursor
@@ -366,7 +366,7 @@ const maxPupilMove = 6; // Increased for more movement range
   }
 
   .zzz {
-    fill: var(--gray-12);
+    fill: var(--mauve-12);
     font-size: 12px;
     font-weight: bold;
     font-family: Arial, sans-serif;

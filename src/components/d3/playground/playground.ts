@@ -223,8 +223,8 @@ function getGridStyles(gridSize: number, showGrid: boolean): string {
   return `<style>
     body {
       background-image:
-        linear-gradient(var(--gray-3) 1px, transparent 1px),
-        linear-gradient(90deg, var(--gray-3) 1px, transparent 1px);
+        linear-gradient(var(--mauve-3) 1px, transparent 1px),
+        linear-gradient(90deg, var(--mauve-3) 1px, transparent 1px);
       background-size: ${gridSize}px ${gridSize}px;
       background-position: -1px -1px;
     }
@@ -238,7 +238,7 @@ function getGridStyles(gridSize: number, showGrid: boolean): string {
       z-index: 9998; 
       font-family: monospace; 
       font-size: 8px; 
-      color: var(--gray-12); 
+      color: var(--mauve-12); 
       font-weight: 600; 
       opacity: 0.7; 
     }
@@ -313,7 +313,7 @@ function updateOutput(state: PlaygroundState) {
         /* Better scrollbar styling */
         * {
           scrollbar-width: thin;
-          scrollbar-color: var(--gray-7) var(--gray-2);
+          scrollbar-color: var(--mauve-7) var(--mauve-2);
         }
         
         *::-webkit-scrollbar {
@@ -322,16 +322,16 @@ function updateOutput(state: PlaygroundState) {
         }
         
         *::-webkit-scrollbar-track {
-          background: var(--gray-2);
+          background: var(--mauve-2);
         }
         
         *::-webkit-scrollbar-thumb {
-          background: var(--gray-7);
+          background: var(--mauve-7);
           border-radius: 4px;
         }
         
         *::-webkit-scrollbar-thumb:hover {
-          background: var(--gray-8);
+          background: var(--mauve-8);
         }
         
         body {
@@ -345,7 +345,7 @@ function updateOutput(state: PlaygroundState) {
       ${gridStyles}
       <script src="https://d3js.org/d3.v7.min.js"><\/script>
     </head>
-    <body style="background-color: var(--gray-1); color: var(--gray-12);">
+    <body style="background-color: var(--mauve-1); color: var(--mauve-12);">
       ${htmlCode}
       <script>
         window.addEventListener('message', (event) => {

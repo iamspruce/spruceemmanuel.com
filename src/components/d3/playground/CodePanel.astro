@@ -52,7 +52,7 @@ const sanitizedContent = content;
 
   .code-editor {
     height: 100%;
-    background: var(--gray-1);
+    background: var(--mauve-1);
     overflow: auto;
   }
 
@@ -76,7 +76,7 @@ const sanitizedContent = content;
     line-height: 1.6 !important;
     white-space: pre;
     display: block;
-    color: var(--gray-12);
+    color: var(--mauve-12);
     min-height: 100%;
   }
 
@@ -86,7 +86,7 @@ const sanitizedContent = content;
   }
 
   .code-editor code[contenteditable="true"]:focus {
-    background: var(--gray-2);
+    background: var(--mauve-2);
   }
 
   /* Improve scrollbar styling */
@@ -96,16 +96,16 @@ const sanitizedContent = content;
   }
 
   .code-editor::-webkit-scrollbar-track {
-    background: var(--gray-2);
+    background: var(--mauve-2);
   }
 
   .code-editor::-webkit-scrollbar-thumb {
-    background: var(--gray-6);
+    background: var(--mauve-6);
     border-radius: 5px;
   }
 
   .code-editor::-webkit-scrollbar-thumb:hover {
-    background: var(--gray-7);
+    background: var(--mauve-7);
   }
 
   /* Highlighting styles (Prism) override for theme */
@@ -113,12 +113,12 @@ const sanitizedContent = content;
   :global(.token.prolog),
   :global(.token.doctype),
   :global(.token.cdata) {
-    color: var(--gray-9);
+    color: var(--mauve-9);
     font-style: italic;
   }
 
   :global(.token.punctuation) {
-    color: var(--gray-11);
+    color: var(--mauve-11);
   }
 
   :global(.token.property),
@@ -145,7 +145,7 @@ const sanitizedContent = content;
   :global(.token.url),
   :global(.language-css .token.string),
   :global(.style .token.string) {
-    color: var(--gray-11);
+    color: var(--mauve-11);
   }
 
   :global(.token.atrule),
@@ -167,12 +167,12 @@ const sanitizedContent = content;
 
   /* Line numbers styling */
   :global(.line-numbers .line-numbers-rows) {
-    border-right: 1px solid var(--gray-6);
-    background: var(--gray-2);
+    border-right: 1px solid var(--mauve-6);
+    background: var(--mauve-2);
   }
 
   :global(.line-numbers-rows > span:before) {
-    color: var(--gray-9);
+    color: var(--mauve-9);
   }
 
   /* Selection styling */

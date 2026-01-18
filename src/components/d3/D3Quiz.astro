@@ -204,12 +204,12 @@ if (quizKeyNoRaw) {
 
     let currentQuestionIndex = 0;
     let userAnswers: (string | number | null)[] = new Array(
-      quizData.questions.length
+      quizData.questions.length,
     ).fill(null);
     let score = 0;
 
     const questionsEl = container.querySelector(
-      ".quiz-questions"
+      ".quiz-questions",
     ) as HTMLElement;
     const resultsEl = container.querySelector(".quiz-results") as HTMLElement;
     const actionsEl = container.querySelector(".quiz-actions") as HTMLElement;
@@ -217,7 +217,7 @@ if (quizKeyNoRaw) {
     const nextBtn = container.querySelector(".next-btn") as HTMLButtonElement;
     const retryBtn = container.querySelector(".retry-btn") as HTMLButtonElement;
     const indicator = container.querySelector(
-      ".question-indicator"
+      ".question-indicator",
     ) as HTMLElement;
     const faceWrapper = container.querySelector(".face-wrapper") as HTMLElement;
 
@@ -376,7 +376,7 @@ if (quizKeyNoRaw) {
       const titleEl = resultsEl.querySelector(".results-title") as HTMLElement;
       const scoreEl = resultsEl.querySelector(".results-score") as HTMLElement;
       const messageEl = resultsEl.querySelector(
-        ".results-message"
+        ".results-message",
       ) as HTMLElement;
 
       titleEl.textContent = result.title;
@@ -391,7 +391,7 @@ if (quizKeyNoRaw) {
         chapterSlug!,
         lessonSlug!,
         quizId!,
-        passed
+        passed,
       );
 
       // Dispatch event for lesson completion tracking
@@ -404,7 +404,7 @@ if (quizKeyNoRaw) {
             score,
             total: quizData.questions.length,
           },
-        })
+        }),
       );
     }
 
@@ -479,10 +479,10 @@ if (quizKeyNoRaw) {
 
 <style is:global>
   .quiz-container {
-    border: 1px solid var(--gray-3);
+    border: 1px solid var(--mauve-3);
     border-radius: 8px;
     margin: 2rem 0;
-    background: var(--gray-1);
+    background: var(--mauve-1);
     position: relative;
   }
   .quiz-header {
@@ -490,9 +490,9 @@ if (quizKeyNoRaw) {
     justify-content: space-between;
     align-items: center;
     padding: var(--space-3xs) var(--space-s);
-    border-bottom: 1px solid var(--gray-4);
-    background: var(--gray-3);
-    color: var(--gray-12);
+    border-bottom: 1px solid var(--mauve-4);
+    background: var(--mauve-3);
+    color: var(--mauve-12);
   }
   .quiz-title {
     font-size: medium;
@@ -534,8 +534,8 @@ if (quizKeyNoRaw) {
     font-size: 1.125rem;
   }
   .question pre {
-    background: var(--gray-3);
-    color: var(--gray-12);
+    background: var(--mauve-3);
+    color: var(--mauve-12);
     padding: var(--space-3xs) var(--space-s);
     border-radius: 6px;
     overflow-x: auto;
@@ -555,12 +555,12 @@ if (quizKeyNoRaw) {
     align-items: center;
     gap: var(--space-3xs);
     padding: var(--space-3xs) var(--space-s);
-    border: 1px solid var(--gray-3);
+    border: 1px solid var(--mauve-3);
     box-shadow: var(--shadow-s);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: var(--gray-3);
+    background: var(--mauve-3);
     font-size: 1.125rem;
   }
   .option:hover {
@@ -583,8 +583,8 @@ if (quizKeyNoRaw) {
     font-weight: 500;
     transition: all 0.2s ease;
     border-radius: var(--radius-xs);
-    border: 1px solid var(--gray-3);
-    color: var(--gray-12);
+    border: 1px solid var(--mauve-3);
+    color: var(--mauve-12);
   }
   .quiz-btn:hover:not(:disabled) {
     background: var(--pink-10);
@@ -617,7 +617,7 @@ if (quizKeyNoRaw) {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: var(--gray-11);
+    color: var(--mauve-11);
   }
   .results-message {
     opacity: 0.9;
@@ -627,10 +627,10 @@ if (quizKeyNoRaw) {
   }
   .retry-btn {
     padding: 0.75rem 2rem;
-    border: 2px solid var(--gray-3);
+    border: 2px solid var(--mauve-3);
     border-radius: 6px;
-    background: var(--gray-1);
-    color: var(--gray-12);
+    background: var(--mauve-1);
+    color: var(--mauve-12);
     cursor: pointer;
     font-weight: 500;
     font-size: 1rem;

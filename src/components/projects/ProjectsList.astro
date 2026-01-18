@@ -148,12 +148,12 @@ const cardThemes = [
   }
   .projects-list-wrapper::before {
     left: 0;
-    background: linear-gradient(to right, var(--gray-1), transparent);
+    background: linear-gradient(to right, var(--mauve-1), transparent);
   }
 
   .projects-list-wrapper::after {
     right: 0;
-    background: linear-gradient(to left, var(--gray-1), transparent);
+    background: linear-gradient(to left, var(--mauve-1), transparent);
   }
 
   .projects-list {
@@ -351,7 +351,7 @@ const cardThemes = [
     const container = document.querySelector(".projects-list") as HTMLElement;
     if (!container) return;
     const list = container.querySelector<HTMLUListElement>(
-      ".project-list-items"
+      ".project-list-items",
     );
     if (!list) return;
     const cards = list.querySelectorAll<HTMLLIElement>(".project-list-item");
@@ -386,12 +386,12 @@ const cardThemes = [
         const opacity = 1 - Math.abs(clampedFactor) * maxOpacity;
         cardElement.style.setProperty(
           "--transform-scroll",
-          `perspective(1000px) rotateY(${rotationY}deg) rotateZ(${rotationZ}deg) scale(${scale}) translateZ(0)`
+          `perspective(1000px) rotateY(${rotationY}deg) rotateZ(${rotationZ}deg) scale(${scale}) translateZ(0)`,
         );
         cardElement.style.setProperty("--opacity", opacity.toString());
         (card as HTMLElement).style.setProperty(
           "--opacity",
-          opacity.toString()
+          opacity.toString(),
         );
       });
 

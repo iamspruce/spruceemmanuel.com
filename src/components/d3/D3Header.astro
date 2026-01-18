@@ -244,7 +244,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     const handleReset = () => {
       if (
         window.confirm(
-          "Are you sure you want to reset all your course progress? This action cannot be undone."
+          "Are you sure you want to reset all your course progress? This action cannot be undone.",
         )
       ) {
         courseProgressManager.resetProgress();
@@ -266,13 +266,13 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
 
       // Get summary elements
       const totalChaptersCount = document.getElementById(
-        "total-chapters-count"
+        "total-chapters-count",
       );
       const totalLessonsCount = document.getElementById("total-lessons-count");
       const completedCount = document.getElementById("completed-count");
       const skippedCount = document.getElementById("skipped-count");
       const overallProgressFill = document.getElementById(
-        "overall-progress-fill"
+        "overall-progress-fill",
       );
       const chaptersList = document.getElementById("chapters-list");
 
@@ -313,7 +313,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
           // Get chapter-level quiz summary
           courseProgressManager.calculateChapterQuizSummary(chapter.slug);
           const quizSummary = courseProgressManager.getChapterQuizSummary(
-            chapter.slug
+            chapter.slug,
           );
           let quizSummaryHtml = "";
           if (quizSummary && quizSummary.totalQuizzes > 0) {
@@ -422,8 +422,8 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   }
 
   .d3-nav {
-    background: var(--gray-12);
-    border: 1px solid var(--gray-3);
+    background: var(--mauve-12);
+    border: 1px solid var(--mauve-3);
     transition: transform 0.3s ease;
     position: relative;
     transform: rotate(3deg);
@@ -438,7 +438,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   .nav-logo {
     font-weight: 700;
     font-size: 1.1rem;
-    color: var(--gray-1);
+    color: var(--mauve-1);
     text-decoration: none;
     padding: var(--space-2xs) var(--space-3xs);
     transition: all 0.2s ease;
@@ -450,7 +450,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   .nav-btn {
     border: none;
     background: none;
-    color: var(--gray-1);
+    color: var(--mauve-1);
     padding: var(--space-2xs) var(--space-3xs);
     text-decoration: none;
     cursor: pointer;
@@ -501,11 +501,11 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     height: calc(100vh - 90px);
     overflow: hidden;
     z-index: 999;
-    background: var(--gray-12);
-    color: var(--gray-1);
+    background: var(--mauve-12);
+    color: var(--mauve-1);
     border-radius: var(--radius-m);
     box-shadow: var(--shadow-l);
-    border: 1px solid var(--gray-10);
+    border: 1px solid var(--mauve-10);
     padding: var(--space-2xs);
     display: flex;
     flex-direction: column;
@@ -545,7 +545,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--gray-6);
+    border-bottom: 1px solid var(--mauve-6);
     padding-bottom: var(--space-3xs);
   }
 
@@ -562,7 +562,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     padding: 0;
     width: 32px;
     height: 32px;
-    color: var(--gray-1);
+    color: var(--mauve-1);
     opacity: 0.7;
     transition: opacity 0.2s ease;
   }
@@ -601,7 +601,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
 
   .progress-bar-container {
     width: 100%;
-    background-color: var(--gray-6);
+    background-color: var(--mauve-6);
     border-radius: 99px;
     height: 10px;
     overflow: hidden;
@@ -620,14 +620,14 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     overflow-y: auto;
     /* Custom scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: var(--gray-6) transparent;
+    scrollbar-color: var(--mauve-6) transparent;
   }
 
   .panel-content::-webkit-scrollbar {
     width: 8px;
   }
   .panel-content::-webkit-scrollbar-thumb {
-    background-color: var(--gray-6);
+    background-color: var(--mauve-6);
     border-radius: 4px;
   }
 
@@ -639,7 +639,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   }
 
   .chapter-item {
-    border-bottom: 1px solid var(--gray-6);
+    border-bottom: 1px solid var(--mauve-6);
     padding-bottom: var(--space-xs);
   }
 
@@ -671,11 +671,11 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
 
   .chapter-quiz-summary {
     font-size: 0.8rem;
-    color: var(--gray-1);
+    color: var(--mauve-1);
     opacity: 0.8;
   }
   .chapter-quiz-summary strong {
-    color: var(--gray-1);
+    color: var(--mauve-1);
     opacity: 1;
     font-weight: 600;
   }
@@ -683,8 +683,8 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
   .chapter-progress-badge {
     font-size: calc(var(--step-0) * 0.5);
     padding: var(--space-3xs) var(--space-2xs);
-    background: var(--gray-3);
-    color: var(--gray-12);
+    background: var(--mauve-3);
+    color: var(--mauve-12);
     border-radius: var(--radius-m);
     font-weight: 600;
   }
@@ -704,13 +704,13 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
     border-radius: var(--radius-xs);
     text-decoration: none;
     transition: all 0.2s ease;
-    color: var(--gray-1);
+    color: var(--mauve-1);
     border: 1px solid transparent;
   }
 
   .lesson-item:hover {
-    background: var(--gray-3);
-    color: var(--gray-12);
+    background: var(--mauve-3);
+    color: var(--mauve-12);
   }
 
   .lesson-item.current {
@@ -758,7 +758,7 @@ const { chapterSlug, lessonSlug, structure } = Astro.props;
 
   .panel-footer {
     padding-top: var(--space-2xs);
-    border-top: 1px solid var(--gray-6);
+    border-top: 1px solid var(--mauve-6);
     display: flex;
   }
 

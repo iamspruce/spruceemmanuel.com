@@ -81,10 +81,10 @@ import SVGCanvas from "./SVGCanvas.astro";
     font-size: var(--step-0);
     font-family: var(--font-mono);
     padding: var(--space-s);
-    background: var(--gray-1);
+    background: var(--mauve-1);
     border: 2px solid var(--pink-6);
     border-radius: var(--radius-m);
-    color: var(--gray-12);
+    color: var(--mauve-12);
     resize: vertical;
     min-height: 60px;
     max-height: 120px;
@@ -94,7 +94,7 @@ import SVGCanvas from "./SVGCanvas.astro";
   }
 
   .control-textarea::placeholder {
-    color: var(--gray-9);
+    color: var(--mauve-9);
     font-style: italic;
   }
 
@@ -108,13 +108,13 @@ import SVGCanvas from "./SVGCanvas.astro";
   }
 
   .dark .control-textarea {
-    background: var(--gray-2);
+    background: var(--mauve-2);
     border-color: var(--pink-7);
-    color: var(--gray-11);
+    color: var(--mauve-11);
   }
 
   .dark .control-textarea:focus {
-    background: var(--gray-3);
+    background: var(--mauve-3);
     border-color: var(--pink-9);
     box-shadow:
       0 0 0 4px var(--pink-11),
@@ -192,7 +192,7 @@ import SVGCanvas from "./SVGCanvas.astro";
   }
 
   .control-textarea::-webkit-scrollbar-track {
-    background: var(--gray-3);
+    background: var(--mauve-3);
     border-radius: var(--radius-xs);
   }
 
@@ -206,7 +206,7 @@ import SVGCanvas from "./SVGCanvas.astro";
   }
 
   .dark .control-textarea::-webkit-scrollbar-track {
-    background: var(--gray-4);
+    background: var(--mauve-4);
   }
 
   .dark .control-textarea::-webkit-scrollbar-thumb {
@@ -222,7 +222,7 @@ import SVGCanvas from "./SVGCanvas.astro";
   // Update path stats in real-time
   function updatePathStats(): void {
     const pathInput = document.getElementById(
-      "path-input"
+      "path-input",
     ) as HTMLTextAreaElement;
     const pathStats = document.getElementById("path-stats") as HTMLSpanElement;
 
@@ -243,7 +243,7 @@ import SVGCanvas from "./SVGCanvas.astro";
     updatePathStats();
 
     const pathInput = document.getElementById(
-      "path-input"
+      "path-input",
     ) as HTMLTextAreaElement;
     if (pathInput) {
       pathInput.addEventListener("input", updatePathStats);

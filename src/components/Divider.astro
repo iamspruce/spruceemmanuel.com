@@ -101,7 +101,7 @@ const speedMultiplier = speed === "slow" ? 1.5 : speed === "fast" ? 0.5 : 1;
 
   /* Wave fill styling */
   .wave-fill {
-    fill: var(--gray-1);
+    fill: transparent;
     opacity: 0.98;
     transition: fill 0.3s ease;
   }
@@ -293,7 +293,7 @@ const speedMultiplier = speed === "slow" ? 1.5 : speed === "fast" ? 0.5 : 1;
 
       const maxScroll = Math.max(
         document.documentElement.scrollHeight - window.innerHeight,
-        1
+        1,
       );
       return Math.min(Math.max(scrollY / maxScroll, 0), 1);
     }
@@ -340,7 +340,7 @@ const speedMultiplier = speed === "slow" ? 1.5 : speed === "fast" ? 0.5 : 1;
 
       const divider = waveLine.closest(".wave-divider");
       const speedMultiplier = parseFloat(
-        divider?.getAttribute("data-speed") || "1"
+        divider?.getAttribute("data-speed") || "1",
       );
 
       const animator = new WaveAnimator(waveLine, speedMultiplier);

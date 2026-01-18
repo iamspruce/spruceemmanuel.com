@@ -81,8 +81,8 @@ const gridStyles = showGrid
   <style>
     body {
       background-image:
-        linear-gradient(var(--gray-3) 1px, transparent 1px),
-        linear-gradient(90deg, var(--gray-3) 1px, transparent 1px);
+        linear-gradient(var(--mauve-3) 1px, transparent 1px),
+        linear-gradient(90deg, var(--mauve-3) 1px, transparent 1px);
       background-size: ${gridSize}px ${gridSize}px;
       background-position: -1px -1px;
     }
@@ -96,7 +96,7 @@ const gridStyles = showGrid
       z-index: 9998; 
       font-family: monospace; 
       font-size: 8px; 
-      color: var(--gray-12); 
+      color: var(--mauve-12); 
       font-weight: 600; 
       opacity: 0.7; 
     }
@@ -166,7 +166,7 @@ const gridScript = showGrid
 }
 
 *:hover {
-  scrollbar-color: var(--gray-7) var(--gray-2);
+  scrollbar-color: var(--mauve-7) var(--mauve-2);
 }
 
 *::-webkit-scrollbar {
@@ -184,11 +184,11 @@ const gridScript = showGrid
 }
 
 *:hover::-webkit-scrollbar-thumb {
-  background: var(--gray-7);
+  background: var(--mauve-7);
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-8);
+  background: var(--mauve-8);
 }
   
   body {
@@ -198,7 +198,7 @@ const gridScript = showGrid
   }
 </style>
     </head>
-    <body style="margin: 0; padding: 0; background-color: var(--gray-1); color: var(--gray-12);">
+    <body style="margin: 0; padding: 0; background-color: var(--mauve-1); color: var(--mauve-12);">
       ${htmlContent}
       <script>
         // Listen for control changes from parent
@@ -233,7 +233,7 @@ const gridScript = showGrid
     height: 100%;
     min-height: 500px;
     border: none;
-    background: var(--gray-1);
+    background: var(--mauve-1);
     display: block;
     overflow: hidden;
   }
